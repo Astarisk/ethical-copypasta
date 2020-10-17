@@ -27,10 +27,12 @@
 package haven;
 
 import haven.purus.BetterWindow;
+import haven.purus.OptWndPurus;
 
 import java.awt.event.KeyEvent;
 
 public class OptWnd extends BetterWindow {
+	OptWndPurus optWndPurus;
     public final Panel main, video, audio, keybind;
     public Panel current;
 
@@ -559,6 +561,14 @@ public class OptWnd extends BetterWindow {
 	main.add(new PButton(UI.scale(200), "Video settings", 'v', video));
 	main.add(new PButton(UI.scale(200), "Audio settings", 'a', audio));
 	main.add(new PButton(UI.scale(200), "Keybindings", 'k', keybind));
+	main.add(new Button(UI.scale(200), "Pasta Settings", () ->  {
+		if(optWndPurus == null) {
+			optWndPurus = this.parent.add(new OptWndPurus());
+			optWndPurus.show();
+		} else {
+			optWndPurus.show(!optWndPurus.visible);
+		}
+	}));
 	main.add(60);
 	if(gopts) {
 	    main.add(new Button(UI.scale(200), "Switch character") {

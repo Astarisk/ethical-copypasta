@@ -59,7 +59,7 @@
       <fileset dir="build/classes-lib" />
       <manifest>
 	<attribute name="Main-Class" value="haven.MainFrame" />
-	<attribute name="Class-Path" value="lib/jogl.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar" />
+	<attribute name="Class-Path" value="lib/sqlite-jdbc-3.32.3.2.jar lib/jogl.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar" />
       </manifest>
     </jar>
     <chmod file="build/hafen.jar" perm="a+x" />
@@ -83,6 +83,7 @@
 	<include name="gluegen-rt.jar" />
 	<include name="hafen-res.jar" />
 	<include name="builtin-res.jar" />
+	<include name="sqlite-jdbc-3.32.3.2.jar" />
       </fileset>
       <fileset dir="lib/jogl-natives" />
     </copy>

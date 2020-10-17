@@ -31,6 +31,8 @@ import java.awt.event.KeyEvent;
 import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
 import haven.Resource.AButton;
+import haven.purus.Config;
+
 import java.util.*;
 
 public class MenuGrid extends Widget implements KeyBinding.Bindable {
@@ -436,7 +438,22 @@ public class MenuGrid extends Widget implements KeyBinding.Bindable {
 	updlayout();
     }
 
+	private void loginToggles() {
+		if(haven.purus.Config.toggleTracking)
+			wdgmsg("act","tracking");
+		if(haven.purus.Config.toggleCriminalacts)
+			wdgmsg("act","crime");
+		if(Config.toggleSiege)
+			wdgmsg("act","siegeptr");
+	}
+
+	private boolean loginToggles = false;
+
     public void tick(double dt) {
+    	if(!loginToggles) {
+    		loginToggles = true;
+			loginToggles();
+		}
 	if(recons)
 	    updlayout();
     }
