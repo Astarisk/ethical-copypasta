@@ -26,9 +26,11 @@
 
 package haven;
 
+import haven.purus.BetterWindow;
+
 import java.awt.event.KeyEvent;
 
-public class OptWnd extends Window {
+public class OptWnd extends BetterWindow {
     public final Panel main, video, audio, keybind;
     public Panel current;
 

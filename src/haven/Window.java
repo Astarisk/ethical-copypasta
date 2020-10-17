@@ -75,8 +75,8 @@ public class Window extends Widget implements DTarget {
     public Text cap;
     public Coord wsz, ctl, csz, atl, asz, cptl, cpsz;
     public int cmw;
-    private UI.Grab dm = null;
-    private Coord doff;
+    public UI.Grab dm = null;
+    public Coord doff;
 
     @RName("wnd")
     public static class $_ implements Factory {

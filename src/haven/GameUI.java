@@ -26,6 +26,8 @@
 
 package haven;
 
+import haven.purus.BetterWindow;
+
 import java.util.*;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
@@ -455,7 +457,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	}
     }
 
-    static class Hidewnd extends Window {
+    static class Hidewnd extends BetterWindow {
 	Hidewnd(Coord sz, String cap, boolean lg) {
 	    super(sz, cap, lg);
 	}

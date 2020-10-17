@@ -228,4 +228,8 @@ public class Coord implements Comparable<Coord>, java.io.Serializable {
     public Coord min(int x, int y) {
 	return new Coord(Math.min(this.x, x), Math.min(this.y, y));
     }
+
+    public Coord max(int x, int y) {
+    	return new Coord(Math.max(this.x, x), Math.max(this.y, y));
+	}
 }

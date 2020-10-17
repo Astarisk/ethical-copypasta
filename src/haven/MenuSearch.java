@@ -4,8 +4,9 @@ import java.util.*;
 import java.awt.event.KeyEvent;
 import haven.MenuGrid.Pagina;
 import haven.MenuGrid.PagButton;
+import haven.purus.BetterWindow;
 
-public class MenuSearch extends Window {
+public class MenuSearch extends BetterWindow {
     public final MenuGrid menu;
     public final Results rls;
     public final TextEntry sbox;

@@ -26,7 +26,9 @@
 
 package haven;
 
-public class HelpWnd extends Window {
+import haven.purus.BetterWindow;
+
+public class HelpWnd extends BetterWindow {
     public static final RichText.Foundry fnd;
     public Indir<Resource> res;
     private Indir<Resource> showing = null;

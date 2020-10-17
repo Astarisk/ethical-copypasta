@@ -36,10 +36,12 @@ import haven.MapFile.SMarker;
 import haven.MapFileWidget.*;
 import haven.MapFileWidget.Location;
 import haven.BuddyWnd.GroupSelector;
+import haven.purus.BetterWindow;
+
 import static haven.MCache.tilesz;
 import static haven.MCache.cmaps;
 
-public class MapWnd extends Window {
+public class MapWnd extends BetterWindow {
     public static final Resource markcurs = Resource.local().loadwait("gfx/hud/curs/flag");
     public final MapFileWidget view;
     public final MapView mv;
