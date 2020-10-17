@@ -4,11 +4,12 @@
   <target name="build-env">
     <mkdir dir="build" />
     <mkdir dir="build/classes" />
-    <available property="has-res-jar" file="build/hafen-res.jar" />
+	<mkdir dir="build/lib" />
+    <available property="has-res-jar" file="build/lib/hafen-res.jar" />
     <available property="has-buildinfo" file="build/classes/buildinfo" />
     <available property="unpacked-lib" file="build/classes-lib" />
   </target>
-  
+
   <target name="buildinfo" depends="build-env" unless="has-buildinfo">
     <exec executable="git" outputproperty="gitrev" failifexecutionfails="false">
       <arg line="rev-parse HEAD" />
@@ -40,7 +41,7 @@
     <copy todir="build/classes/haven" file="etc/res-bgload" />
     <copy todir="build/classes/haven" file="etc/icon.png" />
   </target>
-  
+
   <target name="appletview" depends="build-env">
     <copy file="etc/applet.html" todir="build" />
   </target>
@@ -58,12 +59,12 @@
       <fileset dir="build/classes-lib" />
       <manifest>
 	<attribute name="Main-Class" value="haven.MainFrame" />
-	<attribute name="Class-Path" value="jogl.jar gluegen-rt.jar builtin-res.jar hafen-res.jar" />
+	<attribute name="Class-Path" value="lib/jogl.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar" />
       </manifest>
     </jar>
     <chmod file="build/hafen.jar" perm="a+x" />
   </target>
-  
+
   <target name="res-jar" depends="build-env" unless="has-res-jar">
     <get src="http://www.havenandhearth.com/java/builtin-res.jar" dest="lib/builtin-res.jar"
 	 usetimestamp="true" />
@@ -74,9 +75,9 @@
     <available property="lib-builtin-jar" file="lib/builtin-res.jar" />
     <fail unless="lib-builtin-jar" message="builtin-res.jar not available" />
   </target>
-  
+
   <target name="jars" depends="build-env, jar, res-jar">
-    <copy todir="build">
+    <copy todir="build/lib">
       <fileset dir="lib">
 	<include name="jogl.jar" />
 	<include name="gluegen-rt.jar" />
@@ -85,6 +86,7 @@
       </fileset>
       <fileset dir="lib/jogl-natives" />
     </copy>
+	<copy todir="build" file="etc/run.sh" />
   </target>
   
   <target name="deftgt" depends="jars, appletview" />
