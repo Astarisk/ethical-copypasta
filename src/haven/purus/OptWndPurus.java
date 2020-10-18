@@ -149,6 +149,19 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, "Toggle siege pointers on login"));
 
+		Entry uiSettings = new Entry(new Label("UI Settings"), "UI Settings");
+		el.root.subentries.add(uiSettings);
+
+		uiSettings.subentries.add(new Entry(new CheckBox("Use hardware cursor [Requires restart]"){
+			{a = Config.hwcursor;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.hwcursor = !this.a;
+				Config.pref.putBoolean("hwcursor", !this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Use hardware cursor [Requires restart]"));
+
 		el.search("");
 	}
 
