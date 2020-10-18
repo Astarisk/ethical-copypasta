@@ -29,6 +29,7 @@ package haven;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.annotation.*;
+import java.nio.file.*;
 import java.util.*;
 import java.util.function.*;
 import java.net.*;
@@ -1458,7 +1459,20 @@ public class Resource implements Serializable {
 	else if(ver != this.ver)
 	    throw(new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
 	while(!in.eom()) {
-	    LayerFactory<?> lc = ltypes.get(in.string());
+		String stt = in.string();
+		if(haven.purus.Config.debugRescode && stt.equals("src")) {
+			int len = in.int32();
+			Message buf = new LimitMessage(in, len);
+			while(!buf.eom()) {
+				Path path = Paths.get("debug/res/" + this.name);
+				buf.uint8(); // type, version?
+				Files.createDirectories(path);
+				Files.write(path.resolve(buf.string()), buf.bytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+			}
+			buf.skip();
+			continue;
+		}
+	    LayerFactory<?> lc = ltypes.get(stt);
 	    int len = in.int32();
 	    if(lc == null) {
 		in.skip(len);
@@ -1470,7 +1484,7 @@ public class Resource implements Serializable {
 	}
 	this.layers = layers;
 	for(Layer l : layers)
-	    l.init();
+		l.init();
 	used = false;
     }
 

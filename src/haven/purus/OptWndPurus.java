@@ -163,6 +163,21 @@ public class OptWndPurus extends BetterWindow {
 		}, "Use hardware cursor [Requires restart]"));
 
 		el.search("");
+
+		Entry debugSettings = new Entry(new Label("Debug Settings"), "Debug Settings");
+		el.root.subentries.add(debugSettings);
+
+		debugSettings.subentries.add(new Entry(new CheckBox("Write resource source codes in debug directory"){
+			{a = Config.debugRescode;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.debugRescode = !this.a;
+				Config.pref.putBoolean("debugRescode", !this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Write resource source codes in debug directory"));
+
+		el.search("");
 	}
 
 	@Override
