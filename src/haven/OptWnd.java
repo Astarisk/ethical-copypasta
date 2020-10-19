@@ -288,7 +288,7 @@ public class OptWnd extends BetterWindow {
 		composer.add(new Label("UI scale (requires restart)"));
 		{
 		    Label dpy = new Label("");
-		    final double smin = 1, smax = 4;
+		    final double smin = 1, smax = Math.floor(UI.maxscale() / 0.25) * 0.25;
 		    final int steps = (int)Math.round((smax - smin) / 0.25);
 		    composer.addr(
 			new HSlider(UI.scale(160), 0, steps, (int)Math.round(steps * (Utils.getprefd("uiscale", 1.0) - smin) / (smax - smin))) {
@@ -388,6 +388,7 @@ public class OptWnd extends BetterWindow {
 	    addbtn(scroll, width, "Display villages", GameUI.kb_vil);
 	    addbtn(scroll, width, "Display realms", GameUI.kb_rlm);
 	    addbtn(scroll, width, "Take screenshot", GameUI.kb_shoot);
+	    addbtn(scroll, width, "Minimap icons", GameUI.kb_ico);
 	    addbtn(scroll, width, "Toggle UI", GameUI.kb_hide);
 	    scroll.adda(new Label("Camera control"), width / 2, 0.5);
 	    addbtn(scroll, width, "Rotate left", MapView.kb_camleft);

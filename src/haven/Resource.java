@@ -57,7 +57,7 @@ public class Resource implements Serializable {
     public final transient Pool pool;
     private boolean used = false;
 
-    public abstract static class Named implements Indir<Resource> {
+    public abstract static class Named implements Indir<Resource>, Serializable {
 	public final String name;
 	public final int ver;
 
@@ -102,6 +102,26 @@ public class Resource implements Serializable {
 	
 	public Resource get() {
 	    return(get(0));
+	}
+
+	public static Resource loadsaved(Resource.Pool pool, Resource.Spec spec) {
+	    try {
+		if(spec.pool == null)
+		    return(pool.load(spec.name, spec.ver).get());
+		return(spec.get());
+	    } catch(Loading l) {
+		throw(l);
+	    } catch(Exception e) {
+		return(pool.load(spec.name).get());
+	    }
+	}
+
+	public Resource loadsaved(Resource.Pool pool) {
+	    return(loadsaved(pool, this));
+	}
+
+	public Resource loadsaved() {
+	    return(loadsaved(this.pool));
 	}
     }
 
