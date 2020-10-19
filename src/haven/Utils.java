@@ -208,7 +208,7 @@ public class Utils {
 	return(prefs);
     }
 
-    static String getpref(String prefname, String def) {
+    public static String getpref(String prefname, String def) {
 	try {
 	    return(prefs().get(prefname, def));
 	} catch(SecurityException e) {

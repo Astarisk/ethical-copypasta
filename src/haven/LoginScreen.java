@@ -26,6 +26,8 @@
 
 package haven;
 
+import haven.purus.MultiSession;
+
 import java.awt.event.KeyEvent;
 
 public class LoginScreen extends Widget {
@@ -248,6 +250,7 @@ public class LoginScreen extends Widget {
     protected void added() {
 	presize();
 	parent.setfocus(this);
+		ui.root.multiSessionWindow = ui.root.add(new MultiSession.MultiSessionWindow());
     }
 
     public void draw(GOut g) {

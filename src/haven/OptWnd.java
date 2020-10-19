@@ -27,6 +27,7 @@
 package haven;
 
 import haven.purus.BetterWindow;
+import haven.purus.MultiSession;
 import haven.purus.OptWndPurus;
 
 import java.awt.event.KeyEvent;
@@ -403,6 +404,10 @@ public class OptWnd extends BetterWindow {
 	    for(int i = 0; i < Fightsess.kb_acts.length; i++)
 		addbtn(scroll, width, String.format("Combat action %d", i + 1), Fightsess.kb_acts[i]);
 	    addbtn(scroll, width, "Switch targets", Fightsess.kb_relcycle);
+	    // Pasta keys
+		scroll.adda(new Label("Session management"), width / 2, 0.5);
+		addbtn(scroll, width, "Next session", MultiSession.kb_nextSession);
+		addbtn(scroll, width, "Previous session", MultiSession.kb_prevSession);
 	    Composer composer = new Composer(this).vmrgn(UI.scale(5));
 	    composer.adda(scrollport, scrollport.cont.sz.x / 2, 0.5);
 	    composer.vmrgn(0);

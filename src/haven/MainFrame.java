@@ -26,15 +26,19 @@
 
 package haven;
 
+import haven.purus.MultiSession;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainFrame extends java.awt.Frame implements Runnable, Console.Directory {
     UIPanel p;
     private final ThreadGroup g;
+    public static MainFrame mf;
     public final Thread mt;
     DisplayMode fsmode = null, prefs = null;
 	
@@ -170,6 +174,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
 
     public MainFrame(Coord isz) {
 	super("Haven and Hearth");
+	mf = this;
 	Coord sz;
 	if(isz == null) {
 	    sz = Utils.getprefc("wndsz", new Coord(800, 600));
@@ -232,11 +237,67 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
 	}
     }
 
+    private Thread ui;
+	AtomicInteger sessions = new AtomicInteger(0);
+    public void sessionCreate() {
+    	sessions.incrementAndGet();
+    	new HackThread(() -> {
+			try {
+				Session sess = null;
+				UI ui = null;
+				try {
+					UI.Runner fun;
+					Bootstrap bill = new Bootstrap(Config.defserv, Config.mainport);
+					if((Config.authuser != null) && (Config.authck != null)) {
+						bill.setinitcookie(Config.authuser, Config.authck);
+						Config.authck = null;
+					}
+					fun = bill;
+					setTitle("Haven and Hearth");
+					ui = p.newui(null);
+					sess = fun.run(ui);
+
+					fun = new RemoteUI(sess);
+					setTitle("Haven and Hearth \u2013 " + sess.username);
+					ui = p.newui(sess);
+					sess = fun.run(ui);
+				} catch(InterruptedException e) {
+				} finally {
+					//p.newui(null);
+					MultiSession.closeSession(ui);
+					if(sessions.decrementAndGet() == 0)
+						sessionCreate();
+					if(sess != null) {
+						sess.close();
+					}
+				}
+				savewndstate();
+			} finally {
+				/*ui.interrupt();
+				try {
+					ui.join(5000);
+				} catch(InterruptedException e) {
+				}
+				if(ui.isAlive())
+					Warning.warn("ui thread failed to terminate");
+				dispose();*/
+			}
+		}, "Session thread").start();
+	}
+
     public void run() {
 	if(Thread.currentThread() != this.mt)
 	    throw(new RuntimeException("MainFrame is being run from an invalid context"));
-	Thread ui = new HackThread(p, "Haven UI thread");
-	ui.start();
+		ui = new HackThread(p, "Haven UI thread");
+		ui.start();
+		sessionCreate();
+		try {
+			synchronized(ui) {
+				ui.wait();
+			}
+		} catch(InterruptedException e) {
+		}
+		/*
 	try {
 	    Session sess = null;
 	    try {
@@ -271,7 +332,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
 	    if(ui.isAlive())
 		Warning.warn("ui thread failed to terminate");
 	    dispose();
-	}
+	}*/
     }
     
     public static void setupres() {

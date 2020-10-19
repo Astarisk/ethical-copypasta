@@ -26,13 +26,16 @@
 
 package haven;
 
+import haven.purus.MultiSession;
+
 import java.awt.event.KeyEvent;
 
 public class RootWidget extends ConsoleHost {
     public static final Resource defcurs = Resource.local().loadwait("gfx/hud/curs/arw");
     Profile guprof, grprof, ggprof;
     boolean afk = false;
-	
+	public MultiSession.MultiSessionWindow multiSessionWindow;
+
     public RootWidget(UI ui, Coord sz) {
 	super(ui, new Coord(0, 0), sz);
 	setfocusctl(true);
@@ -61,6 +64,13 @@ public class RootWidget extends ConsoleHost {
 		wdgmsg("gk", (int)key);
 	    }
 	}
+		if(MultiSession.kb_nextSession.key().match(ev)) {
+			MultiSession.nextSession(1);
+			return true;
+		} else if(MultiSession.kb_prevSession.key().match(ev)) {
+			MultiSession.nextSession(-1);
+			return true;
+		}
 	return(true);
     }
 

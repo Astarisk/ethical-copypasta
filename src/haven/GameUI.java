@@ -27,6 +27,7 @@
 package haven;
 
 import haven.purus.BetterWindow;
+import haven.purus.MultiSession;
 
 import java.util.*;
 import java.awt.Color;
@@ -365,6 +366,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    });
 	Debug.log = ui.cons.out;
 	opts.c = sz.sub(opts.sz).div(2);
+		ui.root.multiSessionWindow.destroy();
+		ui.root.multiSessionWindow = add(new MultiSession.MultiSessionWindow());
     }
 
     public void dispose() {

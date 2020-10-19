@@ -26,6 +26,8 @@
 
 package haven;
 
+import haven.purus.MultiSession;
+
 import java.awt.Color;
 import java.util.*;
 
@@ -88,6 +90,9 @@ public class Charlist extends Widget {
     }
 
     protected void added() {
+		if(ui.root.children(MultiSession.MultiSessionWindow.class).isEmpty()) {
+			ui.root.multiSessionWindow = ui.root.add(new MultiSession.MultiSessionWindow());
+		}
 	parent.setfocus(this);
     }
 
