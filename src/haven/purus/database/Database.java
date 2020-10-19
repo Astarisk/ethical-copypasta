@@ -12,6 +12,7 @@ public class Database {
 		try {
 			connection = DriverManager.getConnection("jdbc:sqlite:pasta.db");
 			Config.init();
+			Credentials.init();
 		} catch(SQLException throwables) {
 			throwables.printStackTrace();
 		}

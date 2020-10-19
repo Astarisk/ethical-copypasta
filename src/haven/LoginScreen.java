@@ -26,6 +26,7 @@
 
 package haven;
 
+import haven.purus.Credentials;
 import haven.purus.MultiSession;
 
 import java.awt.event.KeyEvent;
@@ -48,6 +49,7 @@ public class LoginScreen extends Widget {
 	add(new Img(bg), Coord.z);
 	optbtn = adda(new Button(UI.scale(100), "Options"), pos("cbl").add(10, -10), 0, 1);
 	optbtn.kb_gkey = GameUI.kb_opt;
+	add(new Credentials.CredentialsWidget());
     }
 
     private static abstract class Login extends Widget {
@@ -82,6 +84,7 @@ public class LoginScreen extends Widget {
 	}
 
 	Object[] data() {
+		Credentials.saveCredentials(user.text, pass.text);
 	    return(new Object[] {new AuthClient.NativeCred(user.text, pass.text), savepass.a});
 	}
 
