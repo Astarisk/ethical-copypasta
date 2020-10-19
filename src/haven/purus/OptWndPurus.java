@@ -45,7 +45,7 @@ public class OptWndPurus extends BetterWindow {
 
 		public EntryList(Coord sz) {
 			super(sz);
-			sb = add(new Scrollbar(sz.y, 0, 00), sz.x, 0);
+			sb = add(new Scrollbar(sz.y, 0, 0), sz.x, 0);
 			sb.resize(sz.y);
 			sb.show();
 			sb.c = new Coord(sz.x - sb.sz.x, 0);
@@ -114,7 +114,7 @@ public class OptWndPurus extends BetterWindow {
 	public OptWndPurus() {
 		super(UI.scale(800, 800), "Pasta Options");
 
-		searchField = add(new TextEntry(700, ""), UI.scale(50, 5));
+		searchField = add(new TextEntry(UI.scale(700), ""), UI.scale(50, 5));
 
 		el = add(new EntryList(UI.scale(600, 750)), UI.scale(100, 25));
 
