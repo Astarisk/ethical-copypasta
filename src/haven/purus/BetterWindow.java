@@ -19,9 +19,25 @@ public class BetterWindow extends Window {
 		setInBounds();
 	}
 
+	@Override
+	protected void added() {
+		loadPosition();
+		super.added();
+	}
+
+	public void savePosition() {
+		Config.pref.putInt("window#" + this.cap.text + "x", this.c.x);
+		Config.pref.putInt("window#" + this.cap.text + "y", this.c.y);
+	}
+
+	public void loadPosition() {
+		this.c = new Coord(Config.pref.getInt("window#" + this.cap.text + "x", this.c.x), Config.pref.getInt("window#" + this.cap.text + "y", this.c.y));
+	}
+
 	public void setInBounds() {
 		try {
 			this.c = this.c.max(-this.sz.x/4*3, -this.sz.y/4*3).min(this.parent.sz.x - this.sz.x/4, this.parent.sz.y - this.sz.y/4);
+			savePosition();
 		} catch(NullPointerException e) {
 			// Ignored
 		}
