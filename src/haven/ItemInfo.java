@@ -219,10 +219,25 @@ public abstract class ItemInfo {
     public static class Contents extends Tip {
 	public final List<ItemInfo> sub;
 	private static final Text.Line ch = Text.render("Contents:");
+
+	public boolean seeds = false;
+	public String contentName = "";
+	public double contentAmount = 0;
 	
 	public Contents(Owner owner, List<ItemInfo> sub) {
 	    super(owner);
 	    this.sub = sub;
+	    for(ItemInfo info : sub) {
+	    	if(info instanceof ItemInfo.Name) {
+	    		ItemInfo.Name ni = (Name)info;
+	    		if(ni.str.text.contains("seeds"))
+	    			seeds = true;
+	    		try {
+					contentAmount = Double.parseDouble(ni.str.text.substring(0, ni.str.text.indexOf(" ")));
+					contentName = ni.str.text.substring(ni.str.text.indexOf("of")+3);
+				} catch (NumberFormatException e) {}
+			}
+		}
 	}
 	
 	public BufferedImage tipimg() {

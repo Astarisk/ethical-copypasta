@@ -191,6 +191,35 @@ public class WItem extends Widget implements DTarget {
 		g.prect(half, half.inv(), half, meter * Math.PI * 2);
 		g.chcolor();
 	    }
+	    for(ItemInfo info : item.info()) {
+	    	if(info instanceof  ItemInfo.Contents) { // Draw content bar
+				double contentPercentage = ((ItemInfo.Contents) info).contentAmount;
+				String name = this.item.getName();
+				if(name.equals("Waterskin")) {
+					contentPercentage /= 3.0;
+				} else if(name.equals("Waterflask")) {
+					contentPercentage /= 2.0;
+				} else if(this.item.getName().equals("Bucket")){
+					if(((ItemInfo.Contents) info).seeds)
+						contentPercentage /= 10000.0;
+					else
+						contentPercentage /= 10.0;
+				} else {
+					continue;
+				}
+				Color col = new Color(0, 120, 255, 255);
+				if(((ItemInfo.Contents) info).seeds) {
+					col = new Color(128, 90, 48, 255);
+				} else if(((ItemInfo.Contents) info).contentName.equals("Milk")) {
+					col = Color.white;
+				} else if(((ItemInfo.Contents) info).contentName.equals("Linseed Oil")) {
+					col = new Color(255, 162, 0, 255);
+				}
+				g.chcolor(col);
+				g.frect(new Coord(this.sz.x-UI.scale(5), this.sz.y-(int)Math.ceil(this.sz.y*contentPercentage)), new Coord(UI.scale(5), (int)Math.floor(this.sz.y*contentPercentage)));
+				g.chcolor();
+			}
+		}
 	} else {
 	    g.image(missing.layer(Resource.imgc).tex(), Coord.z, sz);
 	}

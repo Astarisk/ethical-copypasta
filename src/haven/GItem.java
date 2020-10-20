@@ -39,6 +39,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     private GSprite spr;
     private ItemInfo.Raw rawinfo;
     private List<ItemInfo> info = Collections.emptyList();
+    public String name;
 
     @RName("item")
     public static class $_ implements Factory {
@@ -184,4 +185,18 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 	    meter = (int)((Number)args[0]).doubleValue();
 	}
     }
+
+    public String getName() {
+    	if(name != null)
+    		return name; // Lets hope that names of items don't change
+    	if(rawinfo == null) {
+    		return "";
+		}
+    	try {
+    		name = ItemInfo.find(ItemInfo.Name.class, info()).str.text;
+    		return name;
+		} catch(Exception e) {
+    		return "";
+		}
+	}
 }
