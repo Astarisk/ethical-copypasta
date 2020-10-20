@@ -33,8 +33,12 @@ public class Quality extends QBuff implements GItem.OverlayInfo<Tex> {
 	}
 
 	public void drawoverlay(GOut g, Tex ol) {
-		if(Config.displayQuality.val)
+		if(Config.displayQuality.val) {
+			g.chcolor(new Color(0, 0, 0, 150));
+			g.frect(g.sz().sub(g.sz().x, ol.sz().y), ol.sz());
+			g.chcolor();
 			g.aimage(ol, new Coord(0, g.sz().y), 0, 1);
+		}
 	}
 }
 
