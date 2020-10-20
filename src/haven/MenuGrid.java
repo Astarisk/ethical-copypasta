@@ -439,11 +439,11 @@ public class MenuGrid extends Widget implements KeyBinding.Bindable {
     }
 
 	private void loginToggles() {
-		if(haven.purus.Config.toggleTracking)
+		if(haven.purus.Config.toggleTracking.val)
 			wdgmsg("act","tracking");
-		if(haven.purus.Config.toggleCriminalacts)
+		if(haven.purus.Config.toggleCriminalacts.val)
 			wdgmsg("act","crime");
-		if(Config.toggleSiege)
+		if(Config.toggleSiege.val)
 			wdgmsg("act","siegeptr");
 	}
 

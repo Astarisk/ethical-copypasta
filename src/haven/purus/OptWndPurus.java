@@ -122,29 +122,26 @@ public class OptWndPurus extends BetterWindow {
 		el.root.subentries.add(thingToggles);
 
 		thingToggles.subentries.add(new Entry(new CheckBox("Toggle tracking on login"){
-			{a = Config.toggleTracking;}
+			{a = Config.toggleTracking.val;}
 			@Override
 			public boolean mousedown(Coord c, int button) {
-				Config.toggleTracking = !this.a;
-				Config.pref.putBoolean("toggleTracking", !this.a);
+				Config.toggleTracking.setVal(!this.a);
 				return super.mousedown(c, button);
 			}
 		}, "Toggle tracking on login"));
 		thingToggles.subentries.add(new Entry(new CheckBox("Toggle criminal acts on login"){
-			{a = Config.toggleCriminalacts;}
+			{a = Config.toggleCriminalacts.val;}
 			@Override
 			public boolean mousedown(Coord c, int button) {
-				Config.toggleCriminalacts = !this.a;
-				Config.pref.putBoolean("toggleCriminalacts", !this.a);
+				Config.toggleCriminalacts.setVal(!this.a);
 				return super.mousedown(c, button);
 			}
 		}, "Toggle criminal acts on login"));
 		thingToggles.subentries.add(new Entry(new CheckBox("Toggle siege pointers on login"){
-			{a = Config.toggleSiege;}
+			{a = Config.toggleSiege.val;}
 			@Override
 			public boolean mousedown(Coord c, int button) {
-				Config.toggleSiege = !this.a;
-				Config.pref.putBoolean("toggleSiege", !this.a);
+				Config.toggleSiege.setVal(!this.a);
 				return super.mousedown(c, button);
 			}
 		}, "Toggle siege pointers on login"));
@@ -153,11 +150,10 @@ public class OptWndPurus extends BetterWindow {
 		el.root.subentries.add(uiSettings);
 
 		uiSettings.subentries.add(new Entry(new CheckBox("Use hardware cursor [Requires restart]"){
-			{a = Config.hwcursor;}
+			{a = Config.hwcursor.val;}
 			@Override
 			public boolean mousedown(Coord c, int button) {
-				Config.hwcursor = !this.a;
-				Config.pref.putBoolean("hwcursor", !this.a);
+				Config.hwcursor.setVal(!this.a);
 				return super.mousedown(c, button);
 			}
 		}, "Use hardware cursor [Requires restart]"));
@@ -168,11 +164,10 @@ public class OptWndPurus extends BetterWindow {
 		el.root.subentries.add(debugSettings);
 
 		debugSettings.subentries.add(new Entry(new CheckBox("Write resource source codes in debug directory"){
-			{a = Config.debugRescode;}
+			{a = Config.debugRescode.val;}
 			@Override
 			public boolean mousedown(Coord c, int button) {
-				Config.debugRescode = !this.a;
-				Config.pref.putBoolean("debugRescode", !this.a);
+				Config.debugRescode.setVal(!this.a);
 				return super.mousedown(c, button);
 			}
 		}, "Write resource source codes in debug directory"));

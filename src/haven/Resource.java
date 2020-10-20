@@ -26,6 +26,9 @@
 
 package haven;
 
+import haven.purus.customres.ui.tt.q.quality.Quality;
+import haven.purus.customres.ui.tt.q.quality.ShowQuality;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.annotation.*;
@@ -1140,7 +1143,20 @@ public class Resource implements Serializable {
 		}));
     }
 
+	// Loftar refused to help
+	private static HashMap<String, Class> customClasses = new HashMap<String, Class>(){{
+		put("ui/tt/q/quality$haven.MenuGrid$PagButton$Factory", ShowQuality.Fac.class);
+		put("ui/tt/q/quality$haven.ItemInfo$InfoFactory", Quality.Fac.class);
+	}};
     public <T> T getcode(Class<T> cl, boolean fail) {
+		try {
+			// System.out.println(name + cl.getName()); Use this for debug
+			Class<?> ret = customClasses.get(name + "$" + cl.getName());
+			if(ret != null)
+				return cl.cast(ret.newInstance());
+		} catch(IllegalAccessException | InstantiationException e) {
+			e.printStackTrace();
+		}
 	CodeEntry e = layer(CodeEntry.class);
 	if(e == null) {
 	    if(fail)
@@ -1480,7 +1496,7 @@ public class Resource implements Serializable {
 	    throw(new LoadException("Wrong res version (" + ver + " != " + this.ver + ")", this));
 	while(!in.eom()) {
 		String stt = in.string();
-		if(haven.purus.Config.debugRescode && stt.equals("src")) {
+		if(haven.purus.Config.debugRescode.val && stt.equals("src")) {
 			int len = in.int32();
 			Message buf = new LimitMessage(in, len);
 			while(!buf.eom()) {
