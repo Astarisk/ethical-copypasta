@@ -70,8 +70,8 @@ public class MultiSession {
 		synchronized(sessions) {
 			sessions.add(ui);
 		}
-		ui.audio.amb.volume = 0;
-		ui.audio.pos.volume = 0;
+		ui.audio.amb.setVolumeNoSave(0);
+		ui.audio.pos.setVolumeNoSave(0);
 		if(activeSession != null && activeSession.root != null && activeSession.root.multiSessionWindow != null)
 			activeSession.root.multiSessionWindow.update();
 	}
@@ -94,14 +94,14 @@ public class MultiSession {
 		else
 			MainFrame.mf.setTitle("Haven and Hearth \u2013 Purus Pasta 2");
 		if(activeSession != null) {
-			activeSession.audio.amb.volume = 0;
-			activeSession.audio.pos.volume = 0;
+			activeSession.audio.amb.setVolumeNoSave(0);
+			activeSession.audio.pos.setVolumeNoSave(0);
 		}
 		synchronized(sessions) {
 			activeSession = ui;
 		}
-		ui.audio.amb.volume = Double.parseDouble(Utils.getpref("sfxvol-" + ui.audio.amb.name, "1.0"));
-		ui.audio.pos.volume = Double.parseDouble(Utils.getpref("sfxvol-" + ui.audio.pos.name, "1.0"));
+		activeSession.audio.amb.setVolumeNoSave(Double.parseDouble(Utils.getpref("sfxvol-" + ui.audio.amb.name, "1.0")));
+		activeSession.audio.pos.setVolumeNoSave(Double.parseDouble(Utils.getpref("sfxvol-" + ui.audio.pos.name, "1.0")));
 		if(activeSession.root != null && activeSession.root.multiSessionWindow != null)
 			activeSession.root.multiSessionWindow.update();
 	}

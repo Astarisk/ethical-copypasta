@@ -126,6 +126,12 @@ public class ActAudio extends State {
 	    Utils.setpref("sfxvol-" + name, Double.toString(volume));
 	}
 
+	public void setVolumeNoSave(double volume) {
+		if(volc != null)
+			volc.vol = volume;
+		this.volume = volume;
+	}
+
 	public void clear() {
 	    synchronized(this) {
 		if(mixer != null) {
