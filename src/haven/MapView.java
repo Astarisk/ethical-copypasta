@@ -1729,7 +1729,11 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	}
 	
 	protected void hit(Coord pc, Coord2d mc, ClickData inf) {
-	    Object[] args = {pc, mc.floor(posres), clickb, ui.modflags()};
+		int modflags = ui.modflags();
+		if(clickb == 1 && ui.gui.vhand != null) {
+			modflags &= ~UI.MOD_META;
+		}
+	    Object[] args = {pc, mc.floor(posres), clickb, modflags};
 	    if(inf != null)
 		args = Utils.extend(args, inf.clickargs());
 	    wdgmsg("click", args);

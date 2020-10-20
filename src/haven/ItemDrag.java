@@ -94,7 +94,7 @@ public class ItemDrag extends WItem {
 		return(gui.map.mousedown(gui.map.rootxlate(c.add(rootpos())), button));
 	    }
 	}
-	if(button == 1) {
+	if(button == 1 && !ui.modmeta) {
 	    dropon(parent, c.add(this.c));
 	    return(true);
 	} else if(button == 3) {
