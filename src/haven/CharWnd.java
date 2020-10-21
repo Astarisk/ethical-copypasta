@@ -34,6 +34,7 @@ import java.util.*;
 import static haven.PUtils.*;
 
 import haven.purus.BetterWindow;
+import haven.purus.Config;
 import haven.resutil.FoodInfo;
 import haven.resutil.Curiosity;
 
@@ -1228,6 +1229,7 @@ public class CharWnd extends BetterWindow {
 		}
 		sz.x += UI.scale(3);
 		resize(sz);
+		setInBounds();
 	    }
 
 	    public void draw(GOut g) {
@@ -1253,17 +1255,72 @@ public class CharWnd extends BetterWindow {
 		}
 	    }
 
+	    Coord doff;
+	    UI.Grab mg;
+	    boolean moved = false;
+	    long mouseDownTime = Long.MAX_VALUE;
 	    public boolean mousedown(Coord c, int btn) {
 		if((rtitle != null) && c.isect(Coord.z, rtitle.sz())) {
-		    CharWnd cw = getparent(GameUI.class).chrwdg;
-		    cw.show();
-		    cw.raise();
-		    cw.parent.setfocus(cw);
-		    cw.questtab.showtab();
+		    if(btn == 1) {
+		    	mouseDownTime = System.currentTimeMillis();
+				doff = c;
+				mg = ui.grabmouse(this);
+				moved = false;
+			}
 		    return(true);
 		}
 		return(super.mousedown(c, btn));
 	    }
+
+		@Override
+		protected void added() {
+			loadPosition();
+			setInBounds();
+			super.added();
+		}
+
+		@Override
+		public boolean mouseup(Coord c, int button) {
+	    	if(mg != null)
+	    		mg.remove();
+	    	mg = null;
+			if(!moved && (rtitle != null) && c.isect(Coord.z, rtitle.sz())) {
+				CharWnd cw = getparent(GameUI.class).chrwdg;
+				cw.show();
+				cw.raise();
+				cw.parent.setfocus(cw);
+				cw.questtab.showtab();
+			}
+			return super.mouseup(c, button);
+		}
+
+		public void savePosition() {
+			haven.purus.Config.pref.putInt("questwidget#" + "x", this.c.x);
+			haven.purus.Config.pref.putInt("questwidget#" + "y", this.c.y);
+		}
+
+		public void loadPosition() {
+			this.c = new Coord(haven.purus.Config.pref.getInt("questwidget#" + "x", this.c.x), Config.pref.getInt("questwidget#" + "y", this.c.y));
+		}
+
+		public void setInBounds() {
+			try {
+				if(this.parent == null)
+					return;
+				this.c = this.c.max(0, 0).min(this.parent.sz.x - this.sz.x, this.parent.sz.y - this.sz.y);
+				savePosition();
+			} catch(NullPointerException e) {
+				// Ignored
+			}
+		}
+
+	    public void mousemove(Coord c) {
+	    	if(mg != null && System.currentTimeMillis()-mouseDownTime > 100) {
+				this.c = this.c.add(c.add(doff.inv()));
+				setInBounds();
+				moved = true;
+			}
+		}
 
 	    public void tick(double dt) {
 		if(rtitle == null) {

@@ -790,7 +790,9 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    if(qqview != null)
 		qqview.reqdestroy();
 	    final Widget cref = qqview = child;
-	    add(new AlignPanel() {
+	    qqview = cref;
+	    add(cref);
+	    /*add(new AlignPanel() {
 		    {add(cref);}
 
 		    protected Coord getc() {
@@ -801,7 +803,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 			qqview = null;
 			destroy();
 		    }
-		});
+		});*/
 	} else if(place == "misc") {
 	    Coord c;
 	    int a = 1;
