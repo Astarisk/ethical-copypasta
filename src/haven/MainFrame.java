@@ -255,11 +255,14 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
 					fun = bill;
 					setTitle("Haven and Hearth");
 					ui = p.newui(null);
+					MultiSession.addSession(ui);
 					sess = fun.run(ui);
+					MultiSession.closeSession(ui);
 
 					fun = new RemoteUI(sess);
 					setTitle("Haven and Hearth \u2013 " + sess.username);
 					ui = p.newui(sess);
+					MultiSession.addSession(ui);
 					sess = fun.run(ui);
 				} catch(InterruptedException e) {
 				} finally {

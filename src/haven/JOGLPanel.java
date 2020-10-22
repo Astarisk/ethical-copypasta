@@ -607,12 +607,8 @@ public class JOGLPanel extends GLCanvas implements Runnable, UIPanel, Console.Di
 		ui.destroy();
 	    }
 	}*/
-		if(MultiSession.activeSession != null && MultiSession.activeSession.sess == null) {
-			MultiSession.closeSession(MultiSession.activeSession);
-		}
 
 	UI ui = new UI(this, new Coord(getSize()), sess);
-	MultiSession.addSession(ui);
 	MultiSession.setActiveSession(ui);
 	ui.env = this.env;
 	ui.root.guprof = uprof;
