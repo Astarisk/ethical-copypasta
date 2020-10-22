@@ -48,7 +48,7 @@ public class Config {
 
 	// Name of the variable and preference key should always be the same
 	public static Setting<Boolean> toggleTracking = new Setting<>("toggleTracking", true);
-	public static Setting<Boolean> toggleCriminalacts = new Setting<>("toggleCriminalacts", true);
+	public static Setting<Boolean> toggleCriminalacts = new Setting<>("toggleCriminalacts", false);
 	public static Setting<Boolean> toggleSiege = new Setting<>("toggleSiege", true);
 	public static Setting<Boolean> hwcursor = new Setting<>("hwcursor", true);
 	public static Setting<Boolean> debugRescode = new Setting<>("debugRescode", false);
