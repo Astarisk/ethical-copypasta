@@ -17,11 +17,13 @@ public class Config {
 
 		private void getVal() {
 			if(val instanceof Boolean) {
-				pref.getBoolean(name, (Boolean) val);
+				this.val = (T) val.getClass().cast(pref.getBoolean(name, (Boolean) val));
 			} else if(val instanceof String) {
-				pref.get(name, (String) val);
+				this.val = (T) val.getClass().cast(pref.get(name, (String) val));
 			} else if(val instanceof Integer) {
-				pref.getInt(name, (Integer) val);
+				this.val = (T) val.getClass().cast(pref.getInt(name, (Integer) val));
+			} else if(val instanceof Float) {
+				this.val = (T) val.getClass().cast(pref.getFloat(name, (Float) val));
 			} else {
 				throw(new RuntimeException("Cannot get unknown type " + val.getClass() + " to config!"));
 			}
@@ -35,6 +37,8 @@ public class Config {
 				pref.put(name, (String) val);
 			} else if(val instanceof Integer) {
 				pref.putInt(name, (Integer) val);
+			} else if(val instanceof Float) {
+				pref.putFloat(name, (Float) val);
 			} else {
 				throw(new RuntimeException("Cannot set unknown type " + val.getClass() + " to config!"));
 			}
@@ -49,4 +53,5 @@ public class Config {
 	public static Setting<Boolean> hwcursor = new Setting<>("hwcursor", true);
 	public static Setting<Boolean> debugRescode = new Setting<>("debugRescode", false);
 	public static Setting<Boolean> displayQuality = new Setting<>("displayQuality", true);
+	public static Setting<Float> cameraScrollSensitivity = new Setting<>("cameraScrollSensitivity", 1.0f);
 }

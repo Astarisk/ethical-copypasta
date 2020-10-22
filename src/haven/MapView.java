@@ -35,6 +35,8 @@ import java.util.*;
 import java.util.function.*;
 import java.lang.ref.*;
 import java.lang.reflect.*;
+
+import haven.purus.Config;
 import haven.render.*;
 import haven.render.sl.Uniform;
 import haven.render.sl.Type;
@@ -1803,7 +1805,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    if(placing.adjust.rotate(placing, amount, ui.modflags()))
 		return(true);
 	}
-	return(((Camera)camera).wheel(c, amount));
+	return(camera.wheel(c, Math.round(amount * Config.cameraScrollSensitivity.val)));
     }
     
     public boolean drop(final Coord cc, Coord ul) {

@@ -14,11 +14,15 @@ public class OptWndPurus extends BetterWindow {
 		String keywords;
 		Widget w;
 
-		List<Entry> subentries = new ArrayList<>();
+		private List<Entry> subentries = new ArrayList<>();
 
 		public Entry(Widget w, String keywords) {
 			this.keywords = keywords;
 			this.w = w;
+		}
+
+		public void addSubentry(Entry e) {
+			subentries.add(e);
 		}
 
 		List<Widget> match(String keyword) {
@@ -38,7 +42,7 @@ public class OptWndPurus extends BetterWindow {
 
 	private class EntryList extends Widget {
 
-		Entry root = new Entry(new Widget(), "*");
+		Entry root = new Entry(add(new Widget()), "*");
 		List<Widget> filteredWidgets = new ArrayList<>();
 
 		private Scrollbar sb;
@@ -56,6 +60,12 @@ public class OptWndPurus extends BetterWindow {
 			this.sb.max = 0;
 			for(Widget w : filteredWidgets) {
 				this.sb.max += w.sz.y + UI.scale(15);
+				if(w.parent == null) {
+					add(w);
+				}
+			}
+			for(Widget w : this.children(Widget.class)) {
+				w.hide();
 			}
 			this.sb.max -= this.sz.y;
 			if(this.sb.max < 0)
@@ -71,10 +81,10 @@ public class OptWndPurus extends BetterWindow {
 				if(curY-sb.val > sz.y)
 					break;
 				if(curY + w.sz.y > sb.val) {
-					Coord cc = xlate(new Coord(10, curY-sb.val), true);
-					GOut g2;
-					g2 = g.reclip(cc, w.sz);
-					w.draw(g2);
+					w.c = new Coord(10, curY-sb.val);
+					w.visible = true;
+				} else {
+					w.visible = false;
 				}
 				curY += w.sz.y+UI.scale(15);
 			}
@@ -119,9 +129,9 @@ public class OptWndPurus extends BetterWindow {
 		el = add(new EntryList(UI.scale(600, 750)), UI.scale(100, 25));
 
 		Entry thingToggles = new Entry(new Label("Toggle things on login"), "Toggle on login");
-		el.root.subentries.add(thingToggles);
+		el.root.addSubentry(thingToggles);
 
-		thingToggles.subentries.add(new Entry(new CheckBox("Toggle tracking on login"){
+		thingToggles.addSubentry(new Entry(new CheckBox("Toggle tracking on login"){
 			{a = Config.toggleTracking.val;}
 			@Override
 			public boolean mousedown(Coord c, int button) {
@@ -129,7 +139,7 @@ public class OptWndPurus extends BetterWindow {
 				return super.mousedown(c, button);
 			}
 		}, "Toggle tracking on login"));
-		thingToggles.subentries.add(new Entry(new CheckBox("Toggle criminal acts on login"){
+		thingToggles.addSubentry(new Entry(new CheckBox("Toggle criminal acts on login"){
 			{a = Config.toggleCriminalacts.val;}
 			@Override
 			public boolean mousedown(Coord c, int button) {
@@ -137,7 +147,7 @@ public class OptWndPurus extends BetterWindow {
 				return super.mousedown(c, button);
 			}
 		}, "Toggle criminal acts on login"));
-		thingToggles.subentries.add(new Entry(new CheckBox("Toggle siege pointers on login"){
+		thingToggles.addSubentry(new Entry(new CheckBox("Toggle siege pointers on login"){
 			{a = Config.toggleSiege.val;}
 			@Override
 			public boolean mousedown(Coord c, int button) {
@@ -147,9 +157,9 @@ public class OptWndPurus extends BetterWindow {
 		}, "Toggle siege pointers on login"));
 
 		Entry uiSettings = new Entry(new Label("UI Settings"), "UI Settings");
-		el.root.subentries.add(uiSettings);
+		el.root.addSubentry(uiSettings);
 
-		uiSettings.subentries.add(new Entry(new CheckBox("Use hardware cursor [Requires restart]"){
+		uiSettings.addSubentry(new Entry(new CheckBox("Use hardware cursor [Requires restart]"){
 			{a = Config.hwcursor.val;}
 			@Override
 			public boolean mousedown(Coord c, int button) {
@@ -158,12 +168,24 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, "Use hardware cursor [Requires restart]"));
 
+		Entry cameraSettings = new Entry(new Label("Camera settings"), "Camera settings");
+		el.root.addSubentry(cameraSettings);
+
+		Entry camScrollLbl = new Entry(new Label("Camera scroll zoom sensitivity"), "Camera scroll zoom sensitivity");
+		cameraSettings.addSubentry(camScrollLbl);
+		camScrollLbl.addSubentry(new Entry(new HSlider(UI.scale(200), 1, 100, Math.round(10 * Config.cameraScrollSensitivity.val)) {
+			@Override
+			public void changed() {
+				Config.cameraScrollSensitivity.setVal(this.val / 10.0f);
+				super.changed();
+			}
+		}, ""));
 		el.search("");
 
 		Entry debugSettings = new Entry(new Label("Debug Settings"), "Debug Settings");
-		el.root.subentries.add(debugSettings);
+		el.root.addSubentry(debugSettings);
 
-		debugSettings.subentries.add(new Entry(new CheckBox("Write resource source codes in debug directory"){
+		debugSettings.addSubentry(new Entry(new CheckBox("Write resource source codes in debug directory"){
 			{a = Config.debugRescode.val;}
 			@Override
 			public boolean mousedown(Coord c, int button) {
