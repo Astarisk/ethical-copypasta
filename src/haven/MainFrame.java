@@ -256,6 +256,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
 					setTitle("Haven and Hearth");
 					ui = p.newui(null);
 					MultiSession.addSession(ui);
+					MultiSession.setActiveSession(ui);
 					sess = fun.run(ui);
 					MultiSession.closeSession(ui);
 
@@ -263,6 +264,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
 					setTitle("Haven and Hearth \u2013 " + sess.username);
 					ui = p.newui(sess);
 					MultiSession.addSession(ui);
+					MultiSession.setActiveSession(ui);
 					sess = fun.run(ui);
 				} catch(InterruptedException e) {
 				} finally {
