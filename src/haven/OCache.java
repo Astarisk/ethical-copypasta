@@ -28,6 +28,8 @@ package haven;
 
 import java.util.*;
 import java.util.function.Consumer;
+
+import haven.purus.GobDecayNum;
 import haven.render.Render;
 
 public class OCache implements Iterable<Gob> {
@@ -576,6 +578,8 @@ public class OCache implements Iterable<Gob> {
 
     public static void health(Gob g, int hp) {
 	g.setattr(new GobHealth(g, hp));
+	if(haven.purus.Config.showGobDecayNum.val)
+		g.setattr(new GobDecayNum(g, hp));
     }
     public Delta health(Message msg) {
 	int hp = msg.uint8();

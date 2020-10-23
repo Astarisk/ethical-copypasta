@@ -168,6 +168,15 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, "Use hardware cursor [Requires restart]"));
 
+		uiSettings.addSubentry(new Entry(new CheckBox("Show gob damage [Requires restart]"){
+			{a = Config.showGobDecayNum.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.showGobDecayNum.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Show gob damage [Requires restart]"));
+
 		Entry cameraSettings = new Entry(new Label("Camera settings"), "Camera settings");
 		el.root.addSubentry(cameraSettings);
 

@@ -55,5 +55,6 @@ public class Config {
 	public static Setting<Boolean> displayQuality = new Setting<>("displayQuality", true);
 	public static Setting<Float> cameraScrollSensitivity = new Setting<>("cameraScrollSensitivity", 1.0f);
 	public static Setting<Boolean> tileGrid = new Setting<>("tileGrid", false);
+	public static Setting<Boolean> showGobDecayNum = new Setting<>("showGobDecayNum", true);
 
 }
