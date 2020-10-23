@@ -99,6 +99,14 @@
   <target name="clean">
     <delete dir="build" />
   </target>
+
+	<target name="dist" depends="jars">
+		<zip destfile="build/dist.zip">
+			<zipfileset dir="build/lib" prefix="lib/" />
+			<zipfileset dir="build/" includes="hafen.jar" />
+			<zipfileset dir="etc/" includes="run.bat, run.sh" />
+		</zip>
+	</target>
   
   <target name="profile" depends="jars">
     <nbprofiledirect>
