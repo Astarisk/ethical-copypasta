@@ -1,5 +1,9 @@
 package haven.purus;
 
+import haven.KeyBinding;
+import haven.KeyMatch;
+
+import java.awt.event.KeyEvent;
 import java.util.prefs.Preferences;
 
 public class Config {
@@ -56,5 +60,8 @@ public class Config {
 	public static Setting<Float> cameraScrollSensitivity = new Setting<>("cameraScrollSensitivity", 1.0f);
 	public static Setting<Boolean> tileGrid = new Setting<>("tileGrid", false);
 	public static Setting<Boolean> showGobDecayNum = new Setting<>("showGobDecayNum", true);
+	public static Setting<Boolean> growthStages = new Setting<>("growthStages", false);
+	public static KeyBinding kb_growthStages = KeyBinding.get("kb_growthStages", KeyMatch.forcode(KeyEvent.VK_P, KeyMatch.C));
+
 
 }

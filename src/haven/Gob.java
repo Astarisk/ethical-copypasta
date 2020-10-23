@@ -26,8 +26,12 @@
 
 package haven;
 
+import java.awt.*;
 import java.util.*;
 import java.util.function.*;
+
+import haven.purus.Config;
+import haven.purus.GobText;
 import haven.render.*;
 
 public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner {
@@ -54,7 +58,8 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner {
 	private Collection<RenderTree.Slot> slots = null;
 	private boolean added = false;
 
-	public Overlay(Gob gob, int id, Indir<Resource> res, Message sdt) {
+
+		public Overlay(Gob gob, int id, Indir<Resource> res, Message sdt) {
 	    this.gob = gob;
 	    this.id = id;
 	    this.res = res;
@@ -68,6 +73,14 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner {
 	    this.res = null;
 	    this.sdt = null;
 	    this.spr = spr;
+	}
+
+	public Overlay(Gob gob, Sprite spr, int id) {
+		this.gob = gob;
+		this.id = id;
+		this.res = null;
+		this.sdt = null;
+		this.spr = spr;
 	}
 
 	private void init() {
@@ -529,12 +542,69 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner {
 
     private Waitable.Queue updwait = null;
     private int updateseq = 0;
-    void updated() {
+	int cropstgmaxval = 0;
+	void updated() {
 	synchronized(this) {
 	    updateseq++;
 	    if(updwait != null)
 		updwait.wnotify();
 	}
+		// Maybe wrong place to do this
+		try {
+			Resource res = Gob.this.getres();
+			if(res == null)
+				return;
+			String resname = res.name;
+			if(Config.growthStages.val) {
+				if(resname.startsWith("gfx/terobjs/bushes") || (resname.startsWith("gfx/terobjs/trees") && !resname.endsWith("log") && !resname.endsWith("oldtrunk"))) {
+					ResDrawable rd = Gob.this.getattr(ResDrawable.class);
+					if(rd != null) {
+						int fscale = rd.sdt.peekrbuf(1);
+						if(fscale != -1) {
+							Gob.Overlay ovl = Gob.this.findol(1337);
+							if(ovl == null) {
+								Gob.this.addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
+							} else if (!((GobText) ovl.spr).text.equals(fscale + "%")) {
+								ovl.remove();
+								Gob.this.addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
+							}
+						}
+					}
+				} else if(resname.startsWith("gfx/terobjs/plants") && !resname.endsWith("trellis")) {
+					int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
+					if(cropstgmaxval == 0) {
+						for(FastMesh.MeshRes layer : getres().layers(FastMesh.MeshRes.class)) {
+							int stg = layer.id / 10;
+							if(stg > cropstgmaxval)
+								cropstgmaxval = stg;
+						}
+					}
+					Overlay ol = findol(1338);
+					String text;
+					Color col;
+					if(resname.endsWith("/fallowplant")) {
+						col = Color.GRAY;
+						text = "-1";
+					} else if(stage == cropstgmaxval) {
+						col = Color.GREEN;
+						text = stage + "/" + cropstgmaxval;
+					} else if(stage == 0) {
+						col = Color.RED;
+						text = stage + "/" + cropstgmaxval;
+					} else {
+						col = Color.YELLOW;
+						text = stage + "/" + cropstgmaxval;
+					}
+					if(ol == null) {
+						addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
+					} else if(!((GobText) ol.spr).text.equals(text)) {
+						ol.remove();
+						addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
+					}
+				}
+			}
+		} catch(Loading l) {
+		}
     }
 
     public void updwait(Runnable callback, Consumer<Waitable.Waiting> reg) {

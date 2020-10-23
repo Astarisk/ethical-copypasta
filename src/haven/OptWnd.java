@@ -27,6 +27,7 @@
 package haven;
 
 import haven.purus.BetterWindow;
+import haven.purus.Config;
 import haven.purus.MultiSession;
 import haven.purus.OptWndPurus;
 import haven.purus.TileGrid;
@@ -406,12 +407,14 @@ public class OptWnd extends BetterWindow {
 	    for(int i = 0; i < Fightsess.kb_acts.length; i++)
 		addbtn(scroll, width, String.format("Combat action %d", i + 1), Fightsess.kb_acts[i]);
 	    addbtn(scroll, width, "Switch targets", Fightsess.kb_relcycle);
-	    // Pasta keys
+	    // Pasta keys TODO: Use Pasta config
 		scroll.adda(new Label("Session management"), width / 2, 0.5);
 		addbtn(scroll, width, "Next session", MultiSession.kb_nextSession);
 		addbtn(scroll, width, "Previous session", MultiSession.kb_prevSession);
 		addbtn(scroll, width, "Toggle grid", TileGrid.kb_toggleTileGrid);
-	    Composer composer = new Composer(this).vmrgn(UI.scale(5));
+		addbtn(scroll, width, "Toggle growth stages of trees & crops", Config.kb_growthStages);
+
+		Composer composer = new Composer(this).vmrgn(UI.scale(5));
 	    composer.adda(scrollport, scrollport.cont.sz.x / 2, 0.5);
 	    composer.vmrgn(0);
 	    composer.adda(new PointBind(UI.scale(200)), scrollport.cont.sz.x / 2, 0.5);
