@@ -182,7 +182,7 @@ public class OptWndPurus extends BetterWindow {
 
 		Entry camScrollLbl = new Entry(new Label("Camera scroll zoom sensitivity"), "Camera scroll zoom sensitivity");
 		cameraSettings.addSubentry(camScrollLbl);
-		camScrollLbl.addSubentry(new Entry(new HSlider(UI.scale(200), 1, 100, Math.round(10 * Config.cameraScrollSensitivity.val)) {
+		camScrollLbl.addSubentry(new Entry(new HSlider(UI.scale(400), 1, 200, Math.round(10 * Config.cameraScrollSensitivity.val)) {
 			@Override
 			public void changed() {
 				Config.cameraScrollSensitivity.setVal(this.val / 10.0f);
