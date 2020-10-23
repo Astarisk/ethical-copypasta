@@ -26,17 +26,16 @@
 
 package haven;
 
-import static haven.MCache.cmaps;
-import static haven.MCache.tilesz;
+import static haven.MCache.*;
 import static haven.OCache.posres;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.*;
 import java.util.function.*;
-import java.lang.ref.*;
 import java.lang.reflect.*;
 
 import haven.purus.Config;
+import haven.purus.TileGrid;
 import haven.render.*;
 import haven.render.sl.Uniform;
 import haven.render.sl.Type;
@@ -58,6 +57,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
     public double shake = 0.0;
     public static int plobgran = 8;
     private static final Map<String, Class<? extends Camera>> camtypes = new HashMap<String, Class<? extends Camera>>();
+    private TileGrid tg;
     
     public interface Delayed {
 	public void run(GOut g);
@@ -439,6 +439,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	this.clickmap = new ClickMap();
 	clmaptree.add(clickmap);
 	setcanfocus(true);
+		this.tg = new TileGrid(glob.map);
     }
     
     protected void envdispose() {
@@ -1417,7 +1418,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    }
 	}
     }
-    
+	RenderTree.Slot gridS = null;
     public void tick(double dt) {
 	super.tick(dt);
 	camload = null;
@@ -1442,6 +1443,21 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		    ols[i].tick();
 	    }
 	    clickmap.tick();
+
+		if(Config.tileGrid.val && player() != null) {
+			Coord ul = player().rc.div(tilesz).sub(50, 50).floor();
+			if(!tg.ofs.equals(ul)) {
+				tg.upd(ul);
+				if(ui.sess.glob.map.olseq != -1 && gridS == null) {
+					gridS = drawadd(tg);
+				}
+			}
+		}
+		if(!Config.tileGrid.val && gridS != null) {
+			gridS.remove();
+			tg.ofs = Coord.z;
+			gridS = null;
+		}
 	}
 	Loader.Future<Plob> placing = this.placing;
 	if((placing != null) && placing.done())
@@ -1844,6 +1860,10 @@ public class MapView extends PView implements DTarget, Console.Directory {
     }
 
     public boolean globtype(char c, KeyEvent ev) {
+    	if(TileGrid.kb_toggleTileGrid.key().match(ev)) {
+    		Config.tileGrid.setVal(!Config.tileGrid.val);
+    		return true;
+		}
 	return(false);
     }
 

@@ -29,6 +29,7 @@ package haven;
 import haven.purus.BetterWindow;
 import haven.purus.MultiSession;
 import haven.purus.OptWndPurus;
+import haven.purus.TileGrid;
 
 import java.awt.event.KeyEvent;
 
@@ -409,6 +410,7 @@ public class OptWnd extends BetterWindow {
 		scroll.adda(new Label("Session management"), width / 2, 0.5);
 		addbtn(scroll, width, "Next session", MultiSession.kb_nextSession);
 		addbtn(scroll, width, "Previous session", MultiSession.kb_prevSession);
+		addbtn(scroll, width, "Toggle grid", TileGrid.kb_toggleTileGrid);
 	    Composer composer = new Composer(this).vmrgn(UI.scale(5));
 	    composer.adda(scrollport, scrollport.cont.sz.x / 2, 0.5);
 	    composer.vmrgn(0);
