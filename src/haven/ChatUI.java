@@ -26,6 +26,8 @@
 
 package haven;
 
+import haven.purus.GobHighlight;
+
 import java.util.*;
 import java.awt.Color;
 import java.awt.Font;
@@ -744,6 +746,16 @@ public class ChatUI extends Widget {
 	    if(msg == "msg") {
 		Integer from = (Integer)args[0];
 		String line = (String)args[1];
+		if(name.equals("Area Chat") && line.startsWith("@")) {
+			try {
+				long gobid = Long.parseLong(line.substring(1));
+				Gob gob = ui.sess.glob.oc.getgob(gobid);
+				gob.setattr(new GobHighlight(gob));
+				gob.updated();
+				return;
+			} catch(NumberFormatException | NullPointerException e) {
+			}
+		}
 		if(from == null) {
 		    append(new MyMessage(line, iw()));
 		} else {
