@@ -48,7 +48,7 @@ public class LoginScreen extends Widget {
 	setfocustab(true);
 	add(new Img(bg), Coord.z);
 	optbtn = adda(new Button(UI.scale(100), "Options"), pos("cbl").add(10, -10), 0, 1);
-	optbtn.kb_gkey = GameUI.kb_opt;
+	optbtn.setgkey(GameUI.kb_opt);
 	add(new Credentials.CredentialsWidget());
     }
 

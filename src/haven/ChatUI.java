@@ -782,11 +782,11 @@ public class ChatUI extends Widget {
 	public void uimsg(String msg, Object... args) {
 	    if(msg == "msg") {
 		Integer from = (Integer)args[0];
-		int gobid = (Integer)args[1];
+		long gobid = Utils.uint32((Integer)args[1]);
 		String line = (String)args[2];
 		Color col = Color.WHITE;
 		synchronized(ui.sess.glob.party.memb) {
-		    Party.Member pm = ui.sess.glob.party.memb.get((long)gobid);
+		    Party.Member pm = ui.sess.glob.party.memb.get(gobid);
 		    if(pm != null)
 			col = pm.col;
 		}
@@ -1078,12 +1078,12 @@ public class ChatUI extends Widget {
 		rqline = qfnd.render(pre + qline.line);
 		rqpre = pre.length();
 	    }
-	    c = br.sub(0, 20);
+	    c = br.sub(UI.scale(0, 20));
 	    g.image(rqline.tex(), c);
-	    int lx = rqline.advance(qline.point + rqpre);
-	    g.line(new Coord(br.x + lx + 1, br.y - 18), new Coord(br.x + lx + 1, br.y - 6), 1);
+	    int lx = rqline.advance(qline.point + rqpre) + UI.scale(1);
+	    g.line(new Coord(br.x + lx, br.y - UI.scale(18)), new Coord(br.x + lx, br.y - UI.scale(6)), 1);
 	} else {
-	    c = br.sub(0, 5);
+	    c = br.sub(UI.scale(0, 5));
 	}
 	double now = Utils.ntime();
 	synchronized(notifs) {

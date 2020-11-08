@@ -410,6 +410,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    } else if(kb_camreset.key().match(ev)) {
 		tangl = angl + (float)Utils.cangle(-(float)Math.PI * 0.25f - angl);
 		chfield((float)(100 * Math.sqrt(2)));
+		return(true);
 	    }
 	    return(false);
 	}
@@ -421,9 +422,9 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	public Widget create(UI ui, Object[] args) {
 	    Coord sz = UI.scale((Coord)args[0]);
 	    Coord2d mc = ((Coord)args[1]).mul(posres);
-	    int pgob = -1;
+	    long pgob = -1;
 	    if(args.length > 2)
-		pgob = (Integer)args[2];
+		pgob = Utils.uint32((Integer)args[2]);
 	    return(new MapView(sz, ui.sess.glob, mc, pgob));
 	}
     }
@@ -735,11 +736,54 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	}
     }
 
+    private static final Material gridmat = new Material(new BaseColor(255, 255, 255, 48), States.maskdepth, new MapMesh.OLOrder(-1),
+							 Location.xlate(new Coord3f(0, 0, 0.5f))   /* Apparently, there is no depth bias for lines. :P */
+							 );
+    private class GridLines extends MapRaster {
+	final Grid grid = new Grid<RenderTree.Node>() {
+		RenderTree.Node getcut(Coord cc) {
+		    return(map.getcut(cc).grid());
+		}
+	    };
+
+	private GridLines() {}
+
+	void tick() {
+	    super.tick();
+	    if(area != null)
+		grid.tick();
+	}
+
+	public void added(RenderTree.Slot slot) {
+	    slot.ostate(gridmat);
+	    slot.add(grid);
+	    super.added(slot);
+	}
+
+	public void remove() {
+	    slot.remove();
+	}
+    }
+
+    GridLines gridlines = null;
+    public void showgrid(boolean show) {
+	if((gridlines == null) && show) {
+	    basic.add(gridlines = new GridLines());
+	} else if((gridlines != null) && !show) {
+	    gridlines.remove();
+	    gridlines = null;
+	}
+    }
+
     static class MapClick extends Clickable {
 	final MapMesh cut;
 
 	MapClick(MapMesh cut) {
 	    this.cut = cut;
+	}
+
+	public String toString() {
+	    return(String.format("#<mapclick %s>", cut));
 	}
     }
 
@@ -1152,6 +1196,48 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		});
 	}
 
+	public void fuzzyget(Render out, Coord c, int rad, Consumer<ClickData> cb) {
+	    Area area = new Area(c.sub(rad, rad), c.add(rad + 1, rad + 1)).overlap(Area.sized(Coord.z, this.sz()));
+	    out.pget(basic, FragID.fragid, area, new VectorFormat(1, NumberFormat.SINT32), data -> {
+		    Clickslot cs;
+		    {
+			int id = data.getInt(area.ridx(c) * 4);
+			if((id != 0) && ((cs = idmap.get(id)) != null)) {
+			    cb.accept(new ClickData(cs.bk.state().get(Clickable.slot), (RenderTree.Slot)cs.bk.cast(RenderTree.Node.class)));
+			    return;
+			}
+		    }
+		    int maxr = Integer.MAX_VALUE;
+		    Map<Clickslot, Integer> score = new HashMap<>();
+		    for(Coord fc : area) {
+			int id = data.getInt(area.ridx(fc) * 4);
+			if((id == 0) || ((cs = idmap.get(id)) == null))
+			    continue;
+			int r = (int)Math.round(fc.dist(c) * 10);
+			if(r < maxr) {
+			    score.clear();
+			    maxr = r;
+			} else if(r > maxr) {
+			    continue;
+			}
+			score.put(cs, score.getOrDefault(cs, 0) + 1);
+		    }
+		    int maxscore = 0;
+		    cs = null;
+		    for(Map.Entry<Clickslot, Integer> ent : score.entrySet()) {
+			if((cs == null) || (ent.getValue() > maxscore)) {
+			    maxscore = ent.getValue();
+			    cs = ent.getKey();
+			}
+		    }
+		    if(cs == null) {
+			cb.accept(null);
+			return;
+		    }
+		    cb.accept(new ClickData(cs.bk.state().get(Clickable.slot), (RenderTree.Slot)cs.bk.cast(RenderTree.Node.class)));
+		});
+	}
+
 	public void dispose() {
 	    if(instancer != null) {
 		instancer.dispose();
@@ -1208,12 +1294,16 @@ public class MapView extends PView implements DTarget, Console.Directory {
 				    img -> Debug.dumpimage(img, Debug.somedir("click2.png")));
 		}
 		clmaplist.get(out, c, cd -> {
+			if(clickdb)
+			    Debug.log.printf("map-id: %s\n", cd);
 			if(cd != null)
 			    this.cut = ((MapClick)cd.ci).cut;
 			ckdone(1);
 		    });
 		out.pget(clmaplist.basic, ClickLocation.fragloc, Area.sized(c, new Coord(1, 1)), new VectorFormat(2, NumberFormat.FLOAT32), data -> {
 			pos = new Coord2d(data.getFloat(0), data.getFloat(4));
+			if(clickdb)
+			    Debug.log.printf("map-pos: %s\n", pos);
 			ckdone(2);
 		    });
 	    }
@@ -1232,14 +1322,20 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	};
     }
     
+    private static int gobclfuzz = 3;
     private void checkgobclick(Render out, Pipe.Op basic, Coord c, Consumer<ClickData> cb) {
 	clobjlist.basic(basic);
 	clobjlist.draw(out);
 	if(clickdb) {
 	    GOut.debugimage(out, clobjlist.basic, FragID.fragid, Area.sized(Coord.z, clobjlist.sz()), new VectorFormat(1, NumberFormat.SINT32),
 			  img -> Debug.dumpimage(img, Debug.somedir("click3.png")));
+	    Consumer<ClickData> ocb = cb;
+	    cb = cl -> {
+		Debug.log.printf("obj-id: %s\n", cl);
+		ocb.accept(cl);
+	    };
 	}
-	clobjlist.get(out, c, cb);
+	clobjlist.fuzzyget(out, c, gobclfuzz, cb);
     }
     
     public void delay(Delayed d) {
@@ -1442,6 +1538,8 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		if(ols[i] != null)
 		    ols[i].tick();
 	    }
+	    if(gridlines != null)
+		gridlines.tick();
 	    clickmap.tick();
 
 		if(Config.tileGrid.val && player() != null) {
@@ -1624,7 +1722,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    if(args[0] == null)
 		plgob = -1;
 	    else
-		plgob = (Integer)args[0];
+		plgob = Utils.uint32((Integer)args[0]);
 	} else if(msg == "flashol") {
 	    unflashol();
 	    olflash = (Integer)args[0];
@@ -1868,6 +1966,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	return(super.keydown(ev));
     }
 
+    public static final KeyBinding kb_grid = KeyBinding.get("grid", KeyMatch.forchar('G', KeyMatch.C));
     public boolean globtype(char c, KeyEvent ev) {
     	if(TileGrid.kb_toggleTileGrid.key().match(ev)) {
     		Config.tileGrid.setVal(!Config.tileGrid.val);
@@ -1881,6 +1980,10 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			refreshGobsAll();
 			return true;
 		}
+	if(kb_grid.key().match(ev)) {
+	    showgrid(gridlines == null);
+	    return(true);
+	}
 	return(false);
     }
 
@@ -2092,6 +2195,12 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		public void run(Console cons, String[] args) {
 		    if((plobgran = Integer.parseInt(args[1])) < 0)
 			plobgran = 0;
+		}
+	    });
+	Console.setscmd("clickfuzz", new Console.Command() {
+		public void run(Console cons, String[] args) {
+		    if((gobclfuzz = Integer.parseInt(args[1])) < 0)
+			gobclfuzz = 0;
 		}
 	    });
 	Console.setscmd("clickdb", new Console.Command() {
