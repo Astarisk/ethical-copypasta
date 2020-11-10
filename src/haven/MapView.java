@@ -1891,7 +1891,9 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	}
 	return(true);
     }
-    
+
+    private long lastmmhittest = 0;
+    Coord lasthittestc;
     public void mousemove(Coord c) {
 	if(grab != null)
 	    grab.mmousemove(c);
@@ -1903,9 +1905,76 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    if((placing.lastmc == null) || !placing.lastmc.equals(c)) {
 		placing.new Adjust(c, ui.modflags()).run();
 	    }
+	} else if(ui.modshift && !ui.modctrl && Config.resinfo.val) {
+		long now = System.currentTimeMillis();
+		if ((now - lastmmhittest > 500 || lasthittestc.dist(c) > tilesz.x) && ui.gui.hand.isEmpty()) {
+			lastmmhittest = now;
+			lasthittestc = c;
+			new Hittest(c) {
+				public void hit(Coord pc, Coord2d mc, ClickData inf) {
+					if(inf != null && inf.ci instanceof Gob.GobClick) {
+						Gob.GobClick gc = (Gob.GobClick) inf.ci;
+						if(gc.gob != null) {
+							Resource res = gc.gob.getres();
+							tooltip = String.format(gc.gob.id + " " + gc.clickargs(inf)[3] + " " + gc.clickargs(inf)[4] + "\n");
+							if(res != null) {
+								tooltip += res.name;
+								for(Gob.Overlay o : gc.gob.ols) {
+									try {
+										if(o.res != null && o.res.get() != null)
+											tooltip += String.format("\noverlay: " + o.res.get().name + " id: " + o.id);
+									} catch(Loading l) {
+									}
+								}
+								Drawable d = gc.gob.getattr(Drawable.class);
+								if(d != null)
+									tooltip += String.format("\n sdt: %s", ((ResDrawable) d).sdt.peekrbuf(0));
+								if(d != null) {
+									d.getres().layers(FastMesh.MeshRes.class).stream().map(mr -> String.format("\n meshid: %s", mr.id)).distinct().forEach(s -> tooltip += String.format(s));
+								}
+								tooltip += "\n" + gc.gob.getrc().toString();
+								return;
+							}
+							tooltip = null;
+						}
+					}
+				}
+
+				protected void nohit(Coord pc) {
+					tooltip = null;
+				}
+			}.run();
+		}
+	} else if (ui.modshift && ui.modctrl && Config.resinfo.val) {
+		long now = System.currentTimeMillis();
+		if (now - lastmmhittest > 500 || lasthittestc.dist(c) > tilesz.x) {
+			lastmmhittest = now;
+			lasthittestc = c;
+			new Hittest(c) {
+				public void hit(Coord pc, Coord2d mc, ClickData inf) {
+					if (inf == null) {
+						MCache map = ui.sess.glob.map;
+						int t = map.gettile(mc.floor(tilesz));
+						Resource res = map.tilesetr(t);
+						if (res != null) {
+							tooltip = res.name + "\n" + mc.floor(tilesz);
+							return;
+						}
+					}
+					tooltip = null;
+
+				}
+
+				public void nohit(Coord pc) {
+					tooltip = null;
+				}
+			}.run();
+		}
+	} else {
+		tooltip = null;
 	}
     }
-    
+
     public boolean mouseup(Coord c, int button) {
 	if(button == 2) {
 	    if(camdrag != null) {
@@ -1991,6 +2060,8 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	if(selection != null) {
 	    if(selection.tt != null)
 		return(selection.tt);
+	} else if(tooltip != null && ui.modshift) {
+		return RichText.render((String) tooltip, 0);
 	}
 	return(super.tooltip(c, prev));
     }

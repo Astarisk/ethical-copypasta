@@ -420,6 +420,7 @@ public class OptWnd extends BetterWindow {
 		addbtn(scroll, width, "Previous session", MultiSession.kb_prevSession);
 		addbtn(scroll, width, "Toggle grid", TileGrid.kb_toggleTileGrid);
 		addbtn(scroll, width, "Toggle growth stages of trees & crops", Config.kb_growthStages);
+		addbtn(scroll, width, "Toggle resinfo on tiles and gobs", Config.kb_resinfo);
 
 		Composer composer = new Composer(this).vmrgn(UI.scale(5));
 	    composer.adda(scrollport, scrollport.cont.sz.x / 2, 0.5);

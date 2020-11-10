@@ -1249,6 +1249,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public static final KeyBinding kb_chat = KeyBinding.get("chat-toggle", KeyMatch.forchar('C', KeyMatch.C));
     public static final KeyBinding kb_hide = KeyBinding.get("ui-toggle", KeyMatch.nil);
     public boolean globtype(char key, KeyEvent ev) {
+    	if(haven.purus.Config.kb_resinfo.key().match(ev)) {
+    		haven.purus.Config.resinfo.setVal(!haven.purus.Config.resinfo.val);
+    		return true;
+		}
 	if(key == ':') {
 	    entercmd();
 	    return(true);

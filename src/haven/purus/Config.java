@@ -62,7 +62,9 @@ public class Config {
 	public static Setting<Boolean> tileGrid = new Setting<>("tileGrid", false);
 	public static Setting<Boolean> showGobDecayNum = new Setting<>("showGobDecayNum", true);
 	public static Setting<Boolean> growthStages = new Setting<>("growthStages", false);
-	public static KeyBinding kb_growthStages = KeyBinding.get("kb_growthStages", KeyMatch.forcode(KeyEvent.VK_P, KeyMatch.C));
+	public static Setting<Boolean> resinfo = new Setting<>("resinfo", false);
 
+	public static KeyBinding kb_growthStages = KeyBinding.get("kb_growthStages", KeyMatch.forcode(KeyEvent.VK_P, KeyMatch.C));
+	public static KeyBinding kb_resinfo = KeyBinding.get("kb_resinfo", KeyMatch.forcode(KeyEvent.VK_I, KeyMatch.S));
 
 }
