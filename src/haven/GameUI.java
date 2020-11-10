@@ -28,6 +28,7 @@ package haven;
 
 import haven.purus.BetterWindow;
 import haven.purus.MultiSession;
+import haven.purus.StatusWdg;
 
 import java.util.*;
 import java.util.function.*;
@@ -72,6 +73,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public Belt beltwdg;
     public final Map<Integer, String> polowners = new HashMap<Integer, String>();
     public Bufflist buffs;
+    public StatusWdg statuswdg;
 
     private static final OwnerContext.ClassResolver<BeltSlot> beltctxr = new OwnerContext.ClassResolver<BeltSlot>()
 	.add(Glob.class, slot -> slot.wdg().ui.sess.glob)
@@ -202,6 +204,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	opts.hide();
 	zerg = add(new Zergwnd(), Utils.getprefc("wndc-zerg", UI.scale(new Coord(187, 50))));
 	zerg.hide();
+		statuswdg = add(new StatusWdg());
     }
 
     protected void attached() {
@@ -1314,6 +1317,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	if(map != null)
 	    map.resize(sz);
 	beltwdg.c = new Coord(blpw + UI.scale(10), sz.y - beltwdg.sz.y - UI.scale(5));
+	this.statuswdg.c = new Coord(sz.x/2 + UI.scale(80), UI.scale(10));
 	super.resize(sz);
     }
     

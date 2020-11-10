@@ -44,7 +44,8 @@ public class JOGLPanel extends GLCanvas implements Runnable, UIPanel, Console.Di
     public final GPUProfile gprof = new GPUProfile(300);
     private boolean bgmode = false;
     private boolean aswap;
-    private int fps, framelag;
+    public static int fps;
+    private int framelag;
     private volatile int frameno;
     private double uidle = 0.0, ridle = 0.0;
     private final Dispatcher ed;

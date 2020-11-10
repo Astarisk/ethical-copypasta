@@ -7,6 +7,7 @@ import java.awt.event.KeyEvent;
 import java.util.prefs.Preferences;
 
 public class Config {
+	public static final boolean iswindows = System.getProperty("os.name").startsWith("Windows");
 	public static Preferences pref = SQLPreferences.factory.userRoot().node("puruspasta");
 
 	public static class Setting<T> {
