@@ -28,6 +28,8 @@ package haven;
 
 import java.util.*;
 import java.awt.Color;
+
+import haven.purus.TimeWdg;
 import haven.render.*;
 import haven.render.sl.*;
 
@@ -50,7 +52,8 @@ public class Glob {
     public Indir<Resource> sky1 = null, sky2 = null;
     public double skyblend = 0.0;
     private Map<Indir<Resource>, Object> wmap = new HashMap<Indir<Resource>, Object>();
-    
+	public TimeWdg timewdg = new TimeWdg(this);
+
     public Glob(Session sess) {
 	this.sess = sess;
 	map = new MCache(sess);
@@ -168,6 +171,7 @@ public class Glob {
 		epoch = Utils.rtime();
 		if(!inc)
 		    lastrep = 0;
+		timewdg.servertimecalc();
 	    } else if(t == "astro") {
 		double dt = ((Number)a[n++]).doubleValue();
 		double mp = ((Number)a[n++]).doubleValue();

@@ -137,15 +137,16 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    String genus = "";
 	    if(args.length > 2)
 		genus = (String)args[2];
-	    GameUI gui = new GameUI(chrid, plid, genus);
+	    GameUI gui = new GameUI(chrid, plid, genus, ui);
 	    ui.gui = gui;
 	    return(gui);
 	}
     }
-    
-    private final Coord minimapc;
+
+		private final Coord minimapc;
     private final Coord menugridc;
-    public GameUI(String chrid, long plid, String genus) {
+    public GameUI(String chrid, long plid, String genus, UI ui) {
+    	this.ui = ui;
 	this.chrid = chrid;
 	this.plid = plid;
 	this.genus = genus;
@@ -205,6 +206,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	zerg = add(new Zergwnd(), Utils.getprefc("wndc-zerg", UI.scale(new Coord(187, 50))));
 	zerg.hide();
 		statuswdg = add(new StatusWdg());
+		add(ui.sess.glob.timewdg, Coord.z);
     }
 
     protected void attached() {
@@ -1318,6 +1320,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    map.resize(sz);
 	beltwdg.c = new Coord(blpw + UI.scale(10), sz.y - beltwdg.sz.y - UI.scale(5));
 	this.statuswdg.c = new Coord(sz.x/2 + UI.scale(80), UI.scale(10));
+	ui.sess.glob.timewdg.c =  new Coord(sz.x / 2 - UI.scale(360 / 2), umpanel.sz.y);
 	super.resize(sz);
     }
     
