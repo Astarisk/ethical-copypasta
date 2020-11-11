@@ -2039,9 +2039,13 @@ public class MapView extends PView implements DTarget, Console.Directory {
     public boolean globtype(char c, KeyEvent ev) {
     	if(TileGrid.kb_toggleTileGrid.key().match(ev)) {
     		Config.tileGrid.setVal(!Config.tileGrid.val);
-    		return true;
+			ui.gui.msg("Toggled grid " + (haven.purus.Config.tileGrid.val ? "on" : "off"));
+
+			return true;
 		} else if(Config.kb_growthStages.key().match(ev)) {
 			Config.growthStages.setVal(!Config.growthStages.val);
+			ui.gui.msg("Toggled crop/tree growth stages " + (haven.purus.Config.growthStages.val ? "on" : "off"));
+
 			if(!Config.growthStages.val) {
 				removeCustomSprites(1337);
 				removeCustomSprites(1338);

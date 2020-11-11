@@ -1251,7 +1251,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public boolean globtype(char key, KeyEvent ev) {
     	if(haven.purus.Config.kb_resinfo.key().match(ev)) {
     		haven.purus.Config.resinfo.setVal(!haven.purus.Config.resinfo.val);
-    		return true;
+			msg("Toggled resinfo on shift/shift + ctrl hover " + (haven.purus.Config.resinfo.val ? "on" : "off"));
+			return true;
 		}
 	if(key == ':') {
 	    entercmd();
