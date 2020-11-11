@@ -26,6 +26,8 @@
 
 package haven;
 
+import haven.purus.Config;
+
 import java.awt.event.KeyEvent;
 
 public class Speedget extends Widget {
@@ -33,6 +35,7 @@ public class Speedget extends Widget {
     public static final String tips[];
     public static final Coord tsz;
     public int cur, max;
+    public int SpeedToSet = -1;
 
     static {
 	String[] names = {"crawl", "walk", "run", "sprint"};
@@ -64,10 +67,16 @@ public class Speedget extends Widget {
 	super(tsz);
 	this.cur = cur;
 	this.max = max;
+	SpeedToSet = Config.speedOnLogin.val;
     }
 
     public void draw(GOut g) {
-	int x = 0;
+    	if(SpeedToSet > -1) {
+    		set(SpeedToSet);
+    		SpeedToSet = -1;
+		}
+
+		int x = 0;
 	for(int i = 0; i < 4; i++) {
 	    Tex t;
 	    if(i == cur)

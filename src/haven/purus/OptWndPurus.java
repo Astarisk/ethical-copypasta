@@ -155,6 +155,18 @@ public class OptWndPurus extends BetterWindow {
 				return super.mousedown(c, button);
 			}
 		}, "Toggle siege pointers on login"));
+		Label runlbl;
+		String[] speed = {"Crawling", "Walking", "Running", "Sprinting"};
+		Entry speedOnloginLbl = new Entry(runlbl = new Label("Set movement speed on login: " + speed[Config.speedOnLogin.val]), "Set movement speed on login");
+		thingToggles.addSubentry(speedOnloginLbl);
+		speedOnloginLbl.addSubentry(new Entry(new HSlider(UI.scale(150), 0, 3, Math.round(10 * Config.speedOnLogin.val)) {
+			@Override
+			public void changed() {
+				Config.speedOnLogin.setVal(this.val);
+				runlbl.settext("Set movement speed on login: " + speed[this.val]);
+				super.changed();
+			}
+		}, ""));
 
 		Entry uiSettings = new Entry(new Label("UI Settings"), "UI Settings");
 		el.root.addSubentry(uiSettings);
