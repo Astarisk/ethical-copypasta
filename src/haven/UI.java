@@ -222,6 +222,9 @@ public class UI {
 		if(pwdg == null)
 		    throw(new UIException("Null parent widget " + parent + " for " + id, type, cargs));
 		pwdg.addchild(wdg, pargs);
+		if(pwdg instanceof Window) { // Handle modified windows
+			processWindowContent(parent, gui, (Window) pwdg, wdg);
+		}
 	    }
 	    bind(wdg, id);
 	}
@@ -239,7 +242,46 @@ public class UI {
 	}
     }
 
-    public abstract class Grab {
+	private void processWindowContent(long wndid, GameUI gui, Window pwdg, Widget wdg) {
+		String cap = pwdg.cap.text;
+		if (wdg instanceof ISBox && cap.equals("Stockpile")) {
+			TextEntry entry = new TextEntry(UI.scale(40), "") {
+				@Override
+				public boolean keydown(KeyEvent ev) {
+					int c = ev.getKeyChar();
+					if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 2 || c == '\b') {
+						return buf.key(ev);
+					} else if (c == '\n') {
+						try {
+							int count = Integer.parseInt(dtext());
+							for (int i = 0; i < count; i++)
+								wdg.wdgmsg("xfer");
+							return true;
+						} catch (NumberFormatException e) {
+						}
+					}
+					return !(c >= KeyEvent.VK_F1 && c <= KeyEvent.VK_F12);
+				}
+			};
+			Button btn = new Button(UI.scale(65), "Take") {
+				@Override
+				public void click() {
+					try {
+						String cs = entry.dtext();
+						int count = cs.isEmpty() ? 1 : Integer.parseInt(cs);
+						for (int i = 0; i < count; i++)
+							wdg.wdgmsg("xfer");
+					} catch (NumberFormatException e) {
+					}
+				}
+			};
+			pwdg.add(btn, new Coord(0, wdg.sz.y + UI.scale(5)));
+			pwdg.add(entry, new Coord(btn.sz.x + UI.scale(5), wdg.sz.y + UI.scale(5 + 2)));
+		}
+	}
+
+
+	public abstract class Grab {
 	public final Widget wdg;
 	public Grab(Widget wdg) {this.wdg = wdg;}
 	public abstract void remove();
