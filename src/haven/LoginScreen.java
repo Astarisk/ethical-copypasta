@@ -29,7 +29,14 @@ package haven;
 import haven.purus.Credentials;
 import haven.purus.MultiSession;
 
+import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Scanner;
+import java.util.concurrent.*;
 
 public class LoginScreen extends Widget {
     public static final Text.Foundry
@@ -42,6 +49,9 @@ public class LoginScreen extends Widget {
     private IButton btn;
     private Button optbtn;
     private OptWnd opts;
+    private Button statusbtn;
+    private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
 
     public LoginScreen() {
 	super(bg.sz());
@@ -50,7 +60,9 @@ public class LoginScreen extends Widget {
 	optbtn = adda(new Button(UI.scale(100), "Options"), pos("cbl").add(10, -10), 0, 1);
 	optbtn.setgkey(GameUI.kb_opt);
 	add(new Credentials.CredentialsWidget());
-    }
+	statusbtn = adda(new Button(UI.scale(200), "Initializing..."), sz.x-UI.scale(210), UI.scale(80), 0, 1);
+		executorService.scheduleWithFixedDelay(checkStatus,0, 5, TimeUnit.SECONDS);
+	}
 
     private static abstract class Login extends Widget {
 	Login(Coord sz) {super(sz);}
@@ -172,6 +184,12 @@ public class LoginScreen extends Widget {
 	}
     }
 
+	@Override
+	public void destroy() {
+		executorService.shutdown();
+		super.destroy();
+	}
+
     private void clear() {
 	if(cur != null) {
 	    ui.destroy(cur);
@@ -203,6 +221,15 @@ public class LoginScreen extends Widget {
 	} else if(sender == opts) {
 	    opts.reqdestroy();
 	    opts = null;
+	} else if(sender == statusbtn) {
+		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+		if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+			try {
+				desktop.browse(new URI("https://www.havenandhearth.com/portal/"));
+			} catch (IOException | URISyntaxException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	super.wdgmsg(sender, msg, args);
     }
@@ -259,4 +286,30 @@ public class LoginScreen extends Widget {
 	}
 	return(super.keydown(ev));
     }
+
+    Runnable checkStatus = new Runnable() {
+		@Override
+		public void run() {
+			try {
+				URL url = new URL("http://www.havenandhearth.com/portal/index/status");
+				Scanner scan = new Scanner(url.openStream());
+				while(scan.hasNextLine()) {
+					String line = scan.nextLine();
+					if(line.contains("h2")) {
+						String status = line.substring(line.indexOf("<h2>")+4, line.indexOf("</h2>"));
+						if(status.equals("The server is up"))
+							statusbtn.change(status, Color.GREEN);
+						else
+							statusbtn.change(status, Color.RED);
+					}
+				}
+				Thread.sleep(5000);
+			} catch(IOException e) {
+				e.printStackTrace();
+			} catch(InterruptedException e) {
+				// Ignore
+			}
+		}
+	};
+
 }
