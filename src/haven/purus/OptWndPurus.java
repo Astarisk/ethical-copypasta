@@ -159,7 +159,7 @@ public class OptWndPurus extends BetterWindow {
 		String[] speed = {"Crawling", "Walking", "Running", "Sprinting"};
 		Entry speedOnloginLbl = new Entry(runlbl = new Label("Set movement speed on login: " + speed[Config.speedOnLogin.val]), "Set movement speed on login");
 		thingToggles.addSubentry(speedOnloginLbl);
-		speedOnloginLbl.addSubentry(new Entry(new HSlider(UI.scale(150), 0, 3, Math.round(10 * Config.speedOnLogin.val)) {
+		speedOnloginLbl.addSubentry(new Entry(new HSlider(UI.scale(150), 0, 3, Config.speedOnLogin.val) {
 			@Override
 			public void changed() {
 				Config.speedOnLogin.setVal(this.val);
