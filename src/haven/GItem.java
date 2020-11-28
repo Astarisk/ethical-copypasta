@@ -40,6 +40,9 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     private ItemInfo.Raw rawinfo;
     private List<ItemInfo> info = Collections.emptyList();
     public String name;
+	public double studytime = 0;
+	public Tex metertex;
+
 
     @RName("item")
     public static class $_ implements Factory {

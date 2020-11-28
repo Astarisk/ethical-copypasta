@@ -151,7 +151,24 @@ public class WItem extends Widget implements DTarget {
 	    GItem.InfoOverlay<?>[] ret = buf.toArray(new GItem.InfoOverlay<?>[0]);
 	    return(() -> ret);
 	});
-    public final AttrCache<Double> itemmeter = new AttrCache<>(this::info, AttrCache.map1(GItem.MeterInfo.class, minf -> minf::meter));
+    public final AttrCache<Double> itemmeter = new AttrCache<>(this::info, AttrCache.map1(GItem.MeterInfo.class, minf -> {
+		GItem itm = WItem.this.item;
+		if (minf != null) {
+			double meter = minf.meter();
+			if (itm.studytime > 0 && parent instanceof Inventory ) {
+				int timeleft = (int) Math.floor(itm.studytime * (1.0 - meter));
+				int hoursleft = timeleft / 3600;
+				int minutesleft = timeleft%3600 / 60;
+				itm.metertex = Text.std.renderstroked(String.format("%d:%02d", hoursleft, minutesleft), Color.white, Color. black).tex();
+			} else {
+				itm.metertex = Text.std.renderstroked(String.format("%d%%", (int) (meter * 100)), Color.white, Color. black).tex();
+			}
+			return minf::meter;
+		}
+		itm.metertex = null;
+
+		return minf::meter;
+    }));
 
     private GSprite lspr = null;
     public void tick(double dt) {
@@ -186,10 +203,16 @@ public class WItem extends Widget implements DTarget {
 	    }
 	    Double meter = (item.meter > 0) ? Double.valueOf(item.meter / 100.0) : itemmeter.get();
 	    if((meter != null) && (meter > 0)) {
+	    	/*
 		g.chcolor(255, 255, 255, 64);
 		Coord half = sz.div(2);
 		g.prect(half, half.inv(), half, meter * Math.PI * 2);
 		g.chcolor();
+	    	 */
+			g.chcolor(Color.RED);
+			g.frect(Coord.z, new Coord((int)Math.floor(this.sz.x * meter), UI.scale(3)));
+			g.chcolor();
+			g.image(item.metertex, Coord.z);
 	    }
 	    try {
 			for(ItemInfo info : item.info()) {

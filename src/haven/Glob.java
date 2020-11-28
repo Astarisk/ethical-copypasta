@@ -34,6 +34,7 @@ import haven.render.*;
 import haven.render.sl.*;
 
 public class Glob {
+	public static final double SERVER_TIME_RATIO = 3.29d;
     public final OCache oc = new OCache(this);
     public final MCache map;
     public final Session sess;

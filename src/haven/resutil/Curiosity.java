@@ -39,13 +39,15 @@ public class Curiosity extends ItemInfo.Tip {
 	this.mw = mw;
 	this.enc = enc;
 	this.time = time;
+	if(owner instanceof GItem)
+		((GItem) owner).studytime = time / Glob.SERVER_TIME_RATIO;
     }
 
     static String[] units = {"s", "m", "h", "d"};
     static int[] div = {60, 60, 24};
     static String timefmt(int time) {
 	int[] vals = new int[units.length];
-	vals[0] = time;
+	vals[0] = (int)(time / Glob.SERVER_TIME_RATIO); // Use real time
 	for(int i = 0; i < div.length; i++) {
 	    vals[i + 1] = vals[i] / div[i];
 	    vals[i] = vals[i] % div[i];
