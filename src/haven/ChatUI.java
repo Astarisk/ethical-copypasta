@@ -28,6 +28,8 @@ package haven;
 
 import haven.purus.GobHighlight;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.awt.Color;
 import java.awt.Font;
@@ -718,7 +720,7 @@ public class ChatUI extends Widget {
 		BuddyWnd.Buddy b = getparent(GameUI.class).buddies.find(from);
 		String nm = (b == null)?"???":(b.name);
 		if((r == null) || !nm.equals(cn)) {
-		    r = fnd.render(RichText.Parser.quote(String.format("%s: %s", nm, text)), w, TextAttribute.FOREGROUND, col);
+			r = fnd.render(RichText.Parser.quote(String.format("[%s] %s: %s", LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")), nm, text)), w, TextAttribute.FOREGROUND, col);
 		    cn = nm;
 		}
 		return(r);
@@ -738,7 +740,7 @@ public class ChatUI extends Widget {
 
 	public class MyMessage extends SimpleMessage {
 	    public MyMessage(String text, int w) {
-		super(text, new Color(192, 192, 255), w);
+		super(String.format("[%s] %s", LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")), text), new Color(192, 192, 255), w);
 	    }
 	}
 
