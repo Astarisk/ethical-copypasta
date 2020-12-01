@@ -69,11 +69,22 @@ public class Curiosity extends ItemInfo.Tip {
 	if(exp > 0)
 	    buf.append(String.format("Learning points: $col[192,192,255]{%s}\n", Utils.thformat(exp)));
 	if(time > 0)
-	    buf.append(String.format("Study time: $col[192,255,192]{%s}\n", timefmt(time)));
+	    buf.append(String.format("Study time: $col[192,255,192]{%s}" + " (LP/hour: $col[192,192,255]{%d})\n", timefmt(time), (int)(exp / (time / Glob.SERVER_TIME_RATIO / 60 / 60.0))));
 	if(mw > 0)
 	    buf.append(String.format("Mental weight: $col[255,192,255]{%d}\n", mw));
 	if(enc > 0)
 	    buf.append(String.format("Experience cost: $col[255,255,192]{%d}\n", enc));
-	return(RichText.render(buf.toString(), 0).img);
+	if(enc > 0)
+			buf.append(String.format("LP/EXP: $col[192,192,255]{%s}\n", Utils.thformat(exp/enc)));
+		if(time > 0)
+			buf.append(String.format("LP/Weight: $col[192,192,255]{%s}\n", Utils.thformat((Math.round(exp/mw)))));
+		if(mw > 0 && time > 0)
+			buf.append(String.format("LP/Hour/Weight: $col[192,192,255]{%s}\n", Utils.thformat((Math.round(exp/(time / Glob.SERVER_TIME_RATIO / 60 / 60)/mw)))));
+		if(owner instanceof GItem) {
+			Coord isz = ((GItem)owner).size();
+			buf.append(String.format("LP/Hour/Size: $col[192,192,255]{%s}", Utils.thformat(Math.round(exp/(time / Glob.SERVER_TIME_RATIO / 60 / 60))/(isz.x*isz.y))));
+		}
+
+		return(RichText.render(buf.toString(), 0).img);
     }
 }

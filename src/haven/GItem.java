@@ -202,4 +202,23 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     		return "";
 		}
 	}
+
+	public Coord size() {
+		try {
+			Indir<Resource> res = getres().indir();
+			if(res.get() != null && res.get().layer(Resource.imgc) != null) {
+				Tex tex = res.get().layer(Resource.imgc).tex();
+				if(tex == null)
+					return new Coord(1, 1);
+				else
+					return UI.unscale(tex.sz()).div(30);
+			} else {
+				return new Coord(1, 1);
+			}
+		} catch(Loading l) {
+
+		}
+		return new Coord(1, 1);
+	}
+
 }
