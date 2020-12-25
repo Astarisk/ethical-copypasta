@@ -220,10 +220,12 @@ public class Resource implements Serializable {
     }
     
     public static class CacheSource implements ResSource, Serializable {
-	public transient ResCache cache;
+	public final transient ResCache cache;
+	public final String cachedesc;
 	
 	public CacheSource(ResCache cache) {
 	    this.cache = cache;
+	    this.cachedesc = String.valueOf(cache);
 	}
 	
 	public InputStream get(String name) throws IOException {
@@ -231,7 +233,7 @@ public class Resource implements Serializable {
 	}
 	
 	public String toString() {
-	    return("cache source backed by " + cache);
+	    return("cache source backed by " + cachedesc);
 	}
     }
 
@@ -257,18 +259,25 @@ public class Resource implements Serializable {
     }
 
     public static class JarSource implements ResSource, Serializable {
+	public final String base;
+
+	public JarSource(String base) {
+	    this.base = base;
+	}
+
 	public InputStream get(String name) throws FileNotFoundException {
-	    InputStream s = Resource.class.getResourceAsStream("/res/" + name + ".res");
+	    String full = "/" + base + "/" + name + ".res";
+	    InputStream s = Resource.class.getResourceAsStream(full);
 	    if(s == null)
-		throw(new FileNotFoundException("Could not find resource locally: " + name));
+		throw(new FileNotFoundException("Could not find resource locally: " + full));
 	    return(s);
 	}
-	
+
 	public String toString() {
-	    return("local res source");
+	    return("local res source (" + base + ")");
 	}
     }
-    
+
     public static class HttpSource implements ResSource, Serializable {
 	private final transient SslHelper ssl;
 	public URL baseurl;
@@ -694,7 +703,7 @@ public class Resource implements Serializable {
 	if(_local == null) {
 	    synchronized(Resource.class) {
 		if(_local == null) {
-		    Pool local = new Pool(new JarSource());
+		    Pool local = new Pool(new JarSource("res"));
 		    try {
 			if(Config.resdir != null)
 			    local.add(new FileSource(new File(Config.resdir)));
@@ -715,7 +724,7 @@ public class Resource implements Serializable {
 	if(_remote == null) {
 	    synchronized(Resource.class) {
 		if(_remote == null) {
-		    Pool remote = new Pool(local());
+		    Pool remote = new Pool(local(), new JarSource("res-preload"));
 		    if(prscache != null)
 			remote.add(new CacheSource(prscache));
 		    _remote = remote;;
@@ -898,7 +907,7 @@ public class Resource implements Serializable {
     public class Image extends Layer implements Comparable<Image>, IDLayer<Integer> {
 	public transient BufferedImage img;
 	private transient BufferedImage scaled;
-	private transient Tex tex;
+	private transient Tex tex, rawtex;
 	public final int z, subz;
 	public final boolean nooff;
 	public final int id;
@@ -955,6 +964,21 @@ public class Resource implements Serializable {
 		}
 	    }
 	    return(scaled);
+	}
+
+	public Tex rawtex() {
+	    if(rawtex == null) {
+		synchronized(this) {
+		    if(rawtex == null) {
+			rawtex = new TexI(img) {
+				public String toString() {
+				    return("TexI(" + Resource.this.name + ", " + id + ")");
+				}
+			    };
+		    }
+		}
+	    }
+	    return(rawtex);
 	}
 
 	public Tex tex() {
@@ -1107,8 +1131,33 @@ public class Resource implements Serializable {
 	String name();
 	Class<? extends Instancer> instancer() default Instancer.class;
 	public interface Instancer {
-	    public Object make(Class<?> cl);
+	    public Object make(Class<?> cl, Resource res, Object... args);
+
+	    public static <T> T stdmake(Class<T> cl, Resource ires, Object[] args) {
+		try {
+		    Constructor<T> cons = cl.getConstructor(Resource.class, Object[].class);
+		    return(Utils.construct(cons, new Object[] {ires, args}));
+		} catch(NoSuchMethodException e) {}
+		try {
+		    Constructor<T> cons = cl.getConstructor(Object[].class);
+		    return(Utils.construct(cons, new Object[] {args}));
+		} catch(NoSuchMethodException e) {}
+		try {
+		    Constructor<T> cons = cl.getConstructor(Resource.class);
+		    return(Utils.construct(cons, new Object[] {ires}));
+		} catch(NoSuchMethodException e) {}
+		return(Utils.construct(cl));
+	    }
+
+	    public static final Instancer simple = (cl, res, args) -> {
+		try {
+		    Constructor<?> cons = cl.getConstructor(Object[].class);
+		    return(Utils.construct(cons, args));
+		} catch(NoSuchMethodException e) {}
+		return(Utils.construct(cl));
+	    };
 	}
+	public static final Map<PublishedCode, Instancer> instancers = new WeakHashMap<>();
     }
 
     @LayerName("code")
@@ -1203,24 +1252,26 @@ public class Resource implements Serializable {
 
     @LayerName("codeentry")
     public class CodeEntry extends Layer {
-	private String clnm;
-	private Map<String, Code> clmap = new TreeMap<String, Code>();
-	private Map<String, String> pe = new TreeMap<String, String>();
-	private Collection<Indir<Resource>> classpath = new LinkedList<Indir<Resource>>();
+	private final Map<String, Code> clmap = new HashMap<>();
+	private final Map<String, String> pe = new HashMap<>();
+	private final Map<String, Object[]> pa = new HashMap<>();
+	private final Collection<Indir<Resource>> classpath = new ArrayList<>();
 	transient private ClassLoader loader;
-	transient private Map<String, Class<?>> lpe = null;
-	transient private Map<Class<?>, Object> ipe = new HashMap<Class<?>, Object>();
+	transient private final Map<String, Class<?>> lpe = new HashMap<>();
+	transient private final Map<String, Object> ipe = new HashMap<>();
 
 	public CodeEntry(Message buf) {
 	    while(!buf.eom()) {
 		int t = buf.uint8();
-		if(t == 1) {
+		if((t == 1) || (t == 3)) {
 		    while(true) {
 			String en = buf.string();
 			String cn = buf.string();
 			if(en.length() == 0)
 			    break;
 			pe.put(en, cn);
+			if(t == 3)
+			    pa.put(en, buf.list());
 		    }
 		} else if(t == 2) {
 		    while(true) {
@@ -1241,7 +1292,7 @@ public class Resource implements Serializable {
 		clmap.put(c.name, c);
 	}
 
-	public ClassLoader loader(final boolean wait) {
+	public ClassLoader loader() {
 	    synchronized(CodeEntry.this) {
 		if(this.loader == null) {
 		    this.loader = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
@@ -1250,7 +1301,7 @@ public class Resource implements Serializable {
 				if(classpath.size() > 0) {
 				    Collection<ClassLoader> loaders = new LinkedList<ClassLoader>();
 				    for(Indir<Resource> res : classpath) {
-					loaders.add((wait?Loading.waitfor(res):res.get()).layer(CodeEntry.class).loader(wait));
+					loaders.add(res.get().layer(CodeEntry.class).loader());
 				    }
 				    ret = new LibClassLoader(ret, loaders);
 				}
@@ -1272,39 +1323,39 @@ public class Resource implements Serializable {
 	    return(this.loader);
 	}
 
-	private void load() {
-	    synchronized(CodeEntry.class) {
-		if(lpe != null)
-		    return;
-		ClassLoader loader = loader(false);
-		lpe = new TreeMap<String, Class<?>>();
-		try {
-		    for(Map.Entry<String, String> e : pe.entrySet()) {
-			String name = e.getKey();
-			String clnm = e.getValue();
-			Class<?> cl = loader.loadClass(clnm);
-			lpe.put(name, cl);
+	private Class<?> getentry(Class<?> cl, boolean fail) {
+	    PublishedCode entry = cl.getAnnotation(PublishedCode.class);
+	    if(entry == null)
+		throw(new RuntimeException("Tried to fetch non-published res-loaded class " + cl.getName() + " from " + Resource.this.name));
+	    synchronized(CodeEntry.this) {
+		Class<?> ret = lpe.get(entry.name());
+		if(ret == null) {
+		    String clnm = pe.get(entry.name());
+		    if(clnm == null) {
+			if(fail)
+			    throw(new RuntimeException("Tried to fetch non-present res-loaded class " + cl.getName() + " from " + Resource.this.name));
+			return(null);
 		    }
-		} catch(ClassNotFoundException e) {
-		    throw(new LoadException(e, Resource.this));
+		    try {
+			ret = loader().loadClass(clnm);
+		    } catch(ClassNotFoundException e) {
+			throw(new LoadException(e, Resource.this));
+		    }
+		    lpe.put(entry.name(), ret);
 		}
+		return(ret);
 	    }
 	}
 
 	public <T> Class<? extends T> getcl(Class<T> cl, boolean fail) {
-	    load();
-	    PublishedCode entry = cl.getAnnotation(PublishedCode.class);
-	    if(entry == null)
-		throw(new RuntimeException("Tried to fetch non-published res-loaded class " + cl.getName() + " from " + Resource.this.name));
-	    Class<?> acl;
-	    synchronized(lpe) {
-		if((acl = lpe.get(entry.name())) == null) {
-		    if(fail)
-			throw(new RuntimeException("Tried to fetch non-present res-loaded class " + cl.getName() + " from " + Resource.this.name));
-		    return(null);
-		}
+	    Class<?> acl = getentry(cl, fail);
+	    if(acl == null)
+		return(null);
+	    try {
+		return(acl.asSubclass(cl));
+	    } catch(ClassCastException e) {
+		throw(new RuntimeException(String.format("Illegal entry-point class specified for %s in %s", cl.getName(), Resource.this.name), e));
 	    }
-	    return(acl.asSubclass(cl));
 	}
 
 	public <T> Class<? extends T> getcl(Class<T> cl) {
@@ -1312,37 +1363,34 @@ public class Resource implements Serializable {
 	}
 
 	public <T> T get(Class<T> cl, boolean fail) {
-	    load();
 	    PublishedCode entry = cl.getAnnotation(PublishedCode.class);
 	    if(entry == null)
 		throw(new RuntimeException("Tried to fetch non-published res-loaded class " + cl.getName() + " from " + Resource.this.name));
-	    Class<?> acl;
-	    synchronized(lpe) {
-		if((acl = lpe.get(entry.name())) == null) {
-		    if(fail)
-			throw(new RuntimeException("Tried to fetch non-present res-loaded class " + cl.getName() + " from " + Resource.this.name));
-		    return(null);
-		}
-	    }
-	    synchronized(ipe) {
-		Object pinst;
-		if((pinst = ipe.get(acl)) != null) {
-		    return(cl.cast(pinst));
-		} else {
-		    T inst;
-		    Object rinst = AccessController.doPrivileged((PrivilegedAction<Object>)() -> {
-			    if(entry.instancer() != PublishedCode.Instancer.class)
-				return(Utils.construct(entry.instancer()).make(acl));
-			    else
-				return(Utils.construct(acl));
+	    synchronized(CodeEntry.this) {
+		Object inst;
+		if((inst = ipe.get(entry.name())) == null) {
+		    Class<?> acl = getentry(cl, fail);
+		    if(acl == null)
+			return(null);
+		    Object[] args = pa.getOrDefault(entry.name(), new Object[0]);
+		    inst = AccessController.doPrivileged((PrivilegedAction<Object>)() -> {
+			    PublishedCode.Instancer mk;
+			    synchronized(PublishedCode.instancers) {
+				mk = PublishedCode.instancers.computeIfAbsent(entry, k -> {
+					if(k.instancer() == PublishedCode.Instancer.class)
+					    return(PublishedCode.Instancer.simple);
+					else
+					    return(Utils.construct(k.instancer()));
+				    });
+			    }
+			    return(mk.make(acl, Resource.this, args));
 			});
-		    try {
-			inst = cl.cast(rinst);
-		    } catch(ClassCastException e) {
-			throw(new ClassCastException("Published class in " + Resource.this.name + " is not of type " + cl));
-		    }
-		    ipe.put(acl, inst);
-		    return(inst);
+		    ipe.put(entry.name(), inst);
+		}
+		try {
+		    return(cl.cast(inst));
+		} catch(ClassCastException e) {
+		    throw(new RuntimeException(String.format("Illegal entry-point class specified for %s in %s", entry.name(), Resource.this.name), e));
 		}
 	    }
 	}
@@ -1549,16 +1597,20 @@ public class Resource implements Serializable {
 	return(indir);
     }
 
+    public static Image loadrimg(String name) {
+	return(local().loadwait(name).layer(imgc));
+    }
+
     public static BufferedImage loadimg(String name) {
-	return(local().loadwait(name).layer(imgc).img);
+	return(loadrimg(name).img);
     }
 
     public static BufferedImage loadsimg(String name) {
-	return(local().loadwait(name).layer(imgc).scaled());
+	return(loadrimg(name).scaled());
     }
 
     public static Tex loadtex(String name) {
-	return(local().loadwait(name).layer(imgc).tex());
+	return(loadrimg(name).tex());
     }
 
     public String toString() {

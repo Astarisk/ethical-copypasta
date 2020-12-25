@@ -48,7 +48,15 @@ public class Utils {
     static Coord imgsz(BufferedImage img) {
 	return(new Coord(img.getWidth(), img.getHeight()));
     }
-	
+
+    public static boolean checkhit(BufferedImage img, Coord c) {
+	if(!c.isect(Coord.z, imgsz(img)))
+	    return(false);
+	if(img.getRaster().getNumBands() < 4)
+	    return(true);
+	return(img.getRaster().getSample(c.x, c.y, 3) >= 128);
+    }
+
     public static void defer(final Runnable r) {
 	Defer.later(new Defer.Callable<Object>() {
 		public Object call() {
@@ -1053,6 +1061,35 @@ public class Utils {
 	return((d - min) / (max - min));
     }
 
+    public static <E, O extends Comparable<? super O>> E max(Collection<E> from, Function<? super E, O> key) {
+	E ret = null;
+	O max = null;
+	for(E el : from) {
+	    O score = key.apply(el);
+	    if((max == null) || (score.compareTo(max) > 0)) {
+		ret = el;
+		max = score;
+	    }
+	}
+	return(ret);
+    }
+
+    public static <E, O extends Comparable<? super O>> E min(Collection<E> from, Function<? super E, O> key) {
+	E ret = null;
+	O max = null;
+	for(E el : from) {
+	    O score = key.apply(el);
+	    if((max == null) || (score.compareTo(max) < 0)) {
+		ret = el;
+		max = score;
+	    }
+	}
+	return(ret);
+    }
+
+    public static <E extends Comparable<? super E>> E max(Collection<E> from) {return(max(from, Function.identity()));}
+    public static <E extends Comparable<? super E>> E min(Collection<E> from) {return(min(from, Function.identity()));}
+
     public static float gcd(float x, float y, float E) {
 	float a = Math.max(x, y), b = Math.min(x, y);
 	while(b > E) {
@@ -1367,6 +1404,53 @@ public class Utils {
 	T ret = i.next();
 	i.remove();
 	return(ret);
+    }
+
+    public static <T> List<T> reversed(List<T> ls) {
+	return(new AbstractList<T>() {
+		public int size() {
+		    return(ls.size());
+		}
+
+		public T get(int i) {
+		    return(ls.get(ls.size() - 1 - i));
+		}
+
+		public ListIterator<T> listIterator(int first) {
+		    ListIterator<T> bk = ls.listIterator(ls.size() - first);
+		    return(new ListIterator<T>() {
+			    public boolean hasNext() {return(bk.hasPrevious());}
+			    public boolean hasPrevious() {return(bk.hasNext());}
+			    public T next() {return(bk.previous());}
+			    public T previous() {return(bk.next());}
+			    public int nextIndex() {return(ls.size() - bk.previousIndex() - 1);}
+			    public int previousIndex() {return(ls.size() - bk.nextIndex() - 1);}
+
+			    public void set(T el) {bk.set(el);}
+			    public void remove() {bk.remove();}
+			    public void add(T el) {bk.add(el);}
+			});
+		}
+
+		public ListIterator<T> listIterator() {return(listIterator(0));}
+		public Iterator<T> iterator() {return(listIterator());}
+
+		public T set(int i, T el) {
+		    return(ls.set(ls.size() - 1 - i, el));
+		}
+
+		public void add(int i, T el) {
+		    ls.add(ls.size() - i, el);
+		}
+
+		public T remove(int i) {
+		    return(ls.remove(ls.size() - 1 - i));
+		}
+
+		public String toString() {
+		    return(String.format("#<reversed %s>", ls));
+		}
+	    });
     }
 
     public static <T> int index(T[] arr, T el) {

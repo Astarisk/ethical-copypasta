@@ -323,6 +323,8 @@ public class OCache implements Iterable<Gob> {
 
     public static void cmppose(Gob g, int pseq, List<ResData> poses, List<ResData> tposes, boolean interp, float ttime) {
 	Composite cmp = (Composite)g.getattr(Drawable.class);
+	if(cmp == null)
+	    throw(new RuntimeException(String.format("cmppose on non-composed object: %s %s %s %s", poses, tposes, interp, ttime)));
 	if(cmp.pseq != pseq) {
 	    cmp.pseq = pseq;
 	    if(poses != null)
@@ -373,6 +375,8 @@ public class OCache implements Iterable<Gob> {
 
     public static void cmpmod(Gob g, List<Composited.MD> mod) {
 	Composite cmp = (Composite)g.getattr(Drawable.class);
+	if(cmp == null)
+	    throw(new RuntimeException(String.format("cmpmod on non-composed object: %s", mod)));
 	cmp.chmod(mod);
     }
     public Delta cmpmod(Message msg) {
@@ -404,6 +408,8 @@ public class OCache implements Iterable<Gob> {
 
     public static void cmpequ(Gob g, List<Composited.ED> equ) {
 	Composite cmp = (Composite)g.getattr(Drawable.class);
+	if(cmp == null)
+	    throw(new RuntimeException(String.format("cmpequ on non-composed object: %s", equ)));
 	cmp.chequ(equ);
     }
     public Delta cmpequ(Message msg) {
@@ -627,6 +633,12 @@ public class OCache implements Iterable<Gob> {
     }
 
     public static void resattr(Gob g, Indir<Resource> resid, Message dat) {
+	Resource res = resid.get();
+	GAttrib.Parser parser = res.getcode(GAttrib.Parser.class, false);
+	if(parser != null) {
+	    parser.apply(g, dat);
+	    return;
+	}
 	if(dat != null)
 	    g.setrattr(resid, dat);
 	else
