@@ -26,6 +26,7 @@
 
 package haven;
 
+import haven.purus.customres.ui.tt.level.Level;
 import haven.purus.customres.ui.tt.q.quality.Quality;
 import haven.purus.customres.ui.tt.q.quality.ShowQuality;
 
@@ -1202,6 +1203,7 @@ public class Resource implements Serializable {
 	private static HashMap<String, Class> customClasses = new HashMap<String, Class>(){{
 		put("ui/tt/q/quality$haven.MenuGrid$PagButton$Factory", ShowQuality.Fac.class);
 		put("ui/tt/q/quality$haven.ItemInfo$InfoFactory", Quality.Fac.class);
+		put("ui/tt/level$haven.ItemInfo$InfoFactory", Level.Fac.class);
 	}};
     public <T> T getcode(Class<T> cl, boolean fail) {
 		try {
