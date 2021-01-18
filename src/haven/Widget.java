@@ -1460,4 +1460,13 @@ public class Widget {
 	    }
 	}
     }
+	public GameUI gameui() {
+		Widget parent = this.parent;
+		while (parent != null) {
+			if (parent instanceof GameUI)
+				return (GameUI) parent;
+			parent = parent.parent;
+		}
+		return null;
+	}
 }

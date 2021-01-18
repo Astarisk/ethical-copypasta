@@ -209,6 +209,14 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 		}
 	}
 
+	public WItem witem() {
+    	try {
+			return ((Inventory) this.parent).wmap.get(this);
+		} catch(NullPointerException e) {
+    		return null;
+		}
+	}
+
 	public Coord size() {
 		try {
 			Indir<Resource> res = getres().indir();

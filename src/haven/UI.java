@@ -213,6 +213,9 @@ public class UI {
     }
 	
     public void newwidget(int id, String type, int parent, Object[] pargs, Object... cargs) throws InterruptedException {
+	if(type.equals("inv") && pargs[0].toString().equals("study")) {
+		type = "inv-study";
+	}
 	Widget.Factory f = Widget.gettype2(type);
 	if(f == null)
 	    throw(new UIException("Bad widget name", type, cargs));
