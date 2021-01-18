@@ -238,6 +238,10 @@ public class WItem extends Widget implements DTarget {
 	return(false);
     }
 
+    public Coord invLoc() {
+    	return this.c.div(sqsz);
+	}
+
     public boolean drop(Coord cc, Coord ul) {
 	return(false);
     }
