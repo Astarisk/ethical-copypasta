@@ -233,7 +233,7 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 	}
 
 	public boolean clickmarker(DisplayMarker mark, Location loc, int button, boolean press) {
-	    if((button == 1) && !press) {
+	    if((button == 1) && !press && !domark) {
 		focus(mark.m);
 		return(true);
 	    }
@@ -241,7 +241,7 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 	}
 
 	public boolean clickicon(DisplayIcon icon, Location loc, int button, boolean press) {
-	    if(!press) {
+	    if(!press && !domark) {
 		mvclick(mv, null, loc, icon.gob, button);
 		return(true);
 	    }

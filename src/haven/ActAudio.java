@@ -256,7 +256,7 @@ public class ActAudio extends State {
 			public CS cons() {
 			    return(clip.stream());
 			}
-		    });
+		    }, 0);
 	    }
 
 	    public int hashCode() {
