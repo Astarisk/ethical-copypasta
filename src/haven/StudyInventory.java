@@ -1,6 +1,7 @@
 package haven;
 
 import haven.purus.Config;
+import haven.resutil.Curiosity;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -104,6 +105,12 @@ public class StudyInventory extends Inventory {
         if(w instanceof GItem) {
         	try {
 				oc.setOld(((GItem) w).witem().invLoc(), ((GItem) w).getres().name);
+				Curiosity ci = ItemInfo.find(Curiosity.class, ((GItem) w).info());
+				if(ci != null && ((GItem) w).witem().itemmeter.get() > 0.99) {
+					Resource.Tooltip tt = ((GItem) w).resource().layer(Resource.Tooltip.class);
+					if(tt != null)
+						gameui().syslog.append(tt.t + " LP: " + ci.exp, Color.LIGHT_GRAY);
+				}
 			} catch(Loading l) { }
 		}
         super.cdestroy(w);
