@@ -683,6 +683,7 @@ public class CharWnd extends BetterWindow {
 	}
 	public Widget study;
 	public int texp, tw, tenc;
+	public int lph;
 	private final Text.UText<?> texpt = new Text.UText<Integer>(Text.std) {
 	    public Integer value() {return(texp);}
 	    public String text(Integer v) {return(Utils.thformat(v));}
@@ -694,10 +695,15 @@ public class CharWnd extends BetterWindow {
 	    public Integer value() {return(tenc);}
 	    public String text(Integer v) {return(Integer.toString(tenc));}
 	};
+	private final Text.UText<?> tlph = new Text.UText<Integer>(Text.std) {
+		public Integer value() {return(lph);}
+		public String text(Integer v) {return(Integer.toString(lph));}
+	};
 	private final Metric[] metrics = {
 	    new Metric("Attention:", twt, new Color(255, 192, 255, 255)),
 	    new Metric("Experience cost:", tenct, new Color(255, 255, 192, 255)),
 	    new Metric("Learning points:", texpt, new Color(192, 192, 255, 255)),
+		new Metric("LP/Hour:", tlph, new Color(192, 192, 255, 255))
 	};
 
 	private StudyInfo(Coord sz, Widget study) {
@@ -710,6 +716,7 @@ public class CharWnd extends BetterWindow {
 
 	private void upd() {
 	    int texp = 0, tw = 0, tenc = 0;
+	    double lph = 0;
 	    for(GItem item : study.children(GItem.class)) {
 		try {
 		    Curiosity ci = ItemInfo.find(Curiosity.class, item.info());
@@ -717,11 +724,12 @@ public class CharWnd extends BetterWindow {
 			texp += ci.exp;
 			tw += ci.mw;
 			tenc += ci.enc;
+			lph += ci.exp/(ci.time / Glob.SERVER_TIME_RATIO / 3600.0);
 		    }
 		} catch(Loading l) {
 		}
 	    }
-	    this.texp = texp; this.tw = tw; this.tenc = tenc;
+	    this.texp = texp; this.tw = tw; this.tenc = tenc; this.lph = (int)lph;
 	}
 
 	public void draw(GOut g) {
