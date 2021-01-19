@@ -26,6 +26,8 @@
 
 package haven;
 
+import static haven.MCache.tilesz;
+
 public class ItemDrag extends WItem {
     public Coord doff;
     
@@ -94,7 +96,15 @@ public class ItemDrag extends WItem {
 		return(gui.map.mousedown(gui.map.rootxlate(c.add(rootpos())), button));
 	    }
 	}
-	if(button == 1 && !ui.modmeta) {
+	if(button == 1) {
+		MCache map = ui.sess.glob.map;
+		Gob pl = gameui().map.player();
+		if(pl != null ) {
+			int t = map.gettile(gameui().map.player().rc.floor(tilesz));
+			Resource res = map.tilesetr(t);
+			if(!ui.modmeta && res != null && (res.name.equals("gfx/tiles/water") || res.name.equals("gfx/tiles/deep") || res.name.equals("gfx/tiles/odeeper") || res.name.equals("gfx/tiles/odeep") || res.name.equals("gfx/tiles/owater")))
+				return true;
+		}
 	    dropon(parent, c.add(this.c));
 	    return(true);
 	} else if(button == 3) {
