@@ -189,6 +189,18 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, "Show gob damage [Requires restart]"));
 
+		Label flwSpeed = new Label("Flowermenu speed: " + Config.flowermenuSpeed.val + "s");
+		Entry flowerMenulbl = new Entry(flwSpeed, "Flower menu speed flowermenu");
+		uiSettings.addSubentry(flowerMenulbl);
+		flowerMenulbl.addSubentry(new Entry(new HSlider(UI.scale(400), 0, 100, Math.round(100 * Config.flowermenuSpeed.val)) {
+			@Override
+			public void changed() {
+				Config.flowermenuSpeed.setVal(this.val / 100f);
+				flwSpeed.settext("Flowermenu speed: " + Config.flowermenuSpeed.val + "s");
+				super.changed();
+			}
+		}, ""));
+
 		Entry cameraSettings = new Entry(new Label("Camera settings"), "Camera settings");
 		el.root.addSubentry(cameraSettings);
 
@@ -201,7 +213,6 @@ public class OptWndPurus extends BetterWindow {
 				super.changed();
 			}
 		}, ""));
-		el.search("");
 
 		Entry debugSettings = new Entry(new Label("Debug Settings"), "Debug Settings");
 		el.root.addSubentry(debugSettings);

@@ -26,6 +26,8 @@
 
 package haven;
 
+import haven.purus.Config;
+
 import java.awt.Color;
 import java.awt.Font;
 import static java.lang.Math.PI;
@@ -98,7 +100,7 @@ public class FlowerMenu extends Widget {
     }
 
     public class Opening extends NormAnim {
-	Opening() {super(0.25);}
+	Opening() {super(Config.flowermenuSpeed.val);}
 	
 	public void ntick(double s) {
 	    double ival = 0.8;
