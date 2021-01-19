@@ -525,39 +525,39 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	}
     }
 
-    public void disol(String tag) {
-	synchronized(oltags) {
-	    Integer rc = oltags.get(tag);
-	    if((rc != null) && (--rc > 0))
-		oltags.put(tag, rc);
-	    else
-		oltags.remove(tag);;
+	public void disol(String tag) {
+		synchronized(oltags) {
+			Integer rc = oltags.get(tag);
+			if((rc != null) && (--rc > 0))
+				oltags.put(tag, rc);
+			else
+				oltags.remove(tag);;
+		}
 	}
-    }
 
-    @Deprecated private String oltag(int id) {
-	switch(id) {
-	case 0: case 1:
-	    return("cplot");
-	case 2: case 3:
-	    return("vlg");
-	case 4: case 5:
-	    return("realm");
-	case 16:
-	    return("cplot-s");
-	case 17:
-	    return("sel");
+	@Deprecated private String oltag(int id) {
+		switch(id) {
+			case 0: case 1:
+				return("cplot");
+			case 2: case 3:
+				return("vlg");
+			case 4: case 5:
+				return("realm");
+			case 16:
+				return("cplot-s");
+			case 17:
+				return("sel");
+		}
+		return("n/a");
 	}
-	return("n/a");
-    }
-    @Deprecated public void enol(int id) {
-	enol(oltag(id));
-    }
-    @Deprecated public void disol(int id) {
-	disol(oltag(id));
-    }
+	@Deprecated public void enol(int id) {
+		enol(oltag(id));
+	}
+	@Deprecated public void disol(int id) {
+		disol(oltag(id));
+	}
 
-    private final Gobs gobs;
+	private final Gobs gobs;
     private class Gobs implements RenderTree.Node, OCache.ChangeCallback {
 	final OCache oc = glob.oc;
 	final Map<Gob, Loader.Future<?>> adding = new HashMap<>();
