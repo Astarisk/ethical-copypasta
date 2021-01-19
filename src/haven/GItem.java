@@ -26,6 +26,8 @@
 
 package haven;
 
+import haven.purus.Config;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -159,10 +161,12 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     public List<ItemInfo> info() {
 	if(info == null) {
 		info = ItemInfo.buildinfo(this, rawinfo);
-		try {
-			info.add(new ItemInfo.AdHoc(this, getres().name));
-		} catch(Error e) {
-			// Ignored
+		if(Config.resinfo.val) {
+			try {
+				info.add(new ItemInfo.AdHoc(this, getres().name));
+			} catch(Error e) {
+				// Ignored
+			}
 		}
 	}
 	return(info);
