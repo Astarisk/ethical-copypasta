@@ -2048,30 +2048,37 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			lasthittestc = c;
 			new Hittest(c) {
 				public void hit(Coord pc, Coord2d mc, ClickData inf) {
-					if(inf != null && inf.ci instanceof Gob.GobClick) {
-						Gob.GobClick gc = (Gob.GobClick) inf.ci;
-						if(gc.gob != null) {
-							Resource res = gc.gob.getres();
-							tooltip = String.format(gc.gob.id + " " + gc.clickargs(inf)[3] + " " + gc.clickargs(inf)[4] + "\n");
-							if(res != null) {
-								tooltip += res.name;
-								for(Gob.Overlay o : gc.gob.ols) {
-									try {
-										if(o.res != null && o.res.get() != null)
-											tooltip += String.format("\noverlay: " + o.res.get().name + " id: " + o.id);
-									} catch(Loading l) {
+					if(inf != null) {
+						Gob.GobClick gc = null;
+						if(inf.ci instanceof Gob.GobClick) {
+							gc = (Gob.GobClick) inf.ci;
+						} else if(inf.ci instanceof Composited.CompositeClick) {
+							gc = ((Composited.CompositeClick) inf.ci).gi;
+						}
+						if(gc != null) {
+							if(gc.gob != null) {
+								Resource res = gc.gob.getres();
+								tooltip = String.format(gc.gob.id + " " + gc.clickargs(inf)[3] + " " + gc.clickargs(inf)[4] + "\n");
+								if(res != null) {
+									tooltip += res.name;
+									for(Gob.Overlay o : gc.gob.ols) {
+										try {
+											if(o.res != null && o.res.get() != null)
+												tooltip += String.format("\noverlay: " + o.res.get().name + " id: " + o.id);
+										} catch(Loading l) {
+										}
 									}
+									Drawable d = gc.gob.getattr(Drawable.class);
+									if(d != null)
+										tooltip += String.format("\n sdt: %s", ((ResDrawable) d).sdt.peekrbuf(0));
+									if(d != null) {
+										d.getres().layers(FastMesh.MeshRes.class).stream().map(mr -> String.format("\n meshid: %s", mr.id)).distinct().forEach(s -> tooltip += String.format(s));
+									}
+									tooltip += "\n" + gc.gob.getrc().toString();
+									return;
 								}
-								Drawable d = gc.gob.getattr(Drawable.class);
-								if(d != null)
-									tooltip += String.format("\n sdt: %s", ((ResDrawable) d).sdt.peekrbuf(0));
-								if(d != null) {
-									d.getres().layers(FastMesh.MeshRes.class).stream().map(mr -> String.format("\n meshid: %s", mr.id)).distinct().forEach(s -> tooltip += String.format(s));
-								}
-								tooltip += "\n" + gc.gob.getrc().toString();
-								return;
+								tooltip = null;
 							}
-							tooltip = null;
 						}
 					}
 				}
