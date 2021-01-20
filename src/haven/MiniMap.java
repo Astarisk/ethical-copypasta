@@ -56,6 +56,7 @@ public class MiniMap extends Widget {
     protected Segment dseg;
     protected int dlvl;
     protected Location dloc;
+    private static final HashSet<Long> alarmPlayed = new HashSet<Long>();
 
     public MiniMap(Coord sz, MapFile file) {
 	super(sz);
@@ -479,6 +480,20 @@ public class MiniMap extends Widget {
 			}
 		    }
 		} catch(Loading l) {}
+			try {
+				if(alarmPlayed.contains(gob.id))
+					continue;
+				if(gob.type == Gob.Type.PLAYER && gob.id != ui.gui.plid) {
+					KinInfo kin = gob.getattr(KinInfo.class);
+					if(kin == null) {
+						alarmPlayed.add(gob.id);
+						Audio.play(Resource.local().loadwait("sfx/alarms/whitePlayer"));
+					} else if(kin.group == 2) {
+						alarmPlayed.add(gob.id);
+						Audio.play(Resource.local().loadwait("sfx/alarms/redPlayer"));
+					}
+				}
+			} catch(Loading l) {}
 	    }
 	}
 	Collections.sort(ret, (a, b) -> a.z - b.z);

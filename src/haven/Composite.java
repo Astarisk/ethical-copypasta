@@ -55,6 +55,11 @@ public class Composite extends Drawable {
     
     public void added(RenderTree.Slot slot) {
 	slot.add(comp);
+		if(gob.type == null) {
+			gob.type = gob.determineType(base.get().name);
+			if(gob.type == Gob.Type.PLAYER && gob.attr.containsKey(GobHealth.class))
+				gob.type = Gob.Type.OTHER;
+		}
 	super.added(slot);
     }
 

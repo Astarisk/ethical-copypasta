@@ -48,6 +48,17 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     private final Collection<ResAttr.Cell<?>> rdata = new LinkedList<ResAttr.Cell<?>>();
     private final Collection<ResAttr.Load> lrdata = new LinkedList<ResAttr.Load>();
 
+    public Type type;
+
+    enum Type {
+    	PLAYER,
+		OTHER
+	}
+
+	private static final HashMap<String, Type> types = new HashMap<String, Type>(){{
+		put("gfx/borka/body", Type.PLAYER);
+    }};
+
     public static class Overlay implements RenderTree.Node {
 	public final int id;
 	public final Gob gob;
@@ -448,6 +459,10 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     }
 
     public void draw(GOut g) {}
+
+    public Type determineType(String name) {
+    	return types.get(name);
+	}
 
     public static class GobClick extends Clickable {
 	public final Gob gob;

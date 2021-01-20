@@ -40,6 +40,9 @@ public class ResDrawable extends Drawable {
 	this.res = res;
 	this.sdt = new MessageBuf(sdt);
 	spr = Sprite.create(gob, res.get(), this.sdt.clone());
+	if(gob.type == null) {
+		gob.type = gob.determineType(res.get().name);
+	}
     }
 
     public ResDrawable(Gob gob, Resource res) {

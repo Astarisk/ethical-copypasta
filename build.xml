@@ -59,7 +59,7 @@
       <fileset dir="build/classes-lib" />
       <manifest>
 	<attribute name="Main-Class" value="haven.MainFrame" />
-	<attribute name="Class-Path" value="lib/sqlite-jdbc-3.32.3.2.jar lib/jogl.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar" />
+	<attribute name="Class-Path" value="lib/sqlite-jdbc-3.32.3.2.jar lib/jogl.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar lib/pasta-res.jar" />
       </manifest>
     </jar>
     <chmod file="build/hafen.jar" perm="a+x" />
@@ -76,7 +76,18 @@
     <fail unless="lib-builtin-jar" message="builtin-res.jar not available" />
   </target>
 
-  <target name="jars" depends="build-env, jar, res-jar">
+	<target name="custom-encode" depends="build-env">
+		<mkdir dir="build/custom-res"/>
+		<java jar="lib/LayerUtil.jar" fork="true">
+			<arg line="-re custom-res build/custom-res"/>
+		</java>
+	</target>
+	<target name="custom-jar" depends="custom-encode">
+		<jar basedir="build/custom-res" destfile="build/lib/pasta-res.jar"/>
+		<delete dir="build/custom-res"/>
+	</target>
+
+  <target name="jars" depends="build-env, jar, res-jar, custom-jar">
     <copy todir="build/lib">
       <fileset dir="lib">
 	<include name="jogl.jar" />
