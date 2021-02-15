@@ -8,11 +8,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
+import javax.net.ssl.HttpsURLConnection;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -30,7 +30,7 @@ public class IconService {
 
 	public static void getSentIcons() {
 		try {
-			HttpURLConnection conn = (HttpURLConnection) new URL(FoodService.API_ENDPOINT + "data/icons.json").openConnection();
+			HttpsURLConnection conn = (HttpsURLConnection) new URL(FoodService.API_ENDPOINT + "data/icons.json").openConnection();
 			conn.setRequestProperty("User-Agent", "H&H Client/" + Config.confid);
 			conn.setRequestProperty("Cache-Control", "no-cache");
 			Scanner scan = new Scanner(conn.getInputStream());
@@ -71,7 +71,7 @@ public class IconService {
 			@Override
 			public void run() {
 				try {
-					HttpURLConnection conn = (HttpURLConnection) new URL(FoodService.API_ENDPOINT + "icon").openConnection();
+					HttpsURLConnection conn = (HttpsURLConnection) new URL(FoodService.API_ENDPOINT + "icon").openConnection();
 					conn.setRequestMethod("POST");
 					conn.setRequestProperty("User-Agent", "H&H Client/" + Config.confid);
 					conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
