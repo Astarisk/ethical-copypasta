@@ -608,6 +608,7 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
 	    pname.settext((String)args[0]);
 	    pname.buf.point = pname.buf.line.length();
 	    pname.commit();
+	    gameui().charname = (String)args[0];
 	} else if(msg == "i-set") {
 	    Buddy b = (args[0] == null) ? null : find((Integer)args[0]);
 	    bl.sel = b;

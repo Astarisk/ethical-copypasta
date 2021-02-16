@@ -29,6 +29,7 @@ package haven;
 import haven.purus.BetterWindow;
 import haven.purus.MultiSession;
 import haven.purus.StatusWdg;
+import haven.purus.mapper.Mapper;
 
 import java.util.*;
 import java.util.function.*;
@@ -42,6 +43,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     private static final int blpw = UI.scale(142), brpw = UI.scale(142);
     public final String chrid, genus;
     public final long plid;
+    public String charname; // presentation name
+	public String hatname;
     private final Hidepanel ulpanel, umpanel, urpanel, blpanel, mapmenupanel, brpanel, menupanel;
     public Avaview portrait;
     public MenuGrid menu;
@@ -697,6 +700,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    }
 	    if(mapstore != null) {
 		MapFile file = MapFile.load(mapstore, mapfilename());
+		Mapper.sendMarkerData(file);
 		mmap = blpanel.add(new CornerMap(UI.scale(new Coord(133, 133)), file), minimapc);
 		mmap.lower();
 		mapfile = new MapWnd(file, map, Utils.getprefc("wndsz-map", UI.scale(new Coord(700, 500))), "Map");

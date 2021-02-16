@@ -1,11 +1,22 @@
 package haven.purus;
 
 import haven.*;
+import haven.Button;
 import haven.Label;
 import haven.Scrollbar;
 
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class OptWndPurus extends BetterWindow {
 
@@ -129,6 +140,7 @@ public class OptWndPurus extends BetterWindow {
 		el = add(new EntryList(UI.scale(600, 750)), UI.scale(100, 25));
 
 		Entry thingToggles = new Entry(new Label("Toggle things on login"), "Toggle on login");
+		((Label)thingToggles.w).setcolor(Color.ORANGE);
 		el.root.addSubentry(thingToggles);
 
 		thingToggles.addSubentry(new Entry(new CheckBox("Toggle tracking on login"){
@@ -169,6 +181,7 @@ public class OptWndPurus extends BetterWindow {
 		}, ""));
 
 		Entry uiSettings = new Entry(new Label("UI Settings"), "UI Settings");
+		((Label)uiSettings.w).setcolor(Color.ORANGE);
 		el.root.addSubentry(uiSettings);
 
 		uiSettings.addSubentry(new Entry(new CheckBox("Use hardware cursor [Requires restart]"){
@@ -202,6 +215,7 @@ public class OptWndPurus extends BetterWindow {
 		}, ""));
 
 		Entry cameraSettings = new Entry(new Label("Camera settings"), "Camera settings");
+		((Label)cameraSettings.w).setcolor(Color.ORANGE);
 		el.root.addSubentry(cameraSettings);
 
 		Entry camScrollLbl = new Entry(new Label("Camera scroll zoom sensitivity"), "Camera scroll zoom sensitivity");
@@ -215,6 +229,7 @@ public class OptWndPurus extends BetterWindow {
 		}, ""));
 
 		Entry debugSettings = new Entry(new Label("Debug Settings"), "Debug Settings");
+		((Label)debugSettings.w).setcolor(Color.ORANGE);
 		el.root.addSubentry(debugSettings);
 
 		debugSettings.addSubentry(new Entry(new CheckBox("Write resource source codes in debug directory"){
@@ -225,6 +240,113 @@ public class OptWndPurus extends BetterWindow {
 				return super.mousedown(c, button);
 			}
 		}, "Write resource source codes in debug directory"));
+
+		Entry mapSettings = new Entry(new Label("Map Settings"), "Map Settings");
+		((Label)mapSettings.w).setcolor(Color.ORANGE);
+
+		el.root.addSubentry(mapSettings);
+
+		Entry mapExplanation = new Entry(new RichTextBox(UI.scale(500, 50), "With the token you can save markers and access other map features. If you want to share your markers and tokens in the map with your friends, copy and save your friends token here.\nThe map can be accessed at https://hnhmap.vatsul.com/"), "map");
+		mapSettings.addSubentry(mapExplanation);
+
+		Entry mapTokenStatus = new Entry(new Label("Map Token:"), "map token");
+		mapSettings.addSubentry(mapTokenStatus);
+
+		Entry mapToken = new Entry(new TextEntry(UI.scale(500), Config.mapperToken.val), "map token");
+		mapSettings.addSubentry(mapToken);
+
+		Entry mapTokenBtn = new Entry(new Widget(UI.scale(600, 50)) {
+			{
+				add(new Button(UI.scale(100), "Save token") {
+					@Override
+					public boolean mousedown(Coord c, int button) {
+						String newToken = ((TextEntry)mapToken.w).text;
+						try {
+							URL url = new URL("http://localhost:1337/api/token/" + newToken + "/valid");
+							Scanner scan = new Scanner(url.openStream());
+							if(scan.hasNextLine() && scan.nextLine().equals("Valid")) {
+								Config.mapperToken.setVal(newToken);
+								((Label)mapTokenStatus.w).setcolor(Color.GREEN);
+								((Label)mapTokenStatus.w).settext("Map token was successfully updated!");
+							} else {
+								((Label)mapTokenStatus.w).setcolor(Color.RED);
+								((Label)mapTokenStatus.w).settext("Map token entered was invalid! Changes not saved.");
+							}
+						} catch(IOException e) {
+							((Label)mapTokenStatus.w).setcolor(Color.RED);
+							((Label)mapTokenStatus.w).settext("Error while connecting to server! Changes not saved.");
+							e.printStackTrace();
+						}
+						return super.mousedown(c, button);
+					}
+					{visible = true;}
+
+				}, UI.scale(0, 0));
+				this.add(new Button(UI.scale(175), "Copy token to clipboard") {
+					@Override
+					public boolean mousedown(Coord c, int button) {
+						StringSelection ss = new StringSelection(Config.mapperToken.val);
+						Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, ss);
+						return super.mousedown(c, button);
+					}
+					{visible = true;}
+				}, UI.scale(125, 0));
+				add(new Button(UI.scale(200), "Paste token from clipboard") {
+					@Override
+					public boolean mousedown(Coord c, int button) {
+						try {
+							String newToken = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor).toString();
+							if(newToken != null && newToken.length() < 128) {
+									URL url = new URL("https://hnhmap.vatsul.com/api/token/" + newToken + "/valid");
+									Scanner scan = new Scanner(url.openStream());
+									if(scan.hasNextLine() && scan.nextLine().equals("Valid")) {
+										Config.mapperToken.setVal(newToken);
+										((Label) mapTokenStatus.w).setcolor(Color.GREEN);
+										((Label) mapTokenStatus.w).settext("Map token was successfully updated!");
+										((TextEntry)mapToken.w).settext(newToken);
+									} else {
+										((Label) mapTokenStatus.w).setcolor(Color.RED);
+										((Label) mapTokenStatus.w).settext("Map token entered was invalid! Changes not saved.");
+									}
+							}
+						} catch(IOException | UnsupportedFlavorException e) {
+							((Label) mapTokenStatus.w).setcolor(Color.RED);
+							((Label) mapTokenStatus.w).settext("Error while connecting to server! Changes not saved.");
+							e.printStackTrace();
+						}
+						return super.mousedown(c, button);
+					}
+					{visible = true;}
+
+				}, UI.scale(325, 0));
+
+				add(new Button(UI.scale(60), "Open") {
+					@Override
+					public boolean mousedown(Coord c, int button) {
+						try {
+							Toolkit.getDefaultToolkit().beep();
+							if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+								Desktop.getDesktop().browse(new URI("http://localhost:1337/map/" + Config.mapperToken.val));
+							}
+						} catch(URISyntaxException | IOException e) {
+						}
+						return super.mousedown(c, button);
+					}
+					{visible = true;}
+
+				}, UI.scale(530, 0));
+			}
+
+			@Override
+			public void draw(GOut g) {
+				for(Widget wdg = child; wdg != null; wdg = next) {
+					next = wdg.next;
+					wdg.visible = true;
+				}
+				super.draw(g);
+			}
+		}, "maptoken save");
+		mapSettings.addSubentry(mapTokenBtn);
 
 		el.search("");
 	}

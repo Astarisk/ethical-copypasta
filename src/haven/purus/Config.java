@@ -64,6 +64,7 @@ public class Config {
 	public static Setting<Boolean> growthStages = new Setting<>("growthStages", false);
 	public static Setting<Integer> speedOnLogin = new Setting<>("speedOnLogin", 2);
 	public static Setting<Float> flowermenuSpeed = new Setting<>("flowermenuSpeed", 0.25f);
+	public static Setting<String> mapperToken = new Setting<>("mapperToken", "");
 
 	public static Setting<Boolean> resinfo = new Setting<>("resinfo", false);
 

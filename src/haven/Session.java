@@ -70,7 +70,7 @@ public class Session implements Resource.Resolver {
     final Map<Integer, CachedRes> rescache = new TreeMap<Integer, CachedRes>();
     public final Glob glob;
     public byte[] sesskey;
-	public GameUI gui;
+	public UI ui;
 
     @SuppressWarnings("serial")
     public static class MessageException extends RuntimeException {

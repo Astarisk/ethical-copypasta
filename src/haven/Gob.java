@@ -32,6 +32,7 @@ import java.util.function.*;
 
 import haven.purus.Config;
 import haven.purus.GobText;
+import haven.purus.mapper.Mapper;
 import haven.render.*;
 
 public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Skeleton.HasPose {
@@ -245,6 +246,12 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	updstate();
 	if(virtual && ols.isEmpty() && (getattr(Drawable.class) == null))
 	    glob.oc.remove(this);
+	if(isPlayer() && this.glob.map.grids != null) {
+		MCache.Grid g = this.glob.map.grids.get(rc.floor().div(11*100));
+		if(g != null && glob.sess.ui.gui != null && glob.sess.ui.gui.charname != null) {
+			Mapper.players.putIfAbsent(glob.sess.ui.gui.charname, new Pair<>(glob.sess.ui.gui.hatname, new Pair(rc.div(11).floor().mod(new Coord(100,100)), g.id)));
+		}
+	}
     }
 
     public void gtick(Render g) {
@@ -297,6 +304,10 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	this.rc = c;
 	this.a = a;
     }
+
+    boolean isPlayer() {
+    	return (glob.sess.ui.gui != null && this.id == glob.sess.ui.gui.plid);
+	}
 
     public Coord3f getc() {
 	Moving m = getattr(Moving.class);

@@ -720,7 +720,23 @@ public class Ridges extends MapMesh.Hooks {
 	return(false);
     }
 
-    public static float edgeoff(MCache map, Coord tc, int edge, boolean hi) {
+	public static boolean brokenp(MCache map, Coord tc, MCache.Grid g) {
+		Tiler t = map.tiler(g.gettile(tc));
+		if (!(t instanceof RidgeTile))
+			return (false);
+		int bz = (int) ((RidgeTile) t).breakz();
+		for (Coord ec : tecs) {
+			t = map.tiler(g.gettile(tc.add(ec)));
+			if (t instanceof RidgeTile)
+				bz = (int) Math.min(bz, ((RidgeTile) t).breakz());
+		}
+		for (int i = 0; i < 4; i++) {
+			if (Math.abs(g.getz(tc.add(tccs[(i + 1) % 4])) - g.getz(tc.add(tccs[i]))) > bz)
+				return (true);
+		}
+		return (false);
+	}
+	public static float edgeoff(MCache map, Coord tc, int edge, boolean hi) {
 	Ridges r = map.getcut(tc.div(MCache.cutsz)).data(id);
 	tc = tc.mod(MCache.cutsz);
 	return(r.edgeo[(2 * r.eo(tc, edge)) + (hi?1:0)]);

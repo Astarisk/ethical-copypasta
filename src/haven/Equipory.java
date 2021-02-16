@@ -131,6 +131,9 @@ public class Equipory extends Widget implements DTarget {
 	    ArrayList<WItem> v = new ArrayList<>();
 	    for(int i = 0; i < args.length; i++) {
 		int ep = (Integer)args[i];
+		if(ep == 0 || ep == 16) {
+			gameui().hatname = g.res.get().name;
+		}
 		if(ep < ecoords.length)
 		    v.add(add(new WItem(g), ecoords[ep].add(1, 1)));
 	    }

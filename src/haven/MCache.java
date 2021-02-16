@@ -29,6 +29,8 @@ package haven;
 import java.util.*;
 import java.util.function.*;
 import java.lang.ref.*;
+
+import haven.purus.mapper.Mapper;
 import haven.render.*;
 
 /* XXX: This whole file is a bit of a mess and could use a bit of a
@@ -692,7 +694,8 @@ public class MCache implements MapSource {
 		throw(new RuntimeException("Unknown map data version " + ver));
 	    }
 	    invalidate();
-	    seq++;
+			Mapper.receiveGrid(sess.glob.map, this, grids.get(this.gc.add(1, 0)), grids.get(this.gc.add(0, 1)), grids.get(this.gc.add(0, -1)), grids.get(this.gc.add(-1, 0)));
+		seq++;
 	}
     }
 
