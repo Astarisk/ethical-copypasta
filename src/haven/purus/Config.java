@@ -14,7 +14,7 @@ public class Config {
 		public T val;
 		public String name;
 
-		Setting(String name, T defaultVal) {
+		public Setting(String name, T defaultVal) {
 			this.name = name;
 			this.val = defaultVal;
 			getVal();

@@ -32,12 +32,14 @@ import haven.purus.MultiSession;
 import haven.purus.OptWndPurus;
 import haven.purus.TileGrid;
 import haven.purus.alarms.AlarmWindow;
+import haven.purus.audiomanager.AudioManagerWindow;
 
 import java.awt.event.KeyEvent;
 
 public class OptWnd extends BetterWindow {
 	OptWndPurus optWndPurus;
 	AlarmWindow aw;
+	AudioManagerWindow amw;
     public final Panel main, video, audio, keybind;
     public Panel current;
 
@@ -577,6 +579,14 @@ public class OptWnd extends BetterWindow {
 			aw.show(!aw.visible);
 		}
 	}),0 ,y).pos("bl").adds(0, 5).y;
+		y = main.add(new Button(UI.scale(200), "Volume Manager", () -> {
+			if(amw == null) {
+				amw = this.parent.add(new AudioManagerWindow());
+				amw.show();
+			} else {
+				amw.show(!amw.visible);
+			}
+		}),0 ,y).pos("bl").adds(0, 5).y;
 	y += UI.scale(60);
 	if(gopts) {
 	    y = main.add(new Button(UI.scale(200), "Switch character", false).action(() -> {
