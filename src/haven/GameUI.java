@@ -55,7 +55,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     private List<Widget> meters = new LinkedList<Widget>();
     private Text lastmsg;
     private double msgtime;
-    private Window invwnd, equwnd, makewnd, srchwnd, iconwnd;
+    private Window invwnd, equwnd, srchwnd, iconwnd;
+    public CraftWindow makewnd;
     private Coord makewndc = Utils.getprefc("makewndc", new Coord(400, 200));
     public Inventory maininv;
     public CharWnd chrwdg;
@@ -210,6 +211,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	zerg.hide();
 		statuswdg = add(new StatusWdg());
 		add(ui.sess.glob.timewdg, Coord.z);
+		makewnd = add(new CraftWindow(), UI.scale(400, 200));
+		makewnd.hide();
     }
 
     protected void attached() {
@@ -740,34 +743,9 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    chrwdg = add((CharWnd)child, Utils.getprefc("wndc-chr", new Coord(300, 50)));
 	    chrwdg.hide();
 	} else if(place == "craft") {
-	    String cap = "";
-	    Widget mkwdg = child;
-	    if(mkwdg instanceof Makewindow)
-		cap = ((Makewindow)mkwdg).rcpnm;
-	    if(cap.equals(""))
-		cap = "Crafting";
-	    makewnd = new Window(Coord.z, cap, true) {
-		    public void wdgmsg(Widget sender, String msg, Object... args) {
-			if((sender == this) && msg.equals("close")) {
-			    mkwdg.wdgmsg("close");
-			    return;
-			}
-			super.wdgmsg(sender, msg, args);
-		    }
-		    public void cdestroy(Widget w) {
-			if(w == mkwdg) {
-			    ui.destroy(this);
-			    makewnd = null;
-			}
-		    }
-		    public void destroy() {
-			Utils.setprefc("makewndc", makewndc = this.c);
-			super.destroy();
-		    }
-		};
-	    makewnd.add(mkwdg, Coord.z);
-	    makewnd.pack();
-	    fitwdg(add(makewnd, makewndc));
+	    makewnd.add(child);
+		makewnd.pack();
+		makewnd.show();
 	} else if(place == "buddy") {
 	    zerg.ntab(buddies = (BuddyWnd)child, zerg.kin);
 	} else if(place == "pol") {
