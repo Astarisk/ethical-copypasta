@@ -35,6 +35,8 @@ import haven.MapFile.GridInfo;
 import haven.MapFile.Marker;
 import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
+import haven.purus.alarms.AlarmManager;
+
 import static haven.MCache.cmaps;
 import static haven.MCache.tilesz;
 import static haven.OCache.posres;
@@ -503,8 +505,11 @@ public class MiniMap extends Widget {
 		    }
 		} catch(Loading l) {}
 			try {
+				Resource res = gob.getres();
 				if(alarmPlayed.contains(gob.id))
 					continue;
+				if(res != null && AlarmManager.play(res.name, gob))
+					alarmPlayed.add(gob.id);
 				if(gob.type == Gob.Type.PLAYER && gob.id != ui.gui.plid) {
 					KinInfo kin = gob.getattr(KinInfo.class);
 					if(kin == null) {

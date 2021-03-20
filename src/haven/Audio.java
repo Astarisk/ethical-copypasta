@@ -33,7 +33,7 @@ import dolda.xiphutil.*;
 
 public class Audio {
     public static boolean enabled = true;
-    private static Player player;
+    public static Player player;
     public static final AudioFormat fmt = new AudioFormat(44100, 16, 2, true, false);
     private static int bufsize = 4096;
     public static double volume = 1.0;
@@ -402,8 +402,8 @@ public class Audio {
 	}
     }
 
-    private static class Player extends HackThread {
-	private final CS stream;
+    public static class Player extends HackThread {
+	public final CS stream;
 	private final int nch;
 	private final Object queuemon = new Object();
 	private Collection<Runnable> queue = new LinkedList<Runnable>();

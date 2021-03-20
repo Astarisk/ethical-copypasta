@@ -27,6 +27,7 @@
 package haven;
 
 import haven.purus.MultiSession;
+import haven.purus.alarms.AlarmManager;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -551,6 +552,7 @@ public class MainFrame extends java.awt.Frame implements Console.Directory {
 	}
 	Thread main = new HackThread(g, () -> main2(args), "Haven main thread");
 	main.start();
+		AlarmManager.init();
     }
 	
     private static void dumplist(Collection<Resource> list, String fn) {

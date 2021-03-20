@@ -31,11 +31,13 @@ import haven.purus.Config;
 import haven.purus.MultiSession;
 import haven.purus.OptWndPurus;
 import haven.purus.TileGrid;
+import haven.purus.alarms.AlarmWindow;
 
 import java.awt.event.KeyEvent;
 
 public class OptWnd extends BetterWindow {
 	OptWndPurus optWndPurus;
+	AlarmWindow aw;
     public final Panel main, video, audio, keybind;
     public Panel current;
 
@@ -565,6 +567,14 @@ public class OptWnd extends BetterWindow {
 			optWndPurus.show();
 		} else {
 			optWndPurus.show(!optWndPurus.visible);
+		}
+	}),0 ,y).pos("bl").adds(0, 5).y;
+	y = main.add(new Button(UI.scale(200), "Alarm Manager", () -> {
+		if(aw == null) {
+			aw = this.parent.add(new AlarmWindow());
+			aw.show();
+		} else {
+			aw.show(!aw.visible);
 		}
 	}),0 ,y).pos("bl").adds(0, 5).y;
 	y += UI.scale(60);

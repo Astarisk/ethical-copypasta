@@ -48,6 +48,12 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     private final Collection<SetupMod> setupmods = new ArrayList<>();
     private final Collection<ResAttr.Cell<?>> rdata = new LinkedList<ResAttr.Cell<?>>();
     private final Collection<ResAttr.Load> lrdata = new LinkedList<ResAttr.Load>();
+    public enum Knocked {
+		UNKNOWN,
+		TRUE,
+		FALSE
+	}
+    public Knocked knocked = Knocked.UNKNOWN;
 
     public Type type;
 
