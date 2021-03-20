@@ -44,6 +44,10 @@ public class Makewindow extends Widget {
     public List<Indir<Resource>> tools = new ArrayList<>();;
     private final int xoff = UI.scale(45), qmy = UI.scale(38), outy = UI.scale(65);
 
+	private Tex softcapTex;
+	private int softcapNum = -1;
+	private long softcapProd = -1;
+
     @RName("make")
     public static class $_ implements Factory {
 	public Widget create(UI ui, Object[] args) {
@@ -230,18 +234,47 @@ public class Makewindow extends Widget {
 	}
 	{
 	    int x = 0;
-	    if(!qmod.isEmpty()) {
+		ArrayList<Integer> qmodValues = new ArrayList<>();
+		if(!qmod.isEmpty()) {
 		g.aimage(qmodl.tex(), new Coord(x, qmy + (qmodsz.y / 2)), 0, 0.5);
 		x += qmodl.sz().x + UI.scale(5);
 		x = Math.max(x, xoff);
 		qmx = x;
-		for(Indir<Resource> qm : qmod) {
-		    try {
+		CharWnd cw = null;
+		try {
+			GameUI gui = gameui();
+			if(gui != null)
+				cw = gameui().getchild(CharWnd.class);
+		}catch(Loading l){}
+			for(Indir<Resource> qm : qmod) {
 			Tex t = qmicon(qm);
-			g.image(t, new Coord(x, qmy));
-			x += t.sz().x + UI.scale(1);
-		    } catch(Loading l) {
-		    }
+			try {
+				g.image(t, new Coord(x, qmy));
+				x += t.sz().x + UI.scale(1);
+			} catch(Loading l) {
+			}
+				try {
+					if (cw != null) {
+						String name = qm.get().basename();
+						for (CharWnd.SAttr attr : cw.skill) {
+							if (name.equals(attr.attr.nm)) {
+								g.aimage(attr.attr.comptex, new Coord(x, qmy + t.sz().y), 0.5, 0.5);
+								x += UI.scale(8);
+								qmodValues.add(attr.attr.comp);
+								break;
+							}
+						}
+						for (CharWnd.Attr attr : cw.base) {
+							if (name.equals(attr.attr.nm)) {
+								g.aimage(attr.attr.comptex, new Coord(x, qmy + t.sz().y), 0.5, 0.5);
+								x += UI.scale(8);
+								qmodValues.add(attr.attr.comp);
+								break;
+							}
+						}
+					}
+				} catch (Loading l) {
+				}
 		}
 		x += UI.scale(25);
 	    }
@@ -260,6 +293,15 @@ public class Makewindow extends Widget {
 		}
 		x += UI.scale(25);
 	    }
+		if (qmodValues.size() > 0) {
+			long product = 1;
+			for (long cap : qmodValues)
+				product *= cap;
+			if(softcapNum != qmodValues.size() || softcapProd != product)
+				softcapTex = Text.render("Softcap: " + (int) Math.pow(product, 1.0 / qmodValues.size())).tex();
+			g.aimage(softcapTex, new Coord(x, qmy), 0, -0.5);
+
+		}
 	}
 	c = new Coord(xoff, outy);
 	for(Spec s : outputs) {
@@ -285,7 +327,7 @@ public class Makewindow extends Widget {
 		    Coord tsz = qmicon(qm).sz();
 		    if(mc.isect(c, tsz))
 			return(qm.get().layer(Resource.tooltip).t);
-		    c = c.add(tsz.x + UI.scale(1), 0);
+		    c = c.add(tsz.x + UI.scale(1) + UI.scale(8), 0);
 		}
 	    } catch(Loading l) {
 	    }

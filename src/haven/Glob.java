@@ -71,11 +71,13 @@ public class Glob {
     public static class CAttr {
 	public final String nm;
 	public int base, comp;
-	
+	public Tex comptex;
+
 	public CAttr(String nm, int base, int comp) {
 	    this.nm = nm.intern();
 	    this.base = base;
 	    this.comp = comp;
+	    this.comptex = Text.render(String.format("%d", comp)).tex();
 	}
 	
 	public void update(int base, int comp) {
@@ -83,6 +85,7 @@ public class Glob {
 		return;
 	    this.base = base;
 	    this.comp = comp;
+		this.comptex = Text.render(String.format("%d", comp)).tex();
 	}
     }
     
