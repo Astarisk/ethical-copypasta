@@ -33,6 +33,7 @@ public class ItemDrag extends WItem {
     
     public ItemDrag(Coord dc, GItem item) {
 	super(item);
+	z(100);
 	this.doff = dc;
     }
 
@@ -45,12 +46,6 @@ public class ItemDrag extends WItem {
 	g.chcolor(255, 255, 255, 128);
 	super.drawmain(g, spr);
 	g.chcolor();
-    }
-
-    public void tick(double dt) {
-	super.tick(dt);
-	if(parent.child != this)
-	    raise();
     }
 
     public boolean dropon(Widget w, Coord c) {
@@ -88,7 +83,7 @@ public class ItemDrag extends WItem {
     }
 	
     public boolean mousedown(Coord c, int button) {
-	if(ui.modctrl) {
+	if(ui.modctrl && !ui.modshift && !ui.modmeta) {
 	    /* XXX */
 	    GameUI gui = getparent(GameUI.class);
 	    if((gui != null) && (gui.map != null)) {
