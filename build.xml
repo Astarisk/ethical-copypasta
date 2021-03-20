@@ -114,10 +114,9 @@
   </target>
 
 	<target name="dist" depends="jars">
-		<zip destfile="build/dist.zip">
-			<zipfileset dir="build/lib" prefix="lib/" />
-			<zipfileset dir="build/" includes="hafen.jar" />
-			<zipfileset dir="etc/" includes="run.bat, run.sh" />
+		<zip destfile="build/dist.zip" update="true">
+			<fileset dir="build" includes="*hafen.jar"/>
+			<zipfileset dir="build/lib" includes="json.jar sqlite-jdbc-3.32.3.2.jar pasta-res.jar" prefix="lib/"/>
 		</zip>
 	</target>
   

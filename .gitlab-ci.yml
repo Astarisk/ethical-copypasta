@@ -1,0 +1,16 @@
+image: openjdk:8
+
+before_script:
+    - apt-get -y update
+    - apt-get -y install ant rsync
+
+deploy:
+  stage: deploy
+  script:
+    - ant dist
+    - unzip -o build/dist.zip -d build/update_temp/
+    - cd build/update_temp
+    - find -type f -exec sha1sum "{}" \; | sed 's/  / /g' | sed '/listing.txt/d' > listing.txt
+    - rsync -r --delete . ${RSYNC_DEST}
+  only:
+    - master
