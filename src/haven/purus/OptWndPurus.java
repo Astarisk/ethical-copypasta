@@ -228,6 +228,28 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, ""));
 
+		Entry combatSettings = new Entry(new Label("Combat Settings"), "Combat Settings");
+		((Label)combatSettings.w).setcolor(Color.ORANGE);
+		el.root.addSubentry(combatSettings);
+
+		combatSettings.addSubentry(new Entry(new CheckBox("Proximity aggro kritters when clicked"){
+			{a = Config.proximityKritterAggro.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.proximityKritterAggro.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Proximity aggro kritters when clicked"));
+
+		combatSettings.addSubentry(new Entry(new CheckBox("Proximity aggro players when clicked"){
+			{a = Config.proximityPlayerAggro.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.proximityPlayerAggro.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Proximity aggro players when clicked"));
+
 		Entry debugSettings = new Entry(new Label("Debug Settings"), "Debug Settings");
 		((Label)debugSettings.w).setcolor(Color.ORANGE);
 		el.root.addSubentry(debugSettings);

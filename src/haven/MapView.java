@@ -1998,7 +1998,6 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    Object[] args = {pc, mc.floor(posres), clickb, modflags};
 	    if(inf != null)
 		args = Utils.extend(args, inf.clickargs());
-	    wdgmsg("click", args);
 	    if(inf != null && inf.ci instanceof Gob.GobClick && (modflags & UI.MOD_META) == UI.MOD_META) {
 	    	Gob.GobClick gc = (Gob.GobClick) inf.ci;
 	    	if(ui.gui.vhand == null) {
@@ -2008,6 +2007,41 @@ public class MapView extends PView implements DTarget, Console.Directory {
 				}
 			}
 		}
+	    try {
+			Resource curs = ui.root.getcurs(c);
+			if(clickb == 1 && curs != null && curs.name.equals("gfx/hud/curs/atk") && (Config.proximityKritterAggro.val || Config.proximityPlayerAggro.val)) {
+				Gob closest = null;
+				double bestDist = Double.MAX_VALUE;
+				boolean isPlayer = false; // Prefer players over kritters
+				synchronized(glob.oc) {
+					for(Gob gob: glob.oc) {
+						if(gob.isPlayer())
+							continue;
+						try {
+							double dist = player().rc.dist(gob.rc);
+							if(dist > bestDist || mc.dist(gob.rc) > 5 * tilesz.x)
+								continue;
+							Resource gobres = gob.getres();
+							if(Config.proximityPlayerAggro.val && gobres.name.equals("gfx/borka/body")) {
+								bestDist = dist;
+								closest = gob;
+								isPlayer = true;
+							} else if(Config.proximityKritterAggro.val && !isPlayer && gobres.name.startsWith("gfx/kritter/")) {
+								bestDist = dist;
+								closest = gob;
+							}
+						}catch(Loading l) {}
+					}
+				}
+				if(closest != null) {
+					wdgmsg("click", Coord.z, closest.rc.floor(posres), 1, 0, 0, (int) closest.id, closest.rc.floor(posres), 0, -1);
+					return;
+				}
+			}
+		} catch(Loading l) {
+
+		}
+		wdgmsg("click", args);
 	}
     }
     

@@ -91,6 +91,9 @@ public class Config {
 	public static Setting<ConcurrentHashMap<String, Boolean>> flowerOptOpens = new Setting<>("flowerOptOpens", new ConcurrentHashMap<>());
 	public static Setting<ConcurrentHashMap<String, Float>> customVolumes = new Setting<>("customVolumes", new ConcurrentHashMap<>());
 
+	public static Setting<Boolean> proximityPlayerAggro = new Setting<>("proximityPlayerAggro", false);
+	public static Setting<Boolean> proximityKritterAggro = new Setting<>("proximityKritterAggro", true);
+
 
 	public static Setting<Boolean> resinfo = new Setting<>("resinfo", false);
 
