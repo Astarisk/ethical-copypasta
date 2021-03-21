@@ -33,3 +33,4 @@ gfx/kritter/goldeneagle/goldeneagle;eagles.wav;50;true
 gfx/terobjs/lilypadlotus;voiveljet.wav;50;false
 gfx/terobjs/claypit;voiveljet.wav;50;false
 gfx/terobjs/fairystone;voiveljet.wav;50;false
+gfx/kritter/caveangler/caveangler;angler.wav;50;true
