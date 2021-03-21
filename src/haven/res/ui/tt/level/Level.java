@@ -1,4 +1,4 @@
-package haven.purus.customres.ui.tt.level;/* Preprocessed source code */
+package haven.res.ui.tt.level;/* Preprocessed source code */
 import haven.*;
 
 import java.awt.Color;

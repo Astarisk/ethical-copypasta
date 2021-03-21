@@ -2,7 +2,7 @@ package haven.purus.food;
 
 import haven.Config;
 import haven.ItemInfo;
-import haven.purus.customres.ui.tt.q.qbuff.QBuff;
+import haven.res.ui.tt.q.qbuff.QBuff;
 import haven.resutil.FoodInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;

@@ -1,4 +1,4 @@
-package haven.purus.customres.ui.tt.q.quality;
+package haven.res.ui.tt.q.quality;
 
 /* Preprocessed source code */
 /* $use: ui/tt/q/qbuff */

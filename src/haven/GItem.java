@@ -162,7 +162,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 
     public List<ItemInfo> info() {
 	if(info == null) {
-		info = ItemInfo.buildinfo(this, rawinfo);
+			info = ItemInfo.buildinfo(this, rawinfo);
 		if(Config.resinfo.val) {
 			try {
 				info.add(new ItemInfo.AdHoc(this, getres().name));
@@ -242,5 +242,15 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 		}
 		return new Coord(1, 1);
 	}
+	public String getname() {
+		if (rawinfo == null) {
+			return "";
+		}
 
+		try {
+			return ItemInfo.find(ItemInfo.Name.class, info()).str.text;
+		} catch (Exception ex) {
+			return "";
+		}
+	}
 }

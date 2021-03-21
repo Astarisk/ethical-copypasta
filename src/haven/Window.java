@@ -27,9 +27,16 @@
 package haven;
 
 import haven.purus.BetterWindow;
+import haven.res.ui.tt.wear.Wear;
+import haven.resutil.Curiosity;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import static haven.PUtils.*;
 
 public class Window extends Widget implements DTarget {
@@ -141,9 +148,72 @@ public class Window extends Widget implements DTarget {
 	for(bgc.y = ctl.y; bgc.y < cbr.y; bgc.y += bgr.sz().y)
 	    g.image(bgr, bgc, ctl, cbr);
     }
+	String sensibleTimeFormat(Double time) {
+    	time /= 60;
+		StringBuilder sb = new StringBuilder();
+		int days = new Double(time/1440).intValue();
+		time -= days*1440;
+		int hours = new Double(time/60).intValue();
+		time -= hours*60;
+		int minutes = time.intValue();
+		if(days>0) {
+			sb.append(days + "d ");
+		}
+		sb.append(hours + "h ");
+		sb.append(minutes + "m");
+		return sb.toString();
+	}
+	private static HashMap<String, Long> recentlyTakenCutlery = new HashMap<>();
 
     protected void drawframe(GOut g) {
-	Coord mdo, cbr;
+    	try {
+			if(cap.text.equals("Study Desk")) {
+				int sizeY = 250;
+				int totalLP = 0;
+				HashMap<String, Double> studyTimes = new HashMap<String, Double>();
+				for(Widget wdg = this.lchild; wdg != null; wdg = wdg.prev) {
+					if(wdg instanceof Inventory) {
+						for(WItem item : ((Inventory) wdg).wmap.values()) {
+							Curiosity ci = ItemInfo.find(Curiosity.class, item.item.info());
+							if(ci != null) {
+								totalLP += ci.exp;
+							}
+							studyTimes.put(item.item.getname(), studyTimes.get(item.item.getname()) == null ? item.item.studytime : studyTimes.get(item.item.getname()) + item.item.studytime);
+						}
+					}
+				}
+				g.image(Text.render("Total LP: " + String.format("%,d", totalLP)).tex(), new Coord(30, 271));
+				int y = 285;
+				List<Map.Entry<String, Double>> lst = studyTimes.entrySet().stream().sorted((e1, e2) -> e1.getValue().compareTo(e2.getValue())).collect(Collectors.toList());
+				for(Map.Entry<String, Double> entry : lst) {
+					if(entry.getValue() > 24 * 60 * 60)
+						g.image(Text.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()), Color.green).tex(), new Coord(30, y));
+					else
+						g.image(Text.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()), Color.red).tex(), new Coord(30, y));
+					y += 15;
+					sizeY += 15;
+				}
+				resize(230, sizeY);
+			} else if(cap.text.equals("Table")) {
+				for(Widget w = this.lchild; w != null; w = w.prev) {
+					if(w instanceof Inventory) {
+						for(WItem item : ((Inventory) w).wmap.values()) {
+							for(ItemInfo ii : item.item.info())
+								if(ii instanceof Wear) {
+									Wear wr = (Wear) ii;
+									if(wr.d == wr.m - 1 && item.item.getres() != null && (!recentlyTakenCutlery.containsKey(item.item.getres().name) || System.currentTimeMillis() - recentlyTakenCutlery.get(item.item.getres().name) > 1000 * 60)) { // About to break
+										item.item.wdgmsg("transfer", Coord.z);
+										ui.gui.msg("Detected cutlery that is about to break! Taking to inventory! You may want to polish it.", Color.yellow);
+										recentlyTakenCutlery.put(item.item.getres().name, System.currentTimeMillis());
+									}
+								}
+						}
+					}
+				}
+			}
+		}catch(Loading l){}
+
+		Coord mdo, cbr;
 	g.image(cl, tlo);
 	mdo = tlo.add(cl.sz().x, 0);
 	cbr = mdo.add(cmw, cm.sz().y);

@@ -1,10 +1,10 @@
-package haven.purus.customres.ui.tt.q.quality;
+package haven.res.ui.tt.q.quality;
 
 /* Preprocessed source code */
 /* $use: ui/tt/q/qbuff */
 import haven.*;
 import haven.purus.Config;
-import haven.purus.customres.ui.tt.q.qbuff.QBuff;
+import haven.res.ui.tt.q.qbuff.QBuff;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 

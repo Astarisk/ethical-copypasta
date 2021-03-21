@@ -26,9 +26,10 @@
 
 package haven;
 
-import haven.purus.customres.ui.tt.level.Level;
-import haven.purus.customres.ui.tt.q.quality.Quality;
-import haven.purus.customres.ui.tt.q.quality.ShowQuality;
+import haven.res.ui.tt.level.Level;
+import haven.res.ui.tt.q.quality.Quality;
+import haven.res.ui.tt.q.quality.ShowQuality;
+import haven.res.ui.tt.wear.Wear;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -1207,6 +1208,7 @@ public class Resource implements Serializable {
 		put("ui/tt/q/quality$haven.MenuGrid$PagButton$Factory", ShowQuality.Fac.class);
 		put("ui/tt/q/quality$haven.ItemInfo$InfoFactory", Quality.Fac.class);
 		put("ui/tt/level$haven.ItemInfo$InfoFactory", Level.Fac.class);
+		put("ui/tt/wear$haven.ItemInfo$InfoFactory", Wear.Fac.class);
 	}};
     public <T> T getcode(Class<T> cl, boolean fail) {
 		try {
