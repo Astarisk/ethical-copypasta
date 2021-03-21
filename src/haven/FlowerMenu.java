@@ -218,6 +218,16 @@ public class FlowerMenu extends Widget {
 	kg = ui.grabkeys(this);
 	organize(opts);
 	new Opening().ntick(0);
+	for(int i = 0; i < opts.length; i++) {
+		Boolean pick = Config.flowerOptOpens.val.get(opts[i].name);
+		if(pick == null) {
+			Config.flowerOptOpens.val.put(opts[i].name, false);
+			Config.flowerOptOpens.setVal(Config.flowerOptOpens.val);
+		} else if(pick) {
+			choose(opts[i]);
+			return;
+		}
+	}
     }
 
     public boolean mousedown(Coord c, int button) {

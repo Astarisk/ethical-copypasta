@@ -4,6 +4,8 @@ import haven.KeyBinding;
 import haven.KeyMatch;
 
 import java.awt.event.KeyEvent;
+import java.io.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.prefs.Preferences;
 
 public class Config {
@@ -29,6 +31,17 @@ public class Config {
 				this.val = (T) val.getClass().cast(pref.getInt(name, (Integer) val));
 			} else if(val instanceof Float) {
 				this.val = (T) val.getClass().cast(pref.getFloat(name, (Float) val));
+			} else if(val instanceof Serializable) {
+				try {
+					byte[] arr = pref.getByteArray(name, null);
+					if(arr == null)
+						return;
+					ByteArrayInputStream bis = new ByteArrayInputStream(arr);
+					ObjectInputStream ois = new ObjectInputStream(bis);
+					this.val = (T) val.getClass().cast(ois.readObject());
+				} catch(IOException | ClassNotFoundException e) {
+					e.printStackTrace();
+				}
 			} else {
 				throw(new RuntimeException("Cannot get unknown type " + val.getClass() + " to config!"));
 			}
@@ -44,6 +57,15 @@ public class Config {
 				pref.putInt(name, (Integer) val);
 			} else if(val instanceof Float) {
 				pref.putFloat(name, (Float) val);
+			} else if(val instanceof Serializable) {
+				try {
+					ByteArrayOutputStream bos = new ByteArrayOutputStream();
+					ObjectOutputStream oos = new ObjectOutputStream(bos);
+					oos.writeObject(val);
+					pref.putByteArray(name, bos.toByteArray());
+				} catch(IOException e) {
+					e.printStackTrace();
+				}
 			} else {
 				throw(new RuntimeException("Cannot set unknown type " + val.getClass() + " to config!"));
 			}
@@ -65,6 +87,8 @@ public class Config {
 	public static Setting<Integer> speedOnLogin = new Setting<>("speedOnLogin", 2);
 	public static Setting<Float> flowermenuSpeed = new Setting<>("flowermenuSpeed", 0.25f);
 	public static Setting<String> mapperToken = new Setting<>("mapperToken", "");
+
+	public static Setting<ConcurrentHashMap<String, Boolean>> flowerOptOpens = new Setting<>("flowerOptOpens", new ConcurrentHashMap<>());
 
 	public static Setting<Boolean> resinfo = new Setting<>("resinfo", false);
 
