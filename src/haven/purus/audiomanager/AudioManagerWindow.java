@@ -35,8 +35,8 @@ public class AudioManagerWindow extends BetterWindow {
 	public void refresh() {
 		vl.clearItems();
 		Config.customVolumes.val.entrySet().stream()
-				.sorted((a, b) -> {
-			return Long.compare(recentClips.getOrDefault(a, Long.MAX_VALUE), recentClips.getOrDefault(b, Long.MAX_VALUE));
+				.sorted((b, a) -> {
+			return Long.compare(recentClips.getOrDefault(a.getKey(), 0L), recentClips.getOrDefault(b.getKey(), 0L));
 		})
 				.forEach(vi -> {vl.addItem(new VolumeItem(vi.getKey(), recentClips.getOrDefault(vi.getKey(), 0L), vi.getValue()));});
 	}
