@@ -81,14 +81,14 @@ public class AlarmWindow extends Window {
 
 		ArrayList<AlarmItem> items = new ArrayList<>();
 		Scrollbar sb;
-		int rowHeight = UI.scale(30);
+		int rowHeight = 30;
 		int rows, w;
 
 		public AlarmList(int w, int rows) {
 			this.rows = rows;
 			this.w = w;
 			this.sz = UI.scale(w, rowHeight * rows);
-			sb = new Scrollbar(rowHeight *rows, 0, 100);
+			sb = new Scrollbar(UI.scale(rowHeight) * rows, 0, 100);
 			add(sb, UI.scale(0, 0));
 		}
 
@@ -142,7 +142,7 @@ public class AlarmWindow extends Window {
 			for(int i=0; i<rows; i++) {
 				if(i+sb.val >= items.size())
 					break;
-				GOut ig = g.reclip(UI.scale(UI.scale(15), i*rowHeight), UI.scale(w-UI.scale(15), rowHeight));
+				GOut ig = g.reclip(UI.scale(15, i*rowHeight), UI.scale(w-UI.scale(15), rowHeight));
 				items.get(i+sb.val).draw(ig);
 			}
 			super.draw(g);
@@ -169,10 +169,10 @@ public class AlarmWindow extends Window {
 			this.gobResname = new TextEntry(UI.scale(225), gobResname);
 			add(this.gobResname, UI.scale(0,0));
 			this.alarmFilename = new TextEntry(UI.scale(225), alarmFilename);
-			add(this.alarmFilename, UI.scale(UI.scale(235),0));
+			add(this.alarmFilename, UI.scale(235),0);
 			this.volume = new HSlider(UI.scale(100), 0, 100, volume);
 			add(this.volume, UI.scale(470, 0));
-			add(new Button(50, "Play") {
+			add(new Button(UI.scale(50), "Play") {
 				@Override
 				public boolean mousedown(Coord c, int button) {
 					if(button != 1)
@@ -197,7 +197,7 @@ public class AlarmWindow extends Window {
 
 				}
 			}, UI.scale(580, 0));
-			add(new Button(50, "Delete") {
+			add(new Button(UI.scale(50), "Delete") {
 				@Override
 				public boolean mousedown(Coord c, int button) {
 					if(button != 1)

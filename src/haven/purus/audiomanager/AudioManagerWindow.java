@@ -53,14 +53,14 @@ public class AudioManagerWindow extends BetterWindow {
 
 		ArrayList<AudioManagerWindow.VolumeItem> items = new ArrayList<>();
 		Scrollbar sb;
-		int rowHeight = UI.scale(30);
+		int rowHeight = 30;
 		int rows, w;
 
 		public VolumeList(int w, int rows) {
 			this.rows = rows;
 			this.w = w;
 			this.sz = UI.scale(w, rowHeight * rows);
-			sb = new Scrollbar(rowHeight *rows, 0, 100);
+			sb = new Scrollbar(UI.scale(rowHeight) * rows, 0, 100);
 			add(sb, UI.scale(0, 0));
 		}
 
@@ -114,7 +114,7 @@ public class AudioManagerWindow extends BetterWindow {
 			for(int i=0; i<rows; i++) {
 				if(i+sb.val >= items.size())
 					break;
-				GOut ig = g.reclip(UI.scale(UI.scale(15), i*rowHeight), UI.scale(w-UI.scale(15), rowHeight));
+				GOut ig = g.reclip(UI.scale(15, i*rowHeight), UI.scale(w-UI.scale(15), rowHeight));
 				items.get(i+sb.val).draw(ig);
 			}
 			super.draw(g);
@@ -132,7 +132,7 @@ public class AudioManagerWindow extends BetterWindow {
 			this.playedAt = playedAt;
 			this.resname = resname;
 			add(new Label(resname), UI.scale(0,0));
-			add(agoLbl, UI.scale(UI.scale(235),0));
+			add(agoLbl, UI.scale(235),0);
 			add(new HSlider(UI.scale(200), 0, 100, (int)(new Config.Setting<Float>("volume_" + resname, 1.0f).val*100)){
 				@Override
 				public void changed() {
@@ -140,7 +140,7 @@ public class AudioManagerWindow extends BetterWindow {
 					super.changed();
 				}
 			}, UI.scale(470, 0));
-			add(new Button(50, "Play") {
+			add(new Button(UI.scale(50), "Play") {
 				@Override
 				public boolean mousedown(Coord c, int button) {
 					try {
