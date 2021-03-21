@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AudioManagerWindow extends BetterWindow {
 
-	public static final ConcurrentHashMap<String, VolumeItem> recentClips = new ConcurrentHashMap<String, VolumeItem>();
+	public static final ConcurrentHashMap<String, Long> recentClips = new ConcurrentHashMap<String, Long>();
 	private AudioManagerWindow.VolumeList vl;
 
 	public AudioManagerWindow() {
@@ -34,9 +34,11 @@ public class AudioManagerWindow extends BetterWindow {
 
 	public void refresh() {
 		vl.clearItems();
-		synchronized(recentClips) {
-			recentClips.values().stream().sorted((b, a) -> Long.compare(a.playedAt, b.playedAt)).forEach(vi -> {vl.addItem(vi); vi.updAgo();});
-		}
+		Config.customVolumes.val.entrySet().stream()
+				.sorted((a, b) -> {
+			return Long.compare(recentClips.getOrDefault(a, Long.MAX_VALUE), recentClips.getOrDefault(b, Long.MAX_VALUE));
+		})
+				.forEach(vi -> {vl.addItem(new VolumeItem(vi.getKey(), recentClips.getOrDefault(vi.getKey(), 0L), vi.getValue()));});
 	}
 
 
@@ -128,15 +130,16 @@ public class AudioManagerWindow extends BetterWindow {
 		public long playedAt;
 		private Label agoLbl = new Label((System.currentTimeMillis()-playedAt) + " seconds ago");
 
-		public VolumeItem(String resname, long playedAt) {
+		public VolumeItem(String resname, long playedAt, float vol) {
 			this.playedAt = playedAt;
 			this.resname = resname;
 			add(new Label(resname), UI.scale(0,0));
 			add(agoLbl, UI.scale(235),0);
-			add(new HSlider(UI.scale(200), 0, 100, (int)(new Config.Setting<Float>("volume_" + resname, 1.0f).val*100)){
+			add(new HSlider(UI.scale(200), 0, 100, (int)(vol*100)){
 				@Override
 				public void changed() {
-					new Config.Setting<Float>("volume_" + resname, 1.0f).setVal(this.val/100.0f);
+					Config.customVolumes.val.put(resname, this.val/100.0f);
+					Config.customVolumes.setVal(Config.customVolumes.val);
 					super.changed();
 				}
 			}, UI.scale(470, 0));
@@ -144,7 +147,8 @@ public class AudioManagerWindow extends BetterWindow {
 				@Override
 				public boolean mousedown(Coord c, int button) {
 					try {
-						Audio.play(new Audio.VolAdjust(Audio.fromres(Resource.remote().loadwait(resname)), new Config.Setting<Float>("volume_", 1.0f).val));
+						Audio.play(new Audio.VolAdjust(Audio.fromres(Resource.remote().loadwait(resname)), Config.customVolumes.val.get(resname)));
+
 					}catch(Loading l){}
 					return super.mousedown(c, button);
 				}
@@ -153,7 +157,10 @@ public class AudioManagerWindow extends BetterWindow {
 		}
 
 		public void updAgo() {
-			this.agoLbl.settext((System.currentTimeMillis() - playedAt)/1000 + " seconds ago");
+			if(playedAt == 0)
+				this.agoLbl.settext("Not played in this session");
+			else
+				this.agoLbl.settext((System.currentTimeMillis() - playedAt)/1000 + " seconds ago");
 		}
 
 		@Override

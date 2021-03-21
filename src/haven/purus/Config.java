@@ -89,6 +89,8 @@ public class Config {
 	public static Setting<String> mapperToken = new Setting<>("mapperToken", "");
 
 	public static Setting<ConcurrentHashMap<String, Boolean>> flowerOptOpens = new Setting<>("flowerOptOpens", new ConcurrentHashMap<>());
+	public static Setting<ConcurrentHashMap<String, Float>> customVolumes = new Setting<>("customVolumes", new ConcurrentHashMap<>());
+
 
 	public static Setting<Boolean> resinfo = new Setting<>("resinfo", false);
 

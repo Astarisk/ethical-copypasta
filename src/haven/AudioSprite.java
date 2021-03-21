@@ -80,10 +80,12 @@ public class AudioSprite {
 
 	public ClipSprite(Owner owner, Resource res, Resource.Audio clip) {
 	    super(owner, res);
-	    if(!volumes.containsKey(res.name))
-	    	volumes.put(res.name, new Config.Setting<Float>("volume_" + res.name, 1.0f).val);
-	    AudioManagerWindow.recentClips.put(res.name, new AudioManagerWindow.VolumeItem(res.name, System.currentTimeMillis()));
-	    this.clip = new ActAudio.PosClip(new Audio.Monitor(new Audio.VolAdjust(clip.stream(), volumes.get(res.name))) {
+	    if(!Config.customVolumes.val.containsKey(res.name)) {
+			Config.customVolumes.val.put(res.name, 1.0f);
+			Config.customVolumes.setVal(Config.customVolumes.val);
+		}
+		AudioManagerWindow.recentClips.put(res.name,  System.currentTimeMillis());
+		this.clip = new ActAudio.PosClip(new Audio.Monitor(new Audio.VolAdjust(clip.stream(), Config.customVolumes.val.get(res.name))) {
 		    protected void eof() {
 			super.eof();
 			done = true;
