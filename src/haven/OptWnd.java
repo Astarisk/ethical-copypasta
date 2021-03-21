@@ -392,6 +392,7 @@ public class OptWnd extends BetterWindow {
 			y = addbtn(cont, String.format("Combat action %d", i + 1), Fightsess.kb_acts[i], y);
 		y = addbtn(cont, "Switch targets", Fightsess.kb_relcycle, y);
 	    // Pasta keys TODO: Use Pasta config
+		y = addbtn(cont, "Toggle re-aggro", Fightsess.kb_reaggro, y);
 		y = cont.adda(new Label("Session management"),cont.sz.x / 2, y + UI.scale(10), 0.5, 0.0).pos("bl").adds(0, 5).y;
 		//scroll.adda(new Label("Session management"), width / 2, 0.5);
 		y = addbtn(cont, "Next session", MultiSession.kb_nextSession, y);

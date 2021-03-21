@@ -391,6 +391,8 @@ public class Fightsess extends Widget {
     };
     public static final KeyBinding kb_relcycle =  KeyBinding.get("fgt-cycle", KeyMatch.forcode(KeyEvent.VK_TAB, KeyMatch.C), KeyMatch.S);
 
+    public static final KeyBinding kb_reaggro = KeyBinding.get("reaggro", KeyMatch.forcode(KeyEvent.VK_SPACE, 0));
+
     /* XXX: This is a bit ugly, but release message do need to be
      * properly sequenced with use messages in some way. */
     private class Release implements Runnable {
@@ -422,6 +424,8 @@ public class Fightsess extends Widget {
 		    break;
 		}
 	    }
+	    if(kb_reaggro.key().match(ev) && fv != null && fv.current != null && fv.current.give != null)
+	    	fv.current.give.wdgmsg("click", 1);
 	    int fn = n;
 	    if((n >= 0) && (n < actions.length)) {
 		MapView map = getparent(GameUI.class).map;
