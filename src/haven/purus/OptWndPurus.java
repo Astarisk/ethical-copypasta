@@ -348,7 +348,7 @@ public class OptWndPurus extends BetterWindow {
 						try {
 							Toolkit.getDefaultToolkit().beep();
 							if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-								Desktop.getDesktop().browse(new URI("http://localhost:1337/map/" + Config.mapperToken.val));
+								Desktop.getDesktop().browse(new URI("https://hnhmap.vatsul.com/map/" + Config.mapperToken.val));
 							}
 						} catch(URISyntaxException | IOException e) {
 						}
