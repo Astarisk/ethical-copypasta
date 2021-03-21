@@ -94,6 +94,16 @@ public class Charlist extends Widget {
 			ui.root.multiSessionWindow = ui.root.add(new MultiSession.MultiSessionWindow());
 		}
 	parent.setfocus(this);
+		parent.add(new Button(UI.scale(90), "Log out") {
+			@Override
+			public void click() {
+				Session sess = ((RemoteUI)ui.rcvr).sess;
+				synchronized(sess) {
+					sess.close();
+				}
+				super.click();
+			}
+		}, UI.scale(120, 553));
     }
 
     public void scroll(int amount) {
