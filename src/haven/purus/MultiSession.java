@@ -82,7 +82,10 @@ public class MultiSession {
 			sessions.remove(ui);
 		}
 		synchronized(ui) {
-			ui.destroy();
+			if(ui.sess != null)
+				ui.sess.close();
+			else
+				ui.destroy();
 		}
 		if(activeSession != null && activeSession.root != null && activeSession.root.multiSessionWindow != null)
 			activeSession.root.multiSessionWindow.update();

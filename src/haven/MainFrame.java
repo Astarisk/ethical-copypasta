@@ -250,17 +250,13 @@ public class MainFrame extends java.awt.Frame implements Console.Directory {
 				MultiSession.addSession(ui);
 				MultiSession.setActiveSession(ui);
 				fun = fun.run(ui);
-				if(fun != null && ui.sess != null)
-					ui.sess.close();
+				MultiSession.closeSession(ui);
 				sessions.decrementAndGet();
 			} catch(InterruptedException e) {
 
 			} finally {
-				if(ui != null) {
-					MultiSession.closeSession(ui);
-					if(sessions.decrementAndGet() == 0)
-						sessionCreate();
-				}
+				if(sessions.decrementAndGet() == 0)
+					sessionCreate();
 			}
 			savewndstate();
 		}, "Session thread").start();
