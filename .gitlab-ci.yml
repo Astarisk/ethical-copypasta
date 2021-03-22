@@ -1,4 +1,4 @@
-image: openjdk:8
+image: openjdk:15-buster
 
 before_script:
     - apt-get -y update
