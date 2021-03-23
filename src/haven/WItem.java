@@ -32,6 +32,8 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.function.*;
 import haven.ItemInfo.AttrCache;
+import haven.res.ui.tt.q.quality.Quality;
+
 import static haven.ItemInfo.find;
 import static haven.Inventory.sqsz;
 
@@ -222,6 +224,10 @@ public class WItem extends Widget implements DTarget {
     public boolean mousedown(Coord c, int btn) {
 	if(btn == 1) {
 	    if(ui.modshift) {
+	    	if(ui.modmeta) {
+	    		item.wdgmsg("transfer-identical", item.getres().name);
+	    		return true;
+			}
 		int n = ui.modctrl ? -1 : 1;
 		item.wdgmsg("transfer", c, n);
 	    } else if(ui.modctrl) {
@@ -250,4 +256,12 @@ public class WItem extends Widget implements DTarget {
 	item.wdgmsg("itemact", ui.modflags());
 	return(true);
     }
+
+    public double quality() {
+    	Optional<ItemInfo> qInfo = this.info().stream().filter((info) -> info instanceof Quality).findFirst();
+    	if(qInfo.isEmpty())
+    		return -1;
+    	else
+    		return ((Quality)qInfo.get()).q;
+	}
 }

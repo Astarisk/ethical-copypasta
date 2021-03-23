@@ -12,9 +12,11 @@ import java.awt.image.BufferedImage;
 public class Quality extends QBuff implements GItem.OverlayInfo<Tex> {
 	public static boolean show = false;
 	private static BufferedImage icon = Resource.remote().loadwait("ui/tt/q/quality").layer(Resource.imgc, 0).scaled();
+	public double q;
 
 	public Quality(Owner owner, double q) {
 		super(owner, icon, "Quality", q);
+		this.q = q;
 	}
 
 	public static class Fac implements ItemInfo.InfoFactory {
