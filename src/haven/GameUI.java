@@ -1025,7 +1025,17 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	}
 	mapfiletick();
     }
-    
+
+    public void toggleBuff(String resname, boolean on) {
+		if(!on)
+			buffs.children(BuffToggle.class).stream()
+					.filter((buff) -> buff.name.equals(resname))
+					.forEach(Buff::reqdestroy);
+		else if(buffs.children(BuffToggle.class).stream()
+				.noneMatch((buff) -> buff.name.equals(resname)))
+			buffs.addchild(new BuffToggle(resname, Resource.remote().loadwait(resname)));
+	}
+
     public void uimsg(String msg, Object... args) {
 	if(msg == "err") {
 	    String err = (String)args[0];
@@ -1033,6 +1043,22 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	} else if(msg == "msg") {
 	    String text = (String)args[0];
 	    msg(text);
+		if(text.startsWith("Swimming is now turned")) {
+			if(text.endsWith("off."))
+				toggleBuff("paginae/act/swim", false);
+			else if(text.endsWith("on."))
+				toggleBuff("paginae/act/swim", true);
+		} else if(text.startsWith("Tracking is now turned")) {
+			if(text.endsWith("off."))
+				toggleBuff("paginae/act/tracking", false);
+			else if(text.endsWith("on."))
+				toggleBuff("paginae/act/tracking", true);
+		} else if(text.startsWith("Criminal acts are now turned")) {
+			if(text.endsWith("off."))
+				toggleBuff("paginae/act/crime", false);
+			else if(text.endsWith("on."))
+				toggleBuff("paginae/act/crime", true);
+		}
 	} else if(msg == "prog") {
 	    if(args.length > 0)
 		prog = ((Number)args[0]).doubleValue() / 100.0;
