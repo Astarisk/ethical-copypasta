@@ -44,7 +44,11 @@ import static haven.OCache.posres;
 public class MiniMap extends Widget {
     public static final Tex bg = Resource.loadtex("gfx/hud/mmap/ptex");
     public static final Tex nomap = Resource.loadtex("gfx/hud/mmap/nomap");
-    public static final Tex plp = ((TexI)Resource.loadtex("gfx/hud/mmap/plp")).filter(haven.render.Texture.Filter.LINEAR);
+    public static final Tex mapgrid = Resource.loadtex("hud/mmap/mapgrid");
+
+	public boolean showGrid = false;
+
+	public static final Tex plp = ((TexI)Resource.loadtex("gfx/hud/mmap/plp")).filter(haven.render.Texture.Filter.LINEAR);
     public final MapFile file;
     public Location curloc;
     public Location sessloc;
@@ -458,8 +462,13 @@ public class MiniMap extends Widget {
 	    }
 	    Coord ul = UI.scale(c.mul(cmaps)).sub(dloc.tc.div(scalef())).add(hsz);
 	    g.image(img, ul, UI.scale(img.sz()));
+	    if(showGrid && dlvl == 0) {
+			g.image(mapgrid, ul);
+		}
 	}
-    }
+
+
+	}
 
     public void drawmarkers(GOut g) {
 	Coord hsz = sz.div(2);

@@ -109,7 +109,12 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 	    .settip("Compact mode").setgkey(kb_compact);
 	toolbar.pack();
 	tool = add(new Toolbox());;
-	compact(Utils.getprefb("compact-map", false));
+	add(new ICheckBox("hud/mmap/mapgridbtn","", "-d", "-d", ""), UI.scale(10,10))
+			.state(() -> this.view.showGrid)
+			.set(a -> this.view.showGrid = a)
+			.settip("Show grid");
+
+		compact(Utils.getprefb("compact-map", false));
 	resize(sz);
     }
 
