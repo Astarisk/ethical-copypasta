@@ -228,6 +228,20 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, ""));
 
+		Entry displaySettings = new Entry(new Label("Display settings"), "Display settings");
+		((Label)displaySettings.w).setcolor(Color.ORANGE);
+		el.root.addSubentry(displaySettings);
+
+		displaySettings.addSubentry(new Entry(new CheckBox("Highlight tanning tubs and drying frames"){
+			{a = Config.ttfHighlight.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.ttfHighlight.setVal(!this.a);
+				gameui().map.refreshGobsAll();
+				return super.mousedown(c, button);
+			}
+		}, "Use hardware cursor [Requires restart]"));
+
 		Entry combatSettings = new Entry(new Label("Combat Settings"), "Combat Settings");
 		((Label)combatSettings.w).setcolor(Color.ORANGE);
 		el.root.addSubentry(combatSettings);

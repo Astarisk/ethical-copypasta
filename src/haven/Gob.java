@@ -30,10 +30,8 @@ import java.awt.*;
 import java.util.*;
 import java.util.function.*;
 
-import haven.purus.BoundingBox;
+import haven.purus.*;
 import haven.purus.Config;
-import haven.purus.GobBoundingBox;
-import haven.purus.GobText;
 import haven.purus.mapper.Mapper;
 import haven.render.*;
 
@@ -50,7 +48,11 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     private final Collection<SetupMod> setupmods = new ArrayList<>();
     private final Collection<ResAttr.Cell<?>> rdata = new LinkedList<ResAttr.Cell<?>>();
     private final Collection<ResAttr.Load> lrdata = new LinkedList<ResAttr.Load>();
-    public enum Knocked {
+    private static final MixColor dFrameDone =  new MixColor(255, 0, 0, 64);
+	private static final MixColor dFrameEmpty =  new MixColor(0, 255, 0, 64);
+	private static final MixColor ttEmpty =  new MixColor(255, 0, 0, 64);
+	private static final MixColor ttDone =  new MixColor(0, 255, 0, 64);
+	public enum Knocked {
 		UNKNOWN,
 		TRUE,
 		FALSE
@@ -601,6 +603,40 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 				else if(ol == null && bb != null)
 					this.addol(new Overlay(this, new GobBoundingBox(this, bb), 1339));
 			}
+			if(Config.ttfHighlight.val) {
+				if(res.name.equals("gfx/terobjs/dframe")) {
+					boolean done = true;
+					for(Overlay ol : ols) {
+						if(ol.res != null) {
+							Resource olres = ol.res.get();
+							if(olres.name.endsWith("-blood") || olres.name.endsWith("-windweed") || olres.name.endsWith("-fishraw")) {
+								done = false;
+							}
+						}
+					}
+					if(ols.isEmpty())
+						this.setattr(new GobColor(this, dFrameEmpty));
+					else if(done)
+						this.setattr(new GobColor(this, dFrameDone));
+					else
+						this.delattr(GobColor.class);
+				} else if(res.name.equals("gfx/terobjs/ttub")) {
+					GAttrib rd = getattr(ResDrawable.class);
+					if(rd != null) {
+						int r = ((ResDrawable)rd).sdt.peekrbuf(0);
+						if((r&(0x8)) == 0x8) {
+							this.setattr(new GobColor(this, ttDone));
+						} else if((r&(0x4)) == 0 || r == 5) {
+							this.setattr(new GobColor(this, ttEmpty));
+						} else {
+							this.delattr(GobColor.class);
+						}
+					}
+				}
+			} else {
+				this.delattr(GobColor.class);
+			}
+
 			if(Config.growthStages.val) {
 				if(resname.startsWith("gfx/terobjs/bushes") || (resname.startsWith("gfx/terobjs/trees") && !resname.endsWith("log") && !resname.endsWith("oldtrunk"))) {
 					ResDrawable rd = Gob.this.getattr(ResDrawable.class);
