@@ -432,7 +432,7 @@ public class MenuGrid extends Widget implements KeyBinding.Bindable {
 		if(act != null) {
 			String[] ad = r.pag.act().ad;
 			if (ad.length > 0 && (ad[0].equals("craft") || ad[0].equals("bp"))) {
-				//gameui().histbelt.push(r.pag); TODO
+				gameui().recentCrafts.push(r.pag);
 				if((ad[0].equals("craft")))
 					gameui().makewnd.setLastAction(r.pag);
 			}

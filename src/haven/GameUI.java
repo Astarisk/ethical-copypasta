@@ -28,6 +28,7 @@ package haven;
 
 import haven.purus.BetterWindow;
 import haven.purus.MultiSession;
+import haven.purus.RecentCrafts;
 import haven.purus.StatusWdg;
 import haven.purus.mapper.Mapper;
 
@@ -78,6 +79,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public final Map<Integer, String> polowners = new HashMap<Integer, String>();
     public Bufflist buffs;
     public StatusWdg statuswdg;
+    public RecentCrafts recentCrafts;
 
     private static final OwnerContext.ClassResolver<BeltSlot> beltctxr = new OwnerContext.ClassResolver<BeltSlot>()
 	.add(Glob.class, slot -> slot.wdg().ui.sess.glob)
@@ -384,6 +386,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		ui.root.multiSessionWindow.destroy();
 		ui.root.multiSessionWindow = add(new MultiSession.MultiSessionWindow());
 		add(new FKeyBelt());
+		this.recentCrafts = add(new RecentCrafts());
 	}
 
     public void dispose() {
