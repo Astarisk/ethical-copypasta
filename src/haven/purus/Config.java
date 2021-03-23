@@ -87,6 +87,7 @@ public class Config {
 	public static Setting<Integer> speedOnLogin = new Setting<>("speedOnLogin", 2);
 	public static Setting<Float> flowermenuSpeed = new Setting<>("flowermenuSpeed", 0.25f);
 	public static Setting<String> mapperToken = new Setting<>("mapperToken", "");
+	public static Setting<Boolean> bbDisplay = new Setting<>("bbDisplay", false);
 
 	public static Setting<ConcurrentHashMap<String, Boolean>> flowerOptOpens = new Setting<>("flowerOptOpens", new ConcurrentHashMap<>());
 	public static Setting<ConcurrentHashMap<String, Float>> customVolumes = new Setting<>("customVolumes", new ConcurrentHashMap<>());
@@ -97,7 +98,11 @@ public class Config {
 
 	public static Setting<Boolean> resinfo = new Setting<>("resinfo", false);
 
+
+
 	public static KeyBinding kb_growthStages = KeyBinding.get("kb_growthStages", KeyMatch.forcode(KeyEvent.VK_P, KeyMatch.C));
 	public static KeyBinding kb_resinfo = KeyBinding.get("kb_resinfo", KeyMatch.forcode(KeyEvent.VK_I, KeyMatch.S));
+
+	public static KeyBinding kb_bbtoggle = KeyBinding.get("kb_bbtoggle", KeyMatch.forcode(KeyEvent.VK_B, KeyMatch.S));
 
 }

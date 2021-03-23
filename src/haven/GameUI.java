@@ -1290,6 +1290,13 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     		haven.purus.Config.resinfo.setVal(!haven.purus.Config.resinfo.val);
 			msg("Toggled resinfo on shift/shift + ctrl hover " + (haven.purus.Config.resinfo.val ? "on" : "off"));
 			return true;
+		} else if(haven.purus.Config.kb_bbtoggle.key().match(ev)) {
+			haven.purus.Config.bbDisplay.setVal(!haven.purus.Config.bbDisplay.val);
+			if(!haven.purus.Config.bbDisplay.val) {
+				map.removeCustomSprites(1339);
+			}
+			map.refreshGobsAll();
+			return true;
 		}
 	if(key == ':') {
 	    entercmd();

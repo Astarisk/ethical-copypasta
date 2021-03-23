@@ -30,7 +30,9 @@ import java.awt.*;
 import java.util.*;
 import java.util.function.*;
 
+import haven.purus.BoundingBox;
 import haven.purus.Config;
+import haven.purus.GobBoundingBox;
 import haven.purus.GobText;
 import haven.purus.mapper.Mapper;
 import haven.render.*;
@@ -591,6 +593,14 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 			if(res == null)
 				return;
 			String resname = res.name;
+			if(Config.bbDisplay.val) {
+				BoundingBox bb = BoundingBox.getBoundingBox(this);
+				Overlay ol = this.findol(1339);
+				if(ol != null && bb == null)
+					ol.remove();
+				else if(ol == null && bb != null)
+					this.addol(new Overlay(this, new GobBoundingBox(this, bb), 1339));
+			}
 			if(Config.growthStages.val) {
 				if(resname.startsWith("gfx/terobjs/bushes") || (resname.startsWith("gfx/terobjs/trees") && !resname.endsWith("log") && !resname.endsWith("oldtrunk"))) {
 					ResDrawable rd = Gob.this.getattr(ResDrawable.class);

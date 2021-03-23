@@ -1040,28 +1040,62 @@ public class Resource implements Serializable {
     }
 
     @LayerName("neg")
-    public class Neg extends Layer {
-	public Coord cc;
-	public Coord[][] ep;
-		
-	public Neg(Message buf) {
-	    cc = cdec(buf);
-	    buf.skip(12);
-	    ep = new Coord[8][0];
-	    int en = buf.uint8();
-	    for(int i = 0; i < en; i++) {
-		int epid = buf.uint8();
-		int cn = buf.uint16();
-		ep[epid] = new Coord[cn];
-		for(int o = 0; o < cn; o++)
-		    ep[epid][o] = cdec(buf);
-	    }
-	}
-		
-	public void init() {}
-    }
+	public class Neg extends Layer {
+		public Coord cc;
+		public Coord ac, bc;
+		public Coord[][] ep;
 
-    @LayerName("anim")
+		public Neg(Message buf) {
+			cc = cdec(buf);
+			ac = cdec(buf);
+			bc = cdec(buf);
+
+			buf.skip(4);
+			ep = new Coord[8][0];
+			int en = buf.uint8();
+			for(int i = 0; i < en; i++) {
+				int epid = buf.uint8();
+				int cn = buf.uint16();
+				ep[epid] = new Coord[cn];
+				for(int o = 0; o < cn; o++)
+					ep[epid][o] = cdec(buf);
+			}
+		}
+
+		public void init() {}
+	}
+
+	@LayerName("obst")
+	public class Obst extends Layer {
+		public int vc;
+		public ArrayList<Coord2d>[] vertices;
+		public String id;
+
+		public Obst(Message buf) {
+			int ver = buf.uint8();
+			if(ver >= 2) {
+				id = buf.string();
+			}
+			int pNum = buf.uint8();
+			int[] verticeNum = new int[pNum];
+			vertices = new ArrayList[pNum];
+			for(int i=0; i<pNum; i++) {
+				verticeNum[i] = buf.uint8();
+				vertices[i] = new ArrayList<>(verticeNum[i]);
+			}
+			for(int i=0; i<pNum; i++) {
+				for(int j=0; j<verticeNum[i]; j++) {
+					vertices[i].add(new Coord2d(buf.float16() * 11.0, buf.float16() * 11.0));
+				}
+				vc += verticeNum[i];
+			}
+		}
+
+		public void init() {}
+	}
+
+
+	@LayerName("anim")
     public class Anim extends Layer {
 	private int[] ids;
 	public int id, d;
