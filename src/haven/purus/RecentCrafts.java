@@ -141,6 +141,8 @@ public class RecentCrafts extends Widget {
 		if(slot != -1 && slot < recent.size()) {
 			if(button == 1) {
 				gameui().menu.wdgmsg("act", (Object[]) recent.get(slot).p.act().ad);
+				if((recent.get(slot).p.act().ad[0].equals("craft")))
+					gameui().makewnd.setLastAction(recent.get(slot).p);
 			}
 			return(true);
 		} else {
