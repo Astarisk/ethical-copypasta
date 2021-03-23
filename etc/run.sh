@@ -1,2 +1,2 @@
 #!/bin/bash
-java -Djogl.disable.opengles=true -Xss1024k -Xms1G -Xmx2G -jar hafen.jar -U https://game.havenandhearth.com/res/ game.havenandhearth.com
+java -Djogl.disable.opengles=true -Xms2G -Xmx2G -XX:+UseZGC -jar hafen.jar -U https://game.havenandhearth.com/res/ game.havenandhearth.com
