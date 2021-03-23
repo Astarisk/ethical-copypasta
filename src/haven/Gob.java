@@ -593,7 +593,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 			if(res == null)
 				return;
 			String resname = res.name;
-			if(Config.bbDisplay.val) {
+			if(Config.bbDisplayState.val > 0) {
 				BoundingBox bb = BoundingBox.getBoundingBox(this);
 				Overlay ol = this.findol(1339);
 				if(ol != null && bb == null)

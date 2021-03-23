@@ -1291,10 +1291,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 			msg("Toggled resinfo on shift/shift + ctrl hover " + (haven.purus.Config.resinfo.val ? "on" : "off"));
 			return true;
 		} else if(haven.purus.Config.kb_bbtoggle.key().match(ev)) {
-			haven.purus.Config.bbDisplay.setVal(!haven.purus.Config.bbDisplay.val);
-			if(!haven.purus.Config.bbDisplay.val) {
-				map.removeCustomSprites(1339);
-			}
+			haven.purus.Config.bbDisplayState.setVal((haven.purus.Config.bbDisplayState.val+1)%3);
+				msg("Toggled boundingboxes " + (haven.purus.Config.bbDisplayState.val == 0 ? "off" : (haven.purus.Config.bbDisplayState.val == 1 ? "on state 1" : "on state 2")));
+
+			map.removeCustomSprites(1339);
 			map.refreshGobsAll();
 			return true;
 		}

@@ -39,7 +39,12 @@ public class GobBoundingBox extends Sprite implements RenderTree.Node {
 	}
 
 	public void added(RenderTree.Slot slot) {
-		slot.ostate(Pipe.Op.compose(Rendered.postpfx, emat));
+		if(Config.bbDisplayState.val == 1) {
+			slot.ostate(Pipe.Op.compose(emat));
+		} else if(Config.bbDisplayState.val == 2) {
+			slot.ostate(Pipe.Op.compose(new States.Depthtest(States.Depthtest.Test.TRUE), Rendered.last,emat));
+
+		}
 		slot.add(emod);
 	}
 }
