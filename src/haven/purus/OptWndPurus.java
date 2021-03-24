@@ -277,6 +277,16 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, "Write resource source codes in debug directory"));
 
+
+		debugSettings.addSubentry(new Entry(new CheckBox("Print wdgmsg to console"){
+			{a = Config.debugWdgmsg.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.debugWdgmsg.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Print wdgmsg to console"));
+
 		Entry mapSettings = new Entry(new Label("Map Settings"), "Map Settings");
 		((Label)mapSettings.w).setcolor(Color.ORANGE);
 

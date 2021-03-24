@@ -31,7 +31,9 @@ import haven.purus.MultiSession;
 import haven.purus.RecentCrafts;
 import haven.purus.StatusWdg;
 import haven.purus.mapper.Mapper;
+import haven.purus.pbot.PBotWindow;
 
+import java.io.File;
 import java.util.*;
 import java.util.function.*;
 import java.awt.Color;
@@ -80,6 +82,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public Bufflist buffs;
     public StatusWdg statuswdg;
     public RecentCrafts recentCrafts;
+	public PBotWindow pBotWindow;
 
     private static final OwnerContext.ClassResolver<BeltSlot> beltctxr = new OwnerContext.ClassResolver<BeltSlot>()
 	.add(Glob.class, slot -> slot.wdg().ui.sess.glob)
@@ -108,6 +111,34 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	public <T> T context(Class<T> cl) {return(beltctxr.context(cl, this));}
 	private GameUI wdg() {return(GameUI.this);}
     }
+
+    public class PBotBeltSlot extends BeltSlot {
+
+    	private PBotWindow.PBotScriptEntry scriptEntry;
+
+		public PBotBeltSlot(int idx, String path) {
+			super(idx, null, null);
+			File scriptFile = new File(path);
+			if(scriptFile.exists())
+				this.scriptEntry = new PBotWindow.PBotScriptEntry(scriptFile);
+		}
+
+		private GSprite spr = null;
+		@Override
+		public GSprite spr() {
+			GSprite ret = this.spr;
+			if(ret == null)
+				ret = this.spr = GSprite.create(this, res.get(), Message.nil);
+			return(ret);
+		}
+		@Override
+		public Resource getres() {return(res.get());}
+		@Override
+		public Random mkrandoom() {return(new Random(System.identityHashCode(this)));}
+		@Override
+		public <T> T context(Class<T> cl) {return(beltctxr.context(cl, this));}
+		private GameUI wdg() {return(GameUI.this);}
+	}
 
     public abstract class Belt extends Widget {
 	public Belt(Coord sz) {
@@ -215,6 +246,13 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		add(ui.sess.glob.timewdg, Coord.z);
 		makewnd = add(new CraftWindow(), UI.scale(400, 200));
 		makewnd.hide();
+		for(int i=0; i<belt.length; i++) {
+			String path = new haven.purus.Config.Setting<String>("beltscript_" + ui.sess.username + "_" + i, "").val;
+			PBotBeltSlot bs = new PBotBeltSlot(i, path);
+			if(path.length() > 0 && bs.scriptEntry != null)
+				belt[i] = bs;
+
+		}
     }
 
     protected void attached() {
@@ -386,6 +424,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		ui.root.multiSessionWindow.destroy();
 		ui.root.multiSessionWindow = add(new MultiSession.MultiSessionWindow());
 		add(new FKeyBelt());
+		pBotWindow = add(new PBotWindow());
+		pBotWindow.hide();
 		this.recentCrafts = add(new RecentCrafts());
 	}
 
@@ -1040,7 +1080,19 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 			buffs.addchild(new BuffToggle(resname, Resource.remote().loadwait(resname)));
 	}
 
-    public void uimsg(String msg, Object... args) {
+	@Override
+	public void wdgmsg(String msg, Object... args) {
+		if(msg == "belt") {
+			int slot = (Integer) args[0];
+			if(belt[slot] != null && belt[slot] instanceof GameUI.PBotBeltSlot) {
+				pBotWindow.useEntry(((GameUI.PBotBeltSlot) belt[slot]).scriptEntry);
+				return;
+			}
+		}
+		super.wdgmsg(msg, args);
+	}
+
+	public void uimsg(String msg, Object... args) {
 	if(msg == "err") {
 	    String err = (String)args[0];
 	    error(err);
@@ -1069,16 +1121,18 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    else
 		prog = -1;
 	} else if(msg == "setbelt") {
-	    int slot = (Integer)args[0];
-	    if(args.length < 2) {
-		belt[slot] = null;
-	    } else {
-		Indir<Resource> res = ui.sess.getres((Integer)args[1]);
-		Message sdt = Message.nil;
-		if(args.length > 2)
-		    sdt = new MessageBuf((byte[])args[2]);
-		belt[slot] = new BeltSlot(slot, res, sdt);
-	    }
+		int slot = (Integer) args[0];
+		if(belt[slot] != null && belt[slot] instanceof PBotBeltSlot)
+			return;
+		if(args.length < 2) {
+			belt[slot] = null;
+		} else {
+			Indir<Resource> res = ui.sess.getres((Integer) args[1]);
+			Message sdt = Message.nil;
+			if(args.length > 2)
+				sdt = new MessageBuf((byte[]) args[2]);
+			belt[slot] = new BeltSlot(slot, res, sdt);
+		}
 	} else if(msg == "polowner") {
 	    int id = (Integer)args[0];
 	    String o = (String)args[1];
@@ -1302,6 +1356,20 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 			map.refreshGobsAll();
 			return true;
 		}
+    	for(String s : haven.purus.Config.scriptsKeybinded.val) {
+    		KeyBinding kb = PBotWindow.getKeybinding(s);
+    		if(kb.key().match(ev)) {
+				File scriptFile = new File(s);
+				if(scriptFile.exists()) {
+					pBotWindow.useEntry(new PBotWindow.PBotScriptEntry(scriptFile));
+				} else {
+					msg("Couldn't find script at path" + s + " for keybind, removed keybinding", Color.YELLOW);
+					haven.purus.Config.scriptsKeybinded.val.remove(s);
+					haven.purus.Config.scriptsKeybinded.setVal(haven.purus.Config.scriptsKeybinded.val);
+				}
+				return true;
+			}
+		}
 	if(key == ':') {
 	    entercmd();
 	    return(true);
@@ -1480,8 +1548,13 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		Coord c = beltc(i);
 		g.image(invsq, beltc(i));
 		try {
-		    if(belt[slot] != null)
-			belt[slot].spr().draw(g.reclip(c.add(UI.scale(1), UI.scale(1)), invsq.sz().sub(UI.scale(2), UI.scale(2))));
+		    if(belt[slot] != null) {
+		    	if(belt[slot] instanceof PBotBeltSlot)
+		    		g.image(((PBotBeltSlot) belt[slot]).scriptEntry.icon, c, invsq.sz().sub(UI.scale(2), UI.scale(2)));
+		    	else
+					belt[slot].spr().draw(g.reclip(c.add(UI.scale(1), UI.scale(1)), invsq.sz().sub(UI.scale(2), UI.scale(2))));
+
+			}
 		} catch(Loading e) {}
 		g.chcolor(156, 180, 158, 255);
 		FastText.aprintf(g, c.add(invsq.sz().sub(UI.scale(2), 0)), 1, 1, "F%d", i + 1);
@@ -1537,10 +1610,17 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		}
 	    int slot = beltslot(c);
 	    if(slot != -1 && belt[slot] != null) {
-		if(button == 1)
-		    GameUI.this.wdgmsg("belt", slot, 1, ui.modflags());
-		if(button == 3)
-		    GameUI.this.wdgmsg("setbelt", slot, 1);
+		if(button == 1) {
+			GameUI.this.wdgmsg("belt", slot, 1, ui.modflags());
+		}
+		if(button == 3) {
+			if(belt[slot] != null && belt[slot] instanceof PBotBeltSlot) {
+				new haven.purus.Config.Setting<String>("beltscript_" + ui.sess.username + "_" + slot, "").setVal("");
+				belt[slot] = null;
+			} else {
+				GameUI.this.wdgmsg("setbelt", slot, 1);
+			}
+		}
 		return(true);
 	    } else {
 			if(button == 1) {
@@ -1589,6 +1669,9 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 			GameUI.this.wdgmsg("setbelt", slot, res.name);
 			return(true);
 		    }
+		} else if(thing instanceof PBotWindow.PBotScriptEntry) {
+			belt[slot] = new PBotBeltSlot(slot, ((PBotWindow.PBotScriptEntry) thing).scriptFile.getPath());
+			new haven.purus.Config.Setting<String>("beltscript_" + ui.sess.username + "_" + slot, "").setVal(((PBotWindow.PBotScriptEntry) thing).scriptFile.getPath());
 		}
 	    }
 	    return(false);

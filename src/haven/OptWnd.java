@@ -337,7 +337,7 @@ public class OptWnd extends BetterWindow {
 	}
     }
 
-    private static final Text kbtt = RichText.render("$col[255,255,0]{Escape}: Cancel input\n" +
+    public static final Text kbtt = RichText.render("$col[255,255,0]{Escape}: Cancel input\n" +
 						     "$col[255,255,0]{Backspace}: Revert to default\n" +
 						     "$col[255,255,0]{Delete}: Disable keybinding", 0);
     public class BindingPanel extends Panel {

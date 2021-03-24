@@ -28,6 +28,7 @@ package haven;
 
 import haven.purus.MultiSession;
 import haven.purus.alarms.AlarmManager;
+import haven.purus.pbot.Py4j;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -532,6 +533,7 @@ public class MainFrame extends java.awt.Frame implements Console.Directory {
     public static void main(final String[] args) {
 	/* Set up the error handler as early as humanly possible. */
 	ThreadGroup g = new ThreadGroup("Haven main group");
+	Py4j.start();
 	String ed;
 	if(!(ed = Utils.getprop("haven.errorurl", "")).equals("")) {
 	    try {

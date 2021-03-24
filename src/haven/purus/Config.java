@@ -5,6 +5,7 @@ import haven.KeyMatch;
 
 import java.awt.event.KeyEvent;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.prefs.Preferences;
 
@@ -79,6 +80,7 @@ public class Config {
 	public static Setting<Boolean> toggleSiege = new Setting<>("toggleSiege", true);
 	public static Setting<Boolean> hwcursor = new Setting<>("hwcursor", true);
 	public static Setting<Boolean> debugRescode = new Setting<>("debugRescode", false);
+	public static Setting<Boolean> debugWdgmsg = new Setting<>("debugWdgmsg", false);
 	public static Setting<Boolean> displayQuality = new Setting<>("displayQuality", true);
 	public static Setting<Float> cameraScrollSensitivity = new Setting<>("cameraScrollSensitivity", 1.0f);
 	public static Setting<Boolean> tileGrid = new Setting<>("tileGrid", false);
@@ -100,7 +102,7 @@ public class Config {
 
 	public static Setting<Boolean> resinfo = new Setting<>("resinfo", false);
 
-
+	public static Setting<ArrayList<String>> scriptsKeybinded = new Setting<>("scriptsKeybinded", new ArrayList<>());
 
 	public static KeyBinding kb_growthStages = KeyBinding.get("kb_growthStages", KeyMatch.forcode(KeyEvent.VK_P, KeyMatch.C));
 	public static KeyBinding kb_resinfo = KeyBinding.get("kb_resinfo", KeyMatch.forcode(KeyEvent.VK_I, KeyMatch.S));

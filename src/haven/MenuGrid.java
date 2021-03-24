@@ -275,7 +275,15 @@ public class MenuGrid extends Widget implements KeyBinding.Bindable {
 	super(bgsz.mul(gsz).add(UI.scale(1), UI.scale(1)));
     }
 
-    private void updlayout() {
+	@Override
+	protected void attach(UI ui) {
+		super.attach(ui);
+		synchronized(paginae) {
+			paginae.add(paginafor(Resource.local().load("paginae/purus/PBotMenu")));
+		}
+	}
+
+	private void updlayout() {
 	synchronized(paginae) {
 	    List<PagButton> cur = new ArrayList<>();
 	    recons = !cons(this.cur, cur);
@@ -431,6 +439,11 @@ public class MenuGrid extends Widget implements KeyBinding.Bindable {
 		Resource.AButton act = r.pag.act();
 		if(act != null) {
 			String[] ad = r.pag.act().ad;
+			if(ad[0].equals("@") && ad.length == 2 && ad[1].equals("PBotList")) {
+				gameui().pBotWindow.show(!gameui().pBotWindow.visible);
+				gameui().pBotWindow.raise();
+				return;
+			}
 			if (ad.length > 0 && (ad[0].equals("craft") || ad[0].equals("bp"))) {
 				gameui().recentCrafts.push(r.pag);
 				if((ad[0].equals("craft")))

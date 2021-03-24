@@ -35,7 +35,7 @@ public class KeyBinding {
     public final int modign;
     public KeyMatch key;
 
-    private KeyBinding(String id, KeyMatch defkey, int modign) {
+    public KeyBinding(String id, KeyMatch defkey, int modign) {
 	this.id = id;
 	this.defkey = defkey;
 	this.modign = modign;

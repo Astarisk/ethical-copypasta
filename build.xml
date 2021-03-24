@@ -28,7 +28,9 @@
 	<pathelement path="lib/jnlp.jar" />
 	<pathelement path="lib/jglob.jar" />
 	<pathelement path="lib/json.jar" />
-      </classpath>
+	<pathelement path="lib/py4j-0.10.9.2.jar" />
+
+	  </classpath>
       <compilerarg value="-Xlint:unchecked" />
       <compilerarg value="-Xlint:-options" />
       <!-- <compilerarg value="-Xbarda" /> -->
@@ -60,7 +62,7 @@
       <fileset dir="build/classes-lib" />
       <manifest>
 	<attribute name="Main-Class" value="haven.MainFrame" />
-	<attribute name="Class-Path" value="lib/json.jar lib/sqlite-jdbc-3.32.3.2.jar lib/jogl.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar lib/pasta-res.jar" />
+	<attribute name="Class-Path" value="lib/py4j-0.10.9.2.jar lib/json.jar lib/sqlite-jdbc-3.32.3.2.jar lib/jogl.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar lib/pasta-res.jar" />
       </manifest>
     </jar>
     <chmod file="build/hafen.jar" perm="a+x" />
@@ -96,7 +98,14 @@
 		<copy todir="build" file="customAlarms/defaultAlarms"/>
 	</target>
 
-  <target name="jars" depends="build-env, jar, res-jar, custom-jar, alarms">
+	<target name="scripts" depends="build-env">
+		<mkdir dir="build/scripts"/>
+		<copy todir="build/scripts">
+			<fileset dir="scripts/" includes="**" excludes="**/__pycache__/"/>
+		</copy>
+	</target>
+
+  <target name="jars" depends="build-env, jar, res-jar, custom-jar, alarms, scripts">
     <copy todir="build/lib">
       <fileset dir="lib">
 	<include name="jogl.jar" />
@@ -104,6 +113,7 @@
 	<include name="hafen-res.jar" />
 	<include name="builtin-res.jar" />
 	<include name="sqlite-jdbc-3.32.3.2.jar" />
+	<include name="py4j-0.10.9.2.jar" />
 	<include name="json.jar" />
       </fileset>
       <fileset dir="lib/jogl-natives" />
@@ -124,7 +134,7 @@
 	<target name="dist" depends="jars">
 		<zip destfile="build/dist.zip" update="true">
 			<fileset dir="build" includes="*hafen.jar, defaultAlarms, alarms/*"/>
-			<zipfileset dir="build/lib" includes="json.jar sqlite-jdbc-3.32.3.2.jar pasta-res.jar alarms" prefix="lib/"/>
+			<zipfileset dir="build/lib" includes="py4j-0.10.9.2.jar json.jar sqlite-jdbc-3.32.3.2.jar pasta-res.jar alarms" prefix="lib/"/>
 		</zip>
 	</target>
   
