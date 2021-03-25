@@ -81,6 +81,7 @@ public class Equipory extends Widget implements DTarget {
     Map<GItem, Collection<WItem>> wmap = new HashMap<>();
     private final Avaview ava;
 	private boolean beltOpened = false;
+	public GItem[] slots = new GItem[ecoords.length];
 
     @RName("epry")
     public static class $_ implements Factory {
@@ -139,6 +140,7 @@ public class Equipory extends Widget implements DTarget {
 				gameui().hatname = g.res.get().name;
 			} catch(Loading l) {}
 		}
+		slots[ep] = g;
 		if(ep < ecoords.length)
 		    v.add(add(new WItem(g), ecoords[ep].add(1, 1)));
 	    }
@@ -152,7 +154,12 @@ public class Equipory extends Widget implements DTarget {
     public void cdestroy(Widget w) {
 	super.cdestroy(w);
 	if(w instanceof GItem) {
-	    GItem i = (GItem)w;
+		for(int i=0; i<slots.length; i++) {
+			if(slots[i] == w) {
+				slots[i] = null;
+			}
+		}
+		GItem i = (GItem)w;
 	    for(WItem v : wmap.remove(i))
 		ui.destroy(v);
 	}

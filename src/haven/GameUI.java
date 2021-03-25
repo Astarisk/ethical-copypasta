@@ -55,7 +55,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     private List<Widget> meters = new LinkedList<Widget>();
     private Text lastmsg;
     private double msgtime;
-    private Window invwnd, equwnd, srchwnd, iconwnd;
+    public Window invwnd, equwnd, srchwnd, iconwnd;
     public CraftWindow makewnd;
     private Coord makewndc = Utils.getprefc("makewndc", new Coord(400, 200));
     public Inventory maininv;
@@ -81,6 +81,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public RecentCrafts recentCrafts;
 	public PBotWindow pBotWindow;
 	public BetterBelt betterBelt;
+	public HandsWdg handsWdg;
 
     private static final OwnerContext.ClassResolver<BeltSlot> beltctxr = new OwnerContext.ClassResolver<BeltSlot>()
 	.add(Glob.class, slot -> slot.wdg().ui.sess.glob)
@@ -425,6 +426,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		pBotWindow = add(new PBotWindow());
 		pBotWindow.hide();
 		this.recentCrafts = add(new RecentCrafts());
+		handsWdg = add(new HandsWdg());
 	}
 
     public void dispose() {
