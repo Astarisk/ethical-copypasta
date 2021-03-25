@@ -78,6 +78,7 @@ public class Equipory extends Widget implements DTarget {
     }
     Map<GItem, Collection<WItem>> wmap = new HashMap<>();
     private final Avaview ava;
+	private boolean beltOpened = false;
 
     @RName("epry")
     public static class $_ implements Factory {
@@ -176,7 +177,25 @@ public class Equipory extends Widget implements DTarget {
 	return(true);
     }
 
-    public void drawslots(GOut g) {
+	@Override
+	public void tick(double dt) {
+		if (!beltOpened && gameui().betterBelt == null && ((Window) parent).cap.text.equals("Equipment")) {
+			for (Collection<WItem> itm : wmap.values()) {
+				try {
+					for(WItem wItem : itm) {
+						if (wItem.item.res.get().name.endsWith("belt")) {
+							wItem.mousedown(Coord.z, 3);
+							beltOpened = true;
+						}
+					}
+				} catch (Loading l) {
+				}
+			}
+		}
+		super.tick(dt);
+	}
+
+	public void drawslots(GOut g) {
 	int slots = 0;
 	GameUI gui = getparent(GameUI.class);
 	if((gui != null) && (gui.vhand != null)) {

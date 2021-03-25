@@ -26,6 +26,7 @@
 
 package haven;
 
+import haven.purus.BetterBelt;
 import haven.purus.BetterWindow;
 import haven.res.ui.tt.wear.Wear;
 import haven.resutil.Curiosity;
@@ -97,7 +98,7 @@ public class Window extends Widget implements DTarget {
 	    String cap = (args.length > 1) ? (String)args[1] : null;
 	    boolean lg = (args.length > 2) ? ((Integer)args[2] != 0) : false;
 		if(cap != null && cap.equals("Belt"))
-			return new BetterWindow(sz, cap, lg, Coord.z, Coord.z);
+			return new BetterBelt(sz, cap, lg, Coord.z, Coord.z);
 	    return(new Window(sz, cap, lg, Coord.z, Coord.z));
 	}
     }

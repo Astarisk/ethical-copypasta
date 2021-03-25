@@ -26,10 +26,7 @@
 
 package haven;
 
-import haven.purus.BetterWindow;
-import haven.purus.MultiSession;
-import haven.purus.RecentCrafts;
-import haven.purus.StatusWdg;
+import haven.purus.*;
 import haven.purus.mapper.Mapper;
 import haven.purus.pbot.PBotWindow;
 
@@ -83,6 +80,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public StatusWdg statuswdg;
     public RecentCrafts recentCrafts;
 	public PBotWindow pBotWindow;
+	public BetterBelt betterBelt;
 
     private static final OwnerContext.ClassResolver<BeltSlot> beltctxr = new OwnerContext.ClassResolver<BeltSlot>()
 	.add(Glob.class, slot -> slot.wdg().ui.sess.glob)

@@ -219,7 +219,10 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 
 	public WItem witem() {
     	try {
-			return ((Inventory) this.parent).wmap.get(this);
+    		if(this.parent instanceof Inventory)
+				return ((Inventory) this.parent).wmap.get(this);
+    		else
+				return ((Equipory) this.parent).wmap.get(this).stream().findFirst().get();
 		} catch(NullPointerException e) {
     		return null;
 		}
