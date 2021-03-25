@@ -42,6 +42,7 @@ public class Composite extends Drawable {
     public List<MD> nmod;
     public List<ED> nequ;
     private Collection<ResData> nposes = null, tposes = null;
+    public Collection<ResData> prevposes;
     private boolean nposesold, retainequ = false;
     private float tptime;
     private WrapMode tpmode;
@@ -119,6 +120,7 @@ public class Composite extends Drawable {
 			}
 			if(gob.knocked == Gob.Knocked.UNKNOWN)
 				gob.knocked = Gob.Knocked.FALSE;
+			prevposes = nposes;
 		nposes = null;
 		updequ();
 	    } catch(Loading e) {}

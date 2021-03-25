@@ -1,0 +1,120 @@
+package haven.purus.pbot.api;
+
+import haven.*;
+
+import java.util.List;
+
+public class PBotCharacterAPI {
+
+	private PBotSession pBotSession;
+
+	PBotCharacterAPI(PBotSession pBotSession) {
+		this.pBotSession = pBotSession;
+	}
+
+	/**
+	 * Get the player stamina
+	 * @return Returns 0-100
+	 */
+	public double getStamina() {
+		return (int) (100 * pBotSession.gui.getmeter("stam", 0).a);
+	}
+
+	/**
+	 * Get the player energy
+	 * @return Returns 0-100
+	 */
+	public int getEnergy() {
+		return (int) (100 * pBotSession.gui.getmeter("nrj", 0).a);
+	}
+
+	/**
+	 * Get the player hp
+	 * @return Returns 0-100
+	 */
+	public int getHp() {
+		return (int) (100 * pBotSession.gui.getmeter("hp", 0).a);
+	}
+
+	/**
+	 * Send act message to server
+	 * Act can be used for example to choose a cursor
+	 * Some acts:
+	 * dig, mine, carry, destroy, fish, inspect, repair, crime, swim, tracking, aggro, shoot
+	 * @param act Act(s) to choose
+	 */
+	public void doAct(List<String> act) {
+		pBotSession.gui.menu.wdgmsg("act", act.toArray());
+	}
+
+	/**
+	 * Cancels the current act by clicking
+	 */
+	public void cancelAct() {
+		pBotSession.gui.map.wdgmsg("click", Coord.z, Coord.z, 3, 0);
+	}
+
+	/**
+	 * Log out to character selection
+	 */
+	public void logoutChar() {
+		pBotSession.gui.act("lo", "cs");
+	}
+
+
+	/**
+	 * Log in with a character from character login menu
+	 * @param charname Name of the character
+	 */
+	public void loginChar(String charname) {
+		// TODO
+	}
+
+	/**
+	 * Set player speed setting
+	 * @param speed 1 = crawl, 2 = walk, 3 = run, 4 = sprint
+	 */
+	public void setSpeed(int speed) {
+		Speedget sg = (Speedget) pBotSession.gui.ulpanel.getchild(Speedget.class);
+		if(sg != null)
+			sg.SpeedToSet = speed;
+	}
+
+	/**
+	 * Get current speed setting of player
+	 * @return 1 = crawl, 2 = walk, 3 = run, 4 = sprint
+	 */
+	public int getSpeed() {
+		Speedget sg = (Speedget) pBotSession.gui.ulpanel.getchild(Speedget.class);
+		if(sg != null)
+			return sg.cur;
+		return -1;
+	}
+
+	/**
+	 * Get maximum speed setting that player can be set to
+	 * @return 1 = crawl, 2 = walk, 3 = run, 4 = sprint
+	 */
+	public  int getMaxSpeed() {
+		Speedget sg = (Speedget) pBotSession.gui.ulpanel.getchild(Speedget.class);
+		if(sg != null)
+			return sg.max;
+		return -1;
+	}
+
+	/**
+	 * Send message to given chat
+	 * @param chatName Name of the chat, for example "Area Chat"
+	 * @param msg Message to send into the chat
+	 */
+	public void msgToChat(String chatName, String msg) {
+		for(Widget w = pBotSession.gui.chat.lchild; w != null; w = w.prev) {
+			if(w instanceof ChatUI.EntryChannel) {
+				ChatUI.EntryChannel cht = (ChatUI.EntryChannel) w;
+				if(cht.name().equals(chatName))
+					cht.send(msg);
+			}
+		}
+	}
+
+}

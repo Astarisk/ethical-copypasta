@@ -892,4 +892,17 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	public TickList.Ticking ticker() {return(this);}
     }
     public final Placed placed = new Placed();
+
+	public LinMove getLinMove() {
+		LinMove lm = getattr(LinMove.class);
+		if (lm != null)
+			return lm;
+
+		Following follow = getattr(Following.class);
+		if (follow != null)
+			return follow.tgt().getattr(LinMove.class);
+
+		return null;
+	}
+
 }

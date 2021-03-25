@@ -25,11 +25,15 @@ public class PBotGobAPI {
 		Pattern pat = Pattern.compile(resname);
 		synchronized(pBotSession.gui.ui.sess.glob.oc) {
 			for(Gob gob : pBotSession.gui.ui.sess.glob.oc) {
-				try {
-					Resource res = gob.getres();
+				Resource res;
+				while(true) {
+					try {
+						res = gob.getres();
+						break;
+					} catch(Loading l){PBotUtils.sleep(10);}
+				}
 					if(res != null && pat.matcher(res.name).matches())
 						gobs.add(new PBotGob(gob, pBotSession));
-				} catch(Loading l){}
 			}
 		}
 		return gobs;
@@ -50,14 +54,18 @@ public class PBotGobAPI {
 		Pattern pat = Pattern.compile(resname);
 		synchronized(pBotSession.gui.ui.sess.glob.oc) {
 			for(Gob gob : pBotSession.gui.ui.sess.glob.oc) {
-				try {
-					Resource res = gob.getres();
-					PBotGob pgob = new PBotGob(gob, pBotSession);
+				Resource res;
+				while(true) {
+					try {
+						res = gob.getres();
+						break;
+					} catch(Loading l){PBotUtils.sleep(10);}
+				}
+				PBotGob pgob = new PBotGob(gob, pBotSession);
 					if(res != null && pat.matcher(res.name).matches() && pgob.dist(getPlayer()) < bestDistance) {
 						bestDistance = pgob.dist(getPlayer());
 						bestGob = pgob;
 					}
-				} catch(Loading l){}
 			}
 		}
 		return bestGob;

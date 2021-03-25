@@ -16,5 +16,5 @@ class PBotRunner(object):
         implements = ["haven.purus.pbot.Py4j.PBotScriptLoader"]
 gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(),
                       python_server_entry_point=PBotRunner,
-                      gateway_parameters=GatewayParameters(auto_field=True))
+                      gateway_parameters=GatewayParameters(auto_field=True, auto_convert=True))
 print("0")

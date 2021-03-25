@@ -43,4 +43,16 @@ public class PBotUtils {
 		return getFlowermenu(Long.MAX_VALUE);
 	}
 
+	/**
+	 * Wait for the given time
+	 * @param time time in milliseconds
+	 */
+	public static void sleep(int time) {
+		try {
+			Thread.sleep(time);
+		} catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 }
