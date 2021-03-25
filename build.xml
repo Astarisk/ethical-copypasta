@@ -133,7 +133,7 @@
 
 	<target name="dist" depends="jars">
 		<zip destfile="build/dist.zip" update="true">
-			<fileset dir="build" includes="*hafen.jar, defaultAlarms, alarms/*"/>
+			<fileset dir="build" includes="*hafen.jar, defaultAlarms, alarms/*, scripts/**"/>
 			<zipfileset dir="build/lib" includes="py4j-0.10.9.2.jar json.jar sqlite-jdbc-3.32.3.2.jar pasta-res.jar alarms" prefix="lib/"/>
 		</zip>
 	</target>
