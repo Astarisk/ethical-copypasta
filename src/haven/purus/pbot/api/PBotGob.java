@@ -25,8 +25,9 @@ public class PBotGob {
 	}
 
 	/**
+	 * Euclidean distance between this and target gob
 	 * @param gob target
-	 * @return Euclidean distance between this and target gob
+	 * @return the distance
 	 */
 	public double dist(PBotGob gob) {
 		return gob.getCoords().dist(this.gob.rc);

@@ -36,6 +36,7 @@ public class PBotFlowerMenu {
 	}
 
 	/**
+	 * Get options of flowermenu
 	 * @return Names of the petal options
 	 */
 	public List<String> getPetalNames() {

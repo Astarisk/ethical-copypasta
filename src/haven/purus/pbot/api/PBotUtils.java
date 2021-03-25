@@ -18,7 +18,7 @@ public class PBotUtils {
 	}
 
 	/**
-	 * Waits until the flowermenu appears
+	 * Waits until the flowermenu appears with timeout
 	 * @param timeout Timeout to wait before returning null if menu is not opened
 	 * @return Flowermenu that was opened
 	 */

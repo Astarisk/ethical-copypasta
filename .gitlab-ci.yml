@@ -8,6 +8,7 @@ deploy:
   stage: deploy
   script:
     - ant dist
+    - rsync -r --delete build/doc/javadoc ${RSYNC_DEST}
     - unzip -o build/dist.zip -d build/update_temp/
     - cd build/update_temp
     - find -type f -exec sha1sum "{}" \; | sed 's/  / /g' | sed '/listing.txt/d' > listing.txt

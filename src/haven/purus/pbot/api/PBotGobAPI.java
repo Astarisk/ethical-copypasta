@@ -16,6 +16,7 @@ public class PBotGobAPI {
 	}
 
 	/**
+	 * Get gobs matching the specific regex pattern
 	 * @param resname regex pattern
 	 * @return List of PBotGobs with resname matching the given regex pattern
 	 */
@@ -39,6 +40,7 @@ public class PBotGobAPI {
 	}
 
 	/**
+	 * Get closest gob matching the specific regex pattern
 	 * @param resname regex pattern
 	 * @return Closest PBotGob from player with resname matching the given regex pattern
 	 */
