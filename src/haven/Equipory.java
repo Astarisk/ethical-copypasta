@@ -26,6 +26,8 @@
 
 package haven;
 
+import haven.purus.Config;
+
 import java.util.*;
 import static haven.Inventory.invsq;
 
@@ -179,7 +181,7 @@ public class Equipory extends Widget implements DTarget {
 
 	@Override
 	public void tick(double dt) {
-		if (!beltOpened && gameui().betterBelt == null && ((Window) parent).cap.text.equals("Equipment")) {
+		if (Config.beltShowLogin.val && !beltOpened && gameui().betterBelt == null && ((Window) parent).cap.text.equals("Equipment")) {
 			for (Collection<WItem> itm : wmap.values()) {
 				try {
 					for(WItem wItem : itm) {

@@ -91,6 +91,9 @@ public class Config {
 	public static Setting<String> mapperToken = new Setting<>("mapperToken", "");
 	public static Setting<Integer> bbDisplayState = new Setting<>("bbDisplayState", 0);
 	public static Setting<Boolean> ttfHighlight = new Setting<>("ttfHighlight", true);
+	public static Setting<Boolean> invShowLogin = new Setting<>("invShowLogin", true);
+	public static Setting<Boolean> beltShowLogin = new Setting<>("beltShowLogin", true);
+
 
 
 	public static Setting<ConcurrentHashMap<String, Boolean>> flowerOptOpens = new Setting<>("flowerOptOpens", new ConcurrentHashMap<>());

@@ -214,6 +214,24 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, ""));
 
+		uiSettings.addSubentry(new Entry(new CheckBox("Show inventory on login") {
+			{a = Config.invShowLogin.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.invShowLogin.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Show inventory on login"));
+
+		uiSettings.addSubentry(new Entry(new CheckBox("Show belt on login") {
+			{a = Config.beltShowLogin.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.beltShowLogin.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Show belt on login"));
+
 		Entry cameraSettings = new Entry(new Label("Camera settings"), "Camera settings");
 		((Label)cameraSettings.w).setcolor(Color.ORANGE);
 		el.root.addSubentry(cameraSettings);
