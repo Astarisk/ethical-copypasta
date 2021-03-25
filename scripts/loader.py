@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 from py4j.java_gateway import JavaGateway, CallbackServerParameters, GatewayParameters
 import importlib
 import threading

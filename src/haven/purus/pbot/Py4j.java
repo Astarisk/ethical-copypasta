@@ -18,7 +18,7 @@ public class Py4j {
 			ProcessBuilder pb;
 			if(System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("win")) {
 				new File("./bin/python/python.exe").setExecutable(true);
-				pb = new ProcessBuilder("./bin/python/python.exe", "scripts/loader.py");
+				pb = new ProcessBuilder(".\\bin\\python\\python.exe", ".\\scripts\\loader.py");
 			} else {
 				pb = new ProcessBuilder("python", "scripts/loader.py");
 			}
