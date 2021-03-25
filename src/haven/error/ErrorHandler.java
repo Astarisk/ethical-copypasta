@@ -26,6 +26,8 @@
 
 package haven.error;
 
+import io.sentry.Sentry;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -125,6 +127,14 @@ public class ErrorHandler extends ThreadGroup {
     
 	public void report(Thread th, Throwable t) {
 	    Report r = new Report(t);
+		Sentry.init(options -> {
+			options.setDsn("https://d3a350784ffa476ab87784c74c9f2f84@o361368.ingest.sentry.io/5692958");
+			options.setTag("Java", System.getProperty("java.runtime.version"));
+			options.setTag("OS", System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch"));
+			options.setTag("Thread class", th.getClass().getName());
+			options.setTag("Thread name", th.getName());
+		});
+		Sentry.captureException(t);
 	    r.props.putAll(props);
 	    r.props.put("thnm", th.getName());
 	    r.props.put("thcl", th.getClass().getName());

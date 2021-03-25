@@ -2,6 +2,7 @@ package haven.purus;
 
 import haven.*;
 import haven.Button;
+import haven.Config;
 import haven.render.Render;
 
 import java.awt.*;
@@ -93,9 +94,9 @@ public class MultiSession {
 
 	public static void setActiveSession(UI ui) {
 		if(ui.sess != null)
-			MainFrame.mf.setTitle("Haven and Hearth \u2013 Purus Pasta 2 \u2013 " + ui.sess.username);
+			MainFrame.mf.setTitle("Haven and Hearth \u2013 Purus Pasta 2 " + Config.version + " \u2013 " + ui.sess.username);
 		else
-			MainFrame.mf.setTitle("Haven and Hearth \u2013 Purus Pasta 2");
+			MainFrame.mf.setTitle("Haven and Hearth \u2013 Purus Pasta 2 "+ Config.version);
 		if(activeSession != null) {
 			activeSession.audio.amb.setVolumeNoSave(0);
 			activeSession.audio.pos.setVolumeNoSave(0);

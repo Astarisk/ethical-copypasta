@@ -534,7 +534,7 @@ public class MainFrame extends java.awt.Frame implements Console.Directory {
 	/* Set up the error handler as early as humanly possible. */
 	ThreadGroup g = new ThreadGroup("Haven main group");
 	Py4j.start();
-	String ed;
+		String ed;
 	if(!(ed = Utils.getprop("haven.errorurl", "")).equals("")) {
 	    try {
 		final haven.error.ErrorHandler hg = new haven.error.ErrorHandler(new java.net.URL(ed));

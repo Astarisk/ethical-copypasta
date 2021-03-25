@@ -26,12 +26,18 @@
 
 package haven;
 
+import haven.error.ErrorHandler;
+
+import java.io.InputStream;
 import java.net.URL;
 import java.io.PrintStream;
 import static haven.Utils.getprop;
 
 public class Config {
-    public static String authuser = getprop("haven.authuser", null);
+	public static String version;
+	public static String gitrev;
+
+	public static String authuser = getprop("haven.authuser", null);
     public static String authserv = getprop("haven.authserv", null);
     public static String defserv = getprop("haven.defserv", "127.0.0.1");
     public static String[] servargs = null;
@@ -188,5 +194,19 @@ public class Config {
 		    }
 		}
 	    });
-    }
+		try {
+			InputStream in = ErrorHandler.class.getResourceAsStream("/buildinfo");
+			try {
+				if (in != null) {
+					java.util.Scanner s = new java.util.Scanner(in);
+					String[] binfo = s.next().split(",");
+					version = binfo[0];
+					gitrev = binfo[1];
+				}
+			} finally {
+				in.close();
+			}
+		} catch (Exception e) {}
+
+	}
 }
