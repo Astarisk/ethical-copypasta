@@ -20,12 +20,6 @@ public class PBotWindow extends BetterWindow {
 	private static final Tex setKeyIcon = Resource.loadtex("hud/script/keyset");
 	public static final ConcurrentHashMap<String, KeyBinding> keyBindings = new ConcurrentHashMap<>();
 
-	{
-		keyBindings.put("scripts/pickherb.py", KeyBinding.get("kb_pbotscript_scripts/scripts/pickherb.py", KeyMatch.forchar('Q', 0)));
-		if(!Config.scriptsKeybinded.val.contains("scripts/pickherb.py"))
-			Config.scriptsKeybinded.val.add("scripts/pickherb.py");
-	}
-
 	private String curPath = "scripts";
 
 	private ArrayList<PBotScriptEntry> entries = new ArrayList<>();
