@@ -41,7 +41,7 @@ public class BoundingBox {
 		if (neg == null) {
 			for (RenderLink.Res link : res.layers(RenderLink.Res.class)) {
 				if (link.l instanceof  RenderLink.MeshMat && ((RenderLink.MeshMat)link.l).mesh != null) {
-					obst = ((RenderLink.MeshMat)link.l).mesh.get().layer(Resource.Obst.class);
+					neg = ((RenderLink.MeshMat)link.l).mesh.get().layer(Resource.Neg.class);
 					break;
 				}
 			}
