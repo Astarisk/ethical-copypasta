@@ -22,14 +22,19 @@ public class Pathfinder {
 		add("gfx/tiles/cave");
 	}};
 
+	private static void setGridTile(int x, int y, int markId, int[][] grid) {
+		if(x > 0 && y > 0 && x < 1100 && y < 1100)
+			grid[x][y] = markId;
+	}
+
 	// http://members.chello.at/~easyfilter/bresenham.html
 	private static void drawCircle(int xm, int ym, int r, int markId, int[][] grid) {
 		int x = -r, y = 0, err = 2-2*r;
 		do {
-			grid[xm-x][ym+y] = markId;
-			grid[xm-y][ym-x] = markId;
-			grid[xm+x][ym-y] = markId;
-			grid[xm+y][ym+x] = markId;
+			setGridTile(xm-x, ym+y, markId, grid);
+			setGridTile(xm-y, ym-x, markId, grid);
+			setGridTile(xm+x, ym-y, markId, grid);
+			setGridTile(xm+y, ym+x, markId, grid);
 			r = err;
 			if(r <= y) err += ++y*2+1;
 			if(r > x || err > y)
@@ -45,11 +50,11 @@ public class Pathfinder {
 		double ed = dx+dy == 0 ? 1 : Math.sqrt((double) dx * dx + (double) dy * dy);
 
 		for(wd = (wd+1)/2;;) {
-			grid[x0][y0] = markId;
+			setGridTile(x0, y0, markId, grid);
 			e2 = err; x2 = x0;
 			if(2*e2 >= -dx) {
 				for(e2 += dy, y2 = y0; e2 < ed*wd && (y1 != y2 || dx > dy); e2 += dx) {
-					grid[x0][y2 += sy] = markId;
+					setGridTile(x0, y2 += sy, markId, grid);
 				}
 				if(x0 == x1)
 					break;
@@ -57,7 +62,7 @@ public class Pathfinder {
 			}
 			if(2*e2 <= dy) {
 				for(e2 = dx-e2; e2 < ed*wd && (x1 != x2 || dx < dy); e2 += dy) {
-					grid[x2 += sx][y0] = markId;
+					setGridTile(x2 += sx, y0, markId, grid);
 				}
 				if(y0 == y1)
 					break;
@@ -93,9 +98,21 @@ public class Pathfinder {
 	}
 
 	private static void markPolygon(BoundingBox.Polygon pol, int markId, int[][] grid) {
-		Coord prev = pol.vertices.get(pol.vertices.size()-1).floor().add(50*11, 50*11);
+		Coord prev = pol.vertices.get(pol.vertices.size()-1).round().add(50*11, 50*11);
 		for(Coord2d vert: pol.vertices) {
 			Coord c  = vert.round().add(50*11, 50*11);
+			Coord2d nc = new Coord2d(c.sub(prev)).rotate(Math.PI/2);
+			nc = nc.div(nc.dist(Coord2d.z));
+			drawLine(new Coord2d(prev).add(nc).round().x, new Coord2d(prev).add(nc).round().y, new Coord2d(c).add(nc).round().x, new Coord2d(c).add(nc).round().y, 1.0, markId, grid);
+
+			nc = nc.mul(-1);
+			drawLine(new Coord2d(prev).add(nc).round().x, new Coord2d(prev).add(nc).round().y, new Coord2d(c).add(nc).round().x, new Coord2d(c).add(nc).round().y, 1.0, markId, grid);
+			nc = nc.mul(2);
+			drawLine(new Coord2d(prev).add(nc).round().x, new Coord2d(prev).add(nc).round().y, new Coord2d(c).add(nc).round().x, new Coord2d(c).add(nc).round().y, 1.0, markId, grid);
+
+			nc = nc.mul(-1);
+			drawLine(new Coord2d(prev).add(nc).round().x, new Coord2d(prev).add(nc).round().y, new Coord2d(c).add(nc).round().x, new Coord2d(c).add(nc).round().y, 1.0, markId, grid);
+
 			drawLine(prev.x, prev.y, c.x, c.y, 1.0, markId, grid);
 			prev = c;
 		}
@@ -107,7 +124,7 @@ public class Pathfinder {
 	}
 
 	private static void markPolygon2(BoundingBox.Polygon pol, int[][] grid) {
-		Coord prev = pol.vertices.get(pol.vertices.size()-1).floor().add(50*11, 50*11);
+		Coord prev = pol.vertices.get(pol.vertices.size()-1).round().add(50*11, 50*11);
 		for(Coord2d vert: pol.vertices) {
 			Coord c  = vert.round().add(50*11, 50*11);
 			drawCircle(c.x, c.y, 2, 0, grid);
@@ -149,7 +166,7 @@ public class Pathfinder {
 			int[][] grid = new int[100*11][100*11];
 			for(int i=-45; i<=45; i++) {
 				for(int j=-45; j<=45; j++) {
-					int t = gui.ui.sess.glob.map.gettile(origin.div(MCache.tilesz).floor().add(i, j));
+					int t = gui.ui.sess.glob.map.gettile(origin.div(MCache.tilesz).round().add(i, j));
 					while(true) {
 						try {
 							Resource res = gui.ui.sess.glob.map.tilesetr(t);
@@ -165,7 +182,7 @@ public class Pathfinder {
 			synchronized(gui.ui.sess.glob.oc) {
 				for(Gob gob : gui.ui.sess.glob.oc) {
 					BoundingBox bb = BoundingBox.getBoundingBox(gob);
-					if(bb == null)
+					if(bb == null || !bb.blocks)
 						continue;
 					if(gob == player || gob == destGob) {
 						continue;
@@ -207,9 +224,9 @@ public class Pathfinder {
 			}
 			Coord tgt;
 			if(destGob != null) {
-				tgt = destGob.rc.sub(origin).floor().add(50*11, 50*11);
+				tgt = destGob.rc.sub(origin).round().add(50*11, 50*11);
 			} else {
-				tgt = target.sub(origin).floor().add(50*11, 50*11);
+				tgt = target.sub(origin).round().add(50*11, 50*11);
 			}
 			PriorityQueue<Pair<Pair<Double, Double>, Coord>> q = new PriorityQueue<>((a, b) -> {
 				return Double.compare(a.a.a,b.a.a);

@@ -9,6 +9,7 @@ public class BoundingBox {
 
 	public final ArrayList<Polygon> polygons;
 	public int vertices = 0;
+	public boolean blocks = true;
 
 	private static Polygon acbcPol(Coord ac, Coord bc) {
 		ArrayList<Coord2d> vertices = new ArrayList<>();
@@ -21,11 +22,12 @@ public class BoundingBox {
 		return pol;
 	}
 
-	public BoundingBox(ArrayList<Polygon> polygons) {
+	public BoundingBox(ArrayList<Polygon> polygons, boolean blocks) {
 		this.polygons = polygons;
 		for(Polygon pol : polygons) {
 			vertices += pol.vertices.size();
 		}
+		this.blocks = blocks;
 	}
 
 	public static class Polygon {
@@ -37,6 +39,7 @@ public class BoundingBox {
 	}
 
 	public static BoundingBox getBoundingBox(Gob gob) {
+		boolean blocks = true;
 		Resource res;
 		while(true) {
 			try {
@@ -72,14 +75,16 @@ public class BoundingBox {
 				return null;
 			int state = ((ResDrawable) rd).sdt.peekrbuf(0);
 			if (state == 1)     // open gate
-				return null;
+				blocks = false;
 		} else if (res.name.endsWith("/pow")) {
 			GAttrib rd = gob.getattr(ResDrawable.class);
 			if (rd == null)     // shouldn't happen
 				return null;
 			int state = ((ResDrawable) rd).sdt.peekrbuf(0);
 			if (state == 17 || state == 33) // hf
-				return null;
+				blocks = false;
+		} else if(res.name.equals("gfx/terobjs/arch/cellardoor")) {
+			blocks = false;
 		}
 
 		if(obst != null) {
@@ -91,11 +96,11 @@ public class BoundingBox {
 				}
 				polygons.add(new Polygon(vertices));
 			}
-			return new BoundingBox(polygons);
+			return new BoundingBox(polygons, blocks);
 		} else if(neg != null) {
 			ArrayList<Polygon> polygons = new ArrayList<>();
 			polygons.add(acbcPol(neg.ac, neg.bc));
-			return new BoundingBox(polygons);
+			return new BoundingBox(polygons, blocks);
 		} else {
 			return null;
 		}
