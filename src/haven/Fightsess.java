@@ -206,6 +206,7 @@ public class Fightsess extends Widget {
 		g.chcolor(255, 0, 128, 224);
 		g.fellipse(cdc, UI.scale(new Coord(24, 24)), Math.PI / 2 - (Math.PI * 2 * Math.min(1.0 - a, 1.0)), Math.PI / 2);
 		g.chcolor();
+		g.atext(String.format("%.1f", fv.atkct - now), cdc,0.5,0.5);
 	    }
 	    g.image(cdframe, cdc.sub(cdframe.sz().div(2)));
 	}
