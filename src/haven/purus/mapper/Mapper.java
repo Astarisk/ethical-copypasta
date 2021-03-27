@@ -1,17 +1,20 @@
 package haven.purus.mapper;
 
 import haven.*;
+import haven.Label;
 import haven.purus.Config;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import javax.net.ssl.HttpsURLConnection;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -63,7 +66,22 @@ public class Mapper {
 	};
 
 	static {
-		if(Config.mapperToken.val.length() == 0) {
+		boolean regen = false;
+		if(Config.mapperToken.val.length() == 0)
+			regen = true;
+		else
+		try {
+			URL url = new URL(Mapper.apiURL + "/token/" + Config.mapperToken.val + "/valid");
+			Scanner scan = new Scanner(url.openStream());
+			if(scan.hasNextLine() && scan.nextLine().equals("Valid")) {
+			} else {
+				regen = true;
+			}
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+
+		if(regen) {
 			try {
 				HttpsURLConnection conn = (HttpsURLConnection) new URL(apiURL + "token/generate").openConnection();
 				conn.setRequestProperty("User-Agent", "H&H Client/" + haven.Config.confid);

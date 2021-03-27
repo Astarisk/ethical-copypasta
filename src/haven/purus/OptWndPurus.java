@@ -4,6 +4,7 @@ import haven.*;
 import haven.Button;
 import haven.Label;
 import haven.Scrollbar;
+import haven.purus.mapper.Mapper;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -326,7 +327,7 @@ public class OptWndPurus extends BetterWindow {
 					public boolean mousedown(Coord c, int button) {
 						String newToken = ((TextEntry)mapToken.w).text;
 						try {
-							URL url = new URL("http://localhost:1337/api/token/" + newToken + "/valid");
+							URL url = new URL(Mapper.apiURL + "/token/" + newToken + "/valid");
 							Scanner scan = new Scanner(url.openStream());
 							if(scan.hasNextLine() && scan.nextLine().equals("Valid")) {
 								Config.mapperToken.setVal(newToken);
