@@ -588,7 +588,6 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	    updateseq++;
 	    if(updwait != null)
 		updwait.wnotify();
-	}
 		// Maybe wrong place to do this
 		try {
 			Resource res = Gob.this.getres();
@@ -686,6 +685,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 				}
 			}
 		} catch(Loading l) {
+		}
 		}
     }
 
