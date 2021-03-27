@@ -94,6 +94,7 @@ public class Config {
 	public static Setting<Boolean> invShowLogin = new Setting<>("invShowLogin", true);
 	public static Setting<Boolean> beltShowLogin = new Setting<>("beltShowLogin", true);
 
+	public static Setting<Boolean> pathfinder = new Setting<>("pathfinder", false);
 
 
 	public static Setting<ConcurrentHashMap<String, Boolean>> flowerOptOpens = new Setting<>("flowerOptOpens", new ConcurrentHashMap<>());
@@ -111,5 +112,6 @@ public class Config {
 	public static KeyBinding kb_resinfo = KeyBinding.get("kb_resinfo", KeyMatch.forcode(KeyEvent.VK_I, KeyMatch.S));
 
 	public static KeyBinding kb_bbtoggle = KeyBinding.get("kb_bbtoggle", KeyMatch.forcode(KeyEvent.VK_B, KeyMatch.S));
+	public static KeyBinding kb_pathfinder = KeyBinding.get("kb_pathfinder", KeyMatch.forcode(KeyEvent.VK_S, KeyMatch.C));
 
 }

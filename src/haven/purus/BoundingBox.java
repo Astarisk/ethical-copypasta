@@ -2,6 +2,7 @@ package haven.purus;
 
 import haven.*;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 public class BoundingBox {
@@ -15,7 +16,9 @@ public class BoundingBox {
 		vertices.add(new Coord2d(bc.x, ac.y));
 		vertices.add(new Coord2d(bc.x, bc.y));
 		vertices.add(new Coord2d(ac.x, bc.y));
-		return new Polygon(vertices);
+		Polygon pol = new Polygon(vertices);
+		pol.neg = true;
+		return pol;
 	}
 
 	public BoundingBox(ArrayList<Polygon> polygons) {
@@ -27,13 +30,21 @@ public class BoundingBox {
 
 	public static class Polygon {
 		public final ArrayList<Coord2d> vertices;
+		public boolean neg;
 		public Polygon(ArrayList<Coord2d> vertices) {
 			this.vertices = vertices;
 		}
 	}
 
 	public static BoundingBox getBoundingBox(Gob gob) {
-		Resource res = gob.getres();
+		Resource res;
+		while(true) {
+			try {
+				res = gob.getres();
+				break;
+			} catch(Loading l) {
+			}
+		}
 		if(res == null)
 			return null;
 		Resource.Obst obst = res.layer(Resource.Obst.class);
@@ -83,10 +94,7 @@ public class BoundingBox {
 			return new BoundingBox(polygons);
 		} else if(neg != null) {
 			ArrayList<Polygon> polygons = new ArrayList<>();
-			if(res.name.endsWith("/hwall"))
-				polygons.add(acbcPol(new Coord(-1, 0), new Coord(0, 11)));
-			else
-				polygons.add(acbcPol(neg.ac, neg.bc));
+			polygons.add(acbcPol(neg.ac, neg.bc));
 			return new BoundingBox(polygons);
 		} else {
 			return null;

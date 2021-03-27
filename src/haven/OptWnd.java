@@ -401,6 +401,8 @@ public class OptWnd extends BetterWindow {
 		y = addbtn(cont, "Toggle growth stages of trees & crops", Config.kb_growthStages, y);
 		y = addbtn(cont, "Toggle resinfo on tiles and gobs", Config.kb_resinfo, y);
 		y = addbtn(cont, "Toggle bounding boxes", Config.kb_bbtoggle, y);
+		y = addbtn(cont, "Toggle pathfinder", Config.kb_pathfinder, y);
+
 
 
 		/*Composer composer = new Composer(this).vmrgn(UI.scale(5));

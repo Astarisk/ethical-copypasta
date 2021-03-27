@@ -30,8 +30,8 @@ public class GobBoundingBox extends Sprite implements RenderTree.Node {
 		for(BoundingBox.Polygon pol : this.bb.polygons) {
 			Coord2d previous = pol.vertices.get(pol.vertices.size()-1);
 			for(Coord2d vertex : pol.vertices) {
-				buf.putFloat((float) previous.x).putFloat((float) previous.y).putFloat(1.0f);
-				buf.putFloat((float) vertex.x).putFloat((float) vertex.y).putFloat(1.0f);
+				buf.putFloat((float) previous.x).putFloat((float) (pol.neg ? -previous.y : previous.y)).putFloat(1.0f);
+				buf.putFloat((float) vertex.x).putFloat((float) (pol.neg ? -vertex.y : vertex.y)).putFloat(1.0f);
 				previous = vertex;
 			}
 		}
@@ -43,7 +43,6 @@ public class GobBoundingBox extends Sprite implements RenderTree.Node {
 			slot.ostate(Pipe.Op.compose(emat));
 		} else if(Config.bbDisplayState.val == 2) {
 			slot.ostate(Pipe.Op.compose(new States.Depthtest(States.Depthtest.Test.TRUE), Rendered.last,emat));
-
 		}
 		slot.add(emod);
 	}

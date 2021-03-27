@@ -28,6 +28,7 @@ package haven;
 
 import haven.purus.*;
 import haven.purus.mapper.Mapper;
+import haven.purus.pathfinder.Pathfinder;
 import haven.purus.pbot.PBotWindow;
 
 import java.io.File;
@@ -82,6 +83,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	public PBotWindow pBotWindow;
 	public BetterBelt betterBelt;
 	public HandsWdg handsWdg;
+	public Thread pathfinder;
 
     private static final OwnerContext.ClassResolver<BeltSlot> beltctxr = new OwnerContext.ClassResolver<BeltSlot>()
 	.add(Glob.class, slot -> slot.wdg().ui.sess.glob)
@@ -1355,6 +1357,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
 			map.removeCustomSprites(1339);
 			map.refreshGobsAll();
+			return true;
+		} else if(haven.purus.Config.kb_pathfinder.key().match(ev)) {
+			haven.purus.Config.pathfinder.setVal(!haven.purus.Config.pathfinder.val);
+			msg("Pathfinder " + (haven.purus.Config.pathfinder.val ? "on" : "off"));
 			return true;
 		}
     	for(String s : haven.purus.Config.scriptsKeybinded.val) {

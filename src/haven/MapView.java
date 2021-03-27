@@ -36,6 +36,7 @@ import java.lang.reflect.*;
 
 import haven.purus.Config;
 import haven.purus.TileGrid;
+import haven.purus.pathfinder.Pathfinder;
 import haven.render.*;
 import haven.MCache.OverlayInfo;
 import haven.render.sl.Uniform;
@@ -1996,7 +1997,18 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			modflags &= ~UI.MOD_META;
 		}
 	    Object[] args = {pc, mc.floor(posres), clickb, modflags};
-	    if(inf != null)
+		if(Config.pathfinder.val) {
+			if(inf != null  && inf.ci instanceof Gob.GobClick) {
+				Pathfinder.run(mc, ((Gob.GobClick) inf.ci).gob, clickb, modflags, -1,"", gameui());
+			} else {
+				Pathfinder.run(mc,null, clickb, modflags,-1,"", gameui());
+			}
+			return;
+		} else {
+			if(gameui().pathfinder != null)
+				gameui().pathfinder.stop();
+		}
+		if(inf != null)
 		args = Utils.extend(args, inf.clickargs());
 	    if(inf != null && inf.ci instanceof Gob.GobClick && (modflags & UI.MOD_META) == UI.MOD_META) {
 	    	Gob.GobClick gc = (Gob.GobClick) inf.ci;
