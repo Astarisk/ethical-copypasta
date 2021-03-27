@@ -29,6 +29,7 @@ package haven;
 import haven.purus.MultiSession;
 import haven.purus.alarms.AlarmManager;
 import haven.purus.pbot.Py4j;
+import io.sentry.Sentry;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -533,6 +534,9 @@ public class MainFrame extends java.awt.Frame implements Console.Directory {
     public static void main(final String[] args) {
 	/* Set up the error handler as early as humanly possible. */
 	ThreadGroup g = new ThreadGroup("Haven main group");
+	Sentry.init("https://d3a350784ffa476ab87784c74c9f2f84@o361368.ingest.sentry.io/5692958?release=" + Config.version + ":" + Config.gitrev);
+	Sentry.getContext().addTag("Java", System.getProperty("java.runtime.version"));
+	Sentry.getContext().addTag("OS", System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch"));
 	Py4j.start();
 		String ed;
 	if(!(ed = Utils.getprop("haven.errorurl", "")).equals("")) {

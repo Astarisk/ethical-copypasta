@@ -28,8 +28,11 @@
 	<pathelement path="lib/jglob.jar" />
 	<pathelement path="lib/json.jar" />
 	<pathelement path="lib/py4j-0.10.9.2.jar" />
+	<pathelement path="lib/jackson-core.jar"/>
 	<pathelement path="lib/sentry-4.3.0.jar"/>
-	<pathelement path="lib/gson-2.8.5.jar"/>
+	<pathelement path="lib/slf4j-simple.jar"/>
+	  <pathelement path="lib/slf4j-api.jar"/>
+	  <pathelement path="lib/gson-2.8.5.jar"/>
 	  </classpath>
       <compilerarg value="-Xlint:unchecked" />
       <compilerarg value="-Xlint:-options" />
@@ -62,7 +65,7 @@
       <fileset dir="build/classes-lib" />
       <manifest>
 	<attribute name="Main-Class" value="haven.MainFrame" />
-	<attribute name="Class-Path" value="lib/gson-2.8.5.jar lib/sentry-4.3.0.jar lib/py4j-0.10.9.2.jar lib/json.jar lib/sqlite-jdbc-3.32.3.2.jar lib/jogl.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar lib/pasta-res.jar" />
+	<attribute name="Class-Path" value="lib/gson-2.8.5.jar lib/slf4j-api.jar lib/slf4j-simple.jar lib/jackson-core.jar lib/sentry-4.3.0.jar lib/py4j-0.10.9.2.jar lib/json.jar lib/sqlite-jdbc-3.32.3.2.jar lib/jogl.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar lib/pasta-res.jar" />
       </manifest>
     </jar>
     <chmod file="build/hafen.jar" perm="a+x" />
@@ -125,6 +128,9 @@
 	<include name="py4j-0.10.9.2.jar" />
 	<include name="json.jar" />
 	<include name="sentry-4.3.0.jar"/>
+	<include name="jackson-core.jar"/>
+	<include name="slf4j-simple.jar"/>
+	<include name="slf4j-api.jar"/>
 	<include name="gson-2.8.5.jar"/>
       </fileset>
       <fileset dir="lib/jogl-natives" />
@@ -145,7 +151,7 @@
 	<target name="dist" depends="jars, doc">
 		<zip destfile="build/dist.zip" update="true">
 			<fileset dir="build" includes="*hafen.jar, defaultAlarms, alarms/*, scripts/**"/>
-			<zipfileset dir="build/lib" includes="gson-2.8.5.jar sentry-4.3.0.jar py4j-0.10.9.2.jar json.jar sqlite-jdbc-3.32.3.2.jar pasta-res.jar alarms" prefix="lib/"/>
+			<zipfileset dir="build/lib" includes="gson-2.8.5.jar slf4j-api.jar slf4j-simple.jar jackson-core.jar sentry-4.3.0.jar py4j-0.10.9.2.jar json.jar sqlite-jdbc-3.32.3.2.jar pasta-res.jar alarms" prefix="lib/"/>
 		</zip>
 	</target>
   
