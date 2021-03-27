@@ -2034,13 +2034,15 @@ public class MapView extends PView implements DTarget, Console.Directory {
 							if(dist > bestDist || mc.dist(gob.rc) > 5 * tilesz.x)
 								continue;
 							Resource gobres = gob.getres();
-							if(Config.proximityPlayerAggro.val && gobres.name.equals("gfx/borka/body")) {
-								bestDist = dist;
-								closest = gob;
-								isPlayer = true;
-							} else if(Config.proximityKritterAggro.val && !isPlayer && gobres.name.startsWith("gfx/kritter/")) {
-								bestDist = dist;
-								closest = gob;
+							if(gobres != null) {
+								if(Config.proximityPlayerAggro.val && gobres.name.equals("gfx/borka/body")) {
+									bestDist = dist;
+									closest = gob;
+									isPlayer = true;
+								} else if(Config.proximityKritterAggro.val && !isPlayer && gobres.name.startsWith("gfx/kritter/")) {
+									bestDist = dist;
+									closest = gob;
+								}
 							}
 						}catch(Loading l) {}
 					}
