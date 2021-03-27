@@ -17,7 +17,7 @@ public class DmgOverlay extends Sprite implements PView.Render2D {
 
 	public void updDmg(int dmg, int type) {
 		this.dmg[type] += dmg;
-		dmgt[type] = new TexI(Utils.outline2(fnd.render(Integer.toString(dmg), colt[type]).img, Utils.contrast(colt[type])));
+		dmgt[type] = new TexI(Utils.outline2(fnd.render(Integer.toString(this.dmg[type]), colt[type]).img, Utils.contrast(colt[type])));
 	}
 
 	public void draw(GOut g, Pipe state) {
