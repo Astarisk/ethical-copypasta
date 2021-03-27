@@ -3,7 +3,7 @@ gfx/terobjs/herbs/clay-cave;curio.wav;50;false
 gfx/terobjs/woodheart;voiveljet.wav;50;false
 gfx/terobjs/herbs/edelweiss;curio.wav;50;false
 gfx/kritter/boar/boar;boar.wav;50;true
-gfx/kritter/bat/bat;bat.wav;50;true
+gfx/kritter/bat/bat;bat.wav;5;true
 gfx/kritter/bear/bear;karhu.wav;50;true
 gfx/kritter/mammoth/mammoth;mammoth.wav;50;true
 gfx/terobjs/herbs/chimingbluebell;curio.wav;50;false
