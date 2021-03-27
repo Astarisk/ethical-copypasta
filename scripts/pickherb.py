@@ -3,7 +3,7 @@ class Script:
         PBotUtils = sess.PBotUtils()
         PBotGobAPI = sess.PBotGobAPI()
 
-        closestHerb = PBotGobAPI.getClosestGobByResname("gfx/terobjs/herbs/.*|gfx/kritter/jellyfish/jellyfish")
+        closestHerb = PBotGobAPI.getClosestGobByResname("gfx/terobjs/herbs/.*|gfx/kritter/jellyfish/jellyfish|gfx/kritter/.*")
         if closestHerb != None:
             closestHerb.doClick(3, 0)
             menu = PBotUtils.getFlowermenu(5000)
