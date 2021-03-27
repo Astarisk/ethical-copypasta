@@ -50,6 +50,7 @@ public class LoginScreen extends Widget {
     private Button optbtn;
     private OptWnd opts;
     private Button statusbtn;
+    private Button pastadiscord;
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
 
@@ -62,6 +63,8 @@ public class LoginScreen extends Widget {
 	add(new Credentials.CredentialsWidget());
 	statusbtn = adda(new Button(UI.scale(200), "Initializing..."), sz.x-UI.scale(210), UI.scale(80), 0, 1);
 		executorService.scheduleWithFixedDelay(checkStatus,0, 5, TimeUnit.SECONDS);
+	pastadiscord = adda(new Button(UI.scale(200), "Pasta Discord"), sz.x-UI.scale(210), UI.scale(40), 0, 1);
+
 	}
 
     private static abstract class Login extends Widget {
@@ -226,6 +229,15 @@ public class LoginScreen extends Widget {
 		if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
 			try {
 				desktop.browse(new URI("https://www.havenandhearth.com/portal/"));
+			} catch (IOException | URISyntaxException e) {
+				e.printStackTrace();
+			}
+		}
+	} else if(sender == pastadiscord) {
+		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+		if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+			try {
+				desktop.browse(new URI("https://discord.gg/S8ZPxJmHXS"));
 			} catch (IOException | URISyntaxException e) {
 				e.printStackTrace();
 			}
