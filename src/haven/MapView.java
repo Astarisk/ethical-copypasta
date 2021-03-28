@@ -34,6 +34,7 @@ import java.util.*;
 import java.util.function.*;
 import java.lang.reflect.*;
 
+import haven.purus.ClickPath;
 import haven.purus.Config;
 import haven.purus.TileGrid;
 import haven.purus.pathfinder.Pathfinder;
@@ -59,8 +60,9 @@ public class MapView extends PView implements DTarget, Console.Directory {
     public static int plobgran = Utils.getprefi("plobgran", 8);
     private static final Map<String, Class<? extends Camera>> camtypes = new HashMap<String, Class<? extends Camera>>();
     private TileGrid tg;
-    
-    public interface Delayed {
+	public ClickPath cp;
+
+	public interface Delayed {
 	public void run(GOut g);
     }
 
@@ -1652,7 +1654,8 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	}
     }
 	RenderTree.Slot gridS = null;
-    public void tick(double dt) {
+	RenderTree.Slot clickpS = null;
+	public void tick(double dt) {
 	super.tick(dt);
 	camload = null;
 	try {
@@ -1689,6 +1692,15 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			gridS.remove();
 			tg.ofs = Coord.z;
 			gridS = null;
+		}
+
+		if(clickpS != null && (cp == null || clickpS.obj() != cp || player().getv() == 0)) {
+			clickpS.remove();
+			clickpS = null;
+		}
+
+		if(clickpS == null && cp != null && player().getv() > 0) {
+			clickpS = drawadd(cp);
 		}
 	}
 	Loader.Future<Plob> placing = this.placing;
@@ -1999,6 +2011,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    Object[] args = {pc, mc.floor(posres), clickb, modflags};
 		if(inf != null)
 			args = Utils.extend(args, inf.clickargs());
+		cp = null;
 		if(Config.pathfinder.val) {
 			if(inf != null  && inf.ci instanceof Gob.GobClick) {
 				if(args.length >= 9)
@@ -2013,6 +2026,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			if(gameui().pathfinder != null)
 				gameui().pathfinder.stop();
 		}
+		cp = new ClickPath(player(), new Coord2d[]{mc}, gameui().ui.sess.glob.map);
 	    if(inf != null && inf.ci instanceof Gob.GobClick && (modflags & UI.MOD_META) == UI.MOD_META) {
 	    	Gob.GobClick gc = (Gob.GobClick) inf.ci;
 	    	if(ui.gui.vhand == null) {

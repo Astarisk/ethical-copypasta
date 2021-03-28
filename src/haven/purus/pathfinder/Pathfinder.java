@@ -2,6 +2,7 @@ package haven.purus.pathfinder;
 
 import haven.*;
 import haven.purus.BoundingBox;
+import haven.purus.ClickPath;
 import haven.purus.pbot.api.PBotUtils;
 import haven.resutil.Ridges;
 
@@ -326,10 +327,17 @@ public class Pathfinder {
 					if(action.length() > 0) {
 						gui.wdgmsg("act", action);
 					}
-					if(destGob.rc != null)
+					if(destGob.rc != null) {
 						gui.map.wdgmsg("click", Coord.z, destGob.rc.floor(OCache.posres), button, 0, mod, (int) destGob.id, destGob.rc.floor(OCache.posres), 0, meshid);
+						gui.map.cp = new ClickPath(player, new Coord2d[]{destGob.rc}, gui.ui.sess.glob.map);
+					}
 					break;
 				}
+				Coord2d[] croute = new Coord2d[rte.size()-i];
+				for(int j=i; j<rte.size(); j++) {
+					croute[j-i] = origin.add(new Coord2d(rte.get(j).sub(50*11, 50*11)));
+				}
+				gui.map.cp = new ClickPath(player, croute, gui.ui.sess.glob.map);
 				Coord2d clickTgt = origin.add(new Coord2d(rte.get(i).sub(50*11, 50*11)));
 				if(i == rte.size()-1 && !doorOffset)
 					gui.map.wdgmsg("click", Coord.z, clickTgt.floor(OCache.posres), button, mod);
