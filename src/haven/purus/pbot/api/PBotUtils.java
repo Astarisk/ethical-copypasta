@@ -1,6 +1,7 @@
 package haven.purus.pbot.api;
 
 import haven.*;
+import haven.purus.pathfinder.Pathfinder;
 
 public class PBotUtils {
 	private PBotSession pBotSession;
@@ -78,7 +79,6 @@ public class PBotUtils {
 		}
 	}
 
-
 	/**
 	 * Returns the item currently in the hand
 	 * @return Item at hand
@@ -88,6 +88,98 @@ public class PBotUtils {
 			return null;
 		else
 			return new PBotItem(pBotSession.gui.vhand.item, pBotSession);
+	}
+
+	/**
+	 * Left click to somewhere with pathfinder
+	 * @param x X-Coordinate
+	 * @param y Y-Coordinate
+	 */
+	public void pfLeftClick(double x, double y) {
+		Pathfinder.run(new Coord2d(x, y),null, 1, 0, -1,"", pBotSession.gui);
+	}
+
+	/**
+	 * Waits for the hourglass timer when crafting or drinking for example
+	 * Also waits until the hourglass has been seen to change at least once
+	 * If hourglass does not appear within timeout, returns false, else true
+	 * @param timeout Timeout in milliseconds
+	 */
+	public boolean waitForHourglass(int timeout) {
+		double prog = pBotSession.gui.prog;
+		int retries = 0;
+		while(prog == pBotSession.gui.prog) {
+			if(retries > timeout/5)
+				return false;
+			retries++;
+			prog = pBotSession.gui.prog;
+			sleep(5);
+		}
+		while (pBotSession.gui.prog >= 0) {
+			sleep(25);
+		}
+		return true;
+	}
+
+	/**
+	 * Waits for the hourglass timer when crafting or drinking for example
+	 * Also waits until the hourglass has been seen to change at least once
+	 */
+	public void waitForHourglass() {
+		double prog = pBotSession.gui.prog;
+		while (prog == pBotSession.gui.prog) {
+			prog = pBotSession.gui.prog;
+			sleep(5);
+		}
+		while (pBotSession.gui.prog >= 0) {
+			sleep(20);
+		}
+	}
+
+	/**
+	 * Returns value of hourglass, -1 = no hourglass, else the value between 0.0 and 1.0
+	 * @return value of hourglass
+	 */
+	public double getHourglass() {
+		return pBotSession.gui.prog;
+	}
+
+	/**
+	 * Returns the players inventory
+	 * @return Inventory of the player
+	 */
+	public PBotInventory playerInventory() {
+		return new PBotInventory(pBotSession.gui.maininv, pBotSession);
+	}
+
+	/**
+	 * Drops an item from the hand and waits until it has been dropped
+	 * @param mod 1 = shift, 2 = ctrl, 4 = alt
+	 */
+	public void dropItemFromHand(int mod) {
+		pBotSession.gui.map.wdgmsg("drop", Coord.z, pBotSession.gui.map.player().rc.floor(OCache.posres), mod);
+		while(getItemAtHand() != null)
+			sleep(25);
+	}
+
+	/**
+	 * Resource name of the tile in the given location
+	 * @param x X-Coord of the location (rc coord)
+	 * @param y Y-Coord of the location (rc coord)
+	 * @return
+	 */
+	public String tileResnameAt(int x, int y) {
+		while(true) {
+			try {
+				Coord loc = new Coord(x, y);
+				int t = pBotSession.gui.ui.sess.glob.map.gettile(loc.div(MCache.tilesz2));
+				Resource res = pBotSession.gui.ui.sess.glob.map.tilesetr(t);
+				if(res != null)
+					return res.name;
+				else
+					return null;
+			} catch(Loading l) { }
+		}
 	}
 
 

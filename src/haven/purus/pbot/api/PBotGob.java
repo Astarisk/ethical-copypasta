@@ -3,6 +3,7 @@ package haven.purus.pbot.api;
 import haven.*;
 import haven.Composite;
 import haven.purus.GobText;
+import haven.purus.pathfinder.Pathfinder;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -175,33 +176,30 @@ public class PBotGob {
 		return gob.rc;
 	}
 
-	/**
+	/*
 	 * Toggle whether the gob should be marked or not
 	 */
-	public void toggleMarked() {
+	//public void toggleMarked() {
 		// TODO
-	}
+	//}
 
 	/**
-	 * Click a gob with pathfinder, with given button, wait until pathfinder is finished
+	 * Click a gob with pathfinder, with given button
 	 * @param btn 1 = left click, 3 = right click
 	 * @param mod 1 = shift, 2 = ctrl, 4 = alt
 	 * @param meshId meshid to click
-	 * @return True if path was found, or false if not
 	 */
-	public boolean pfClick(int btn, int mod, int meshId) {
-		// TODO
-		return false;
+	public void pfClick(int btn, int mod, int meshId) {
+		Pathfinder.run(gob.rc, gob, btn, mod, meshId,"", pBotSession.gui);
 	}
 
 	/**
-	 * Click a gob with pathfinder, with given button, wait until pathfinder is finished
+	 * Click a gob with pathfinder, with given button
 	 * @param btn 1 = left click, 3 = right click
 	 * @param mod 1 = shift, 2 = ctrl, 4 = alt
-	 * @return True if path was found, or false if not
 	 */
-	public boolean pfClick(int btn, int mod) {
-		return pfClick(btn, mod, -1);
+	public void pfClick(int btn, int mod) {
+		Pathfinder.run(gob.rc, gob, btn, mod, -1,"", pBotSession.gui);
 	}
 
 	/**
