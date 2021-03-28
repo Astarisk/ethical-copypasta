@@ -328,7 +328,7 @@ public class Pathfinder {
 						gui.wdgmsg("act", action);
 					}
 					if(destGob.rc != null) {
-						gui.map.wdgmsg("click", Coord.z, destGob.rc.floor(OCache.posres), button, 0, mod, (int) destGob.id, destGob.rc.floor(OCache.posres), 0, meshid);
+						gui.map.wdgmsg("click", gui.map.sz.div(2), destGob.rc.floor(OCache.posres), button, 0, mod, (int) destGob.id, destGob.rc.floor(OCache.posres), 0, meshid);
 						gui.map.cp = new ClickPath(player, new Coord2d[]{destGob.rc}, gui.ui.sess.glob.map);
 					}
 					break;
