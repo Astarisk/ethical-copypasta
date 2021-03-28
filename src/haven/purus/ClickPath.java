@@ -36,7 +36,9 @@ public class ClickPath implements RenderTree.Node, TickList.Ticking, TickList.Ti
 	}
 
 	public void autogtick(Render g) {
-		g.update(this.emod.va.bufs[0], this::fill);
+		try {
+			g.update(this.emod.va.bufs[0], this::fill);
+		} catch(Loading l) {}
 	}
 
 	public void added(RenderTree.Slot slot) {
