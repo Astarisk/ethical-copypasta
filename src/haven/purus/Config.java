@@ -93,6 +93,8 @@ public class Config {
 	public static Setting<Boolean> ttfHighlight = new Setting<>("ttfHighlight", true);
 	public static Setting<Boolean> invShowLogin = new Setting<>("invShowLogin", true);
 	public static Setting<Boolean> beltShowLogin = new Setting<>("beltShowLogin", true);
+	public static Setting<Boolean> studyLock = new Setting<>("studyLock", false);
+
 
 	public static Setting<Boolean> pathfinder = new Setting<>("pathfinder", false);
 

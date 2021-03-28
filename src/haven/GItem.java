@@ -256,4 +256,12 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 			return "";
 		}
 	}
+
+	@Override
+	public void wdgmsg(Widget sender, String msg, Object... args) {
+		if(msg.equals("take") && this.parent != null && this.parent instanceof StudyInventory && Config.studyLock.val) {
+			return;
+		}
+		super.wdgmsg(sender, msg, args);
+	}
 }

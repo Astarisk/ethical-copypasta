@@ -2031,7 +2031,15 @@ public class CharWnd extends BetterWindow {
 	    Widget lframe = Frame.around(sattr, skill);
 
 	    prev = sattr.add(settip(new Img(catf.render("Study Report").tex()), "gfx/hud/chr/tips/study"), width, 0);
-	    studyc = prev.pos("bl").adds(5, 0);
+		sattr.add(new CheckBox("Lock") {
+			{a = Config.studyLock.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.studyLock.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, width + UI.scale(150), UI.scale(15));
+		studyc = prev.pos("bl").adds(5, 0);
 	    Widget bframe = sattr.adda(new Frame(new Coord(attrw, UI.scale(105)), true), prev.pos("bl").adds(5, 0).x, lframe.pos("br").y, 0.0, 1.0);
 	    int rx = bframe.pos("iur").subs(10, 0).x;
 	    prev = sattr.add(new Label("Experience points:"), bframe.pos("iul").adds(10, 5));
