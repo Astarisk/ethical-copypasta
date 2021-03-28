@@ -3,6 +3,7 @@ package haven.purus.pathfinder;
 import haven.*;
 import haven.purus.BoundingBox;
 import haven.purus.pbot.api.PBotUtils;
+import haven.resutil.Ridges;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -20,6 +21,15 @@ public class Pathfinder {
 		add("gfx/tiles/nil");
 		add("gfx/tiles/deep");
 		add("gfx/tiles/cave");
+	}};
+
+	private static HashMap<String, Coord2d> doorOffsets = new HashMap<String, Coord2d>() {{
+		put("gfx/terobjs/arch/windmill", new Coord2d(0, 27).add(0, MCache.tilesz.div(2.0).y));
+		put("gfx/terobjs/arch/stonemansion", new Coord2d(49, 0).add(MCache.tilesz.div(2.0).x, 0));
+		put("gfx/terobjs/arch/stonestead", new Coord2d(46, 0).add(MCache.tilesz.div(2.0).x, 0));
+		put("gfx/terobjs/arch/logcabin", new Coord2d(22, 0).add(MCache.tilesz.div(2.0).x, 0));
+		put("gfx/terobjs/arch/stonetower", new Coord2d(37, 0).add(MCache.tilesz.div(2.0).x, 0));
+		put("gfx/terobjs/arch/greathall", new Coord2d(77, 0).add(MCache.tilesz.div(2.0).x, 0));
 	}};
 
 	private static void setGridTile(int x, int y, int markId, int[][] grid) {
@@ -164,7 +174,14 @@ public class Pathfinder {
 			int[][] grid = new int[100*11][100*11];
 			for(int i=-45; i<=45; i++) {
 				for(int j=-45; j<=45; j++) {
-					int t = gui.ui.sess.glob.map.gettile(origin.div(MCache.tilesz).round().add(i, j));
+					Coord c = origin.div(MCache.tilesz).round().add(i, j);
+					int t = gui.ui.sess.glob.map.gettile(c);
+					Tiler tl = gui.ui.sess.glob.map.tiler(t);
+					if (tl instanceof Ridges.RidgeTile) {
+						if(Ridges.brokenp(gui.ui.sess.glob.map, c)) {
+							markTileInaccessible(new Coord(i,j), grid);
+						}
+					}
 					while(true) {
 						try {
 							Resource res = gui.ui.sess.glob.map.tilesetr(t);
@@ -177,12 +194,31 @@ public class Pathfinder {
 					}
 				}
 			}
+			Coord tgt;
+			boolean doorOffset = false;
+			if(destGob != null) {
+				Resource res;
+				while(true) {
+					try {
+						res = destGob.getres();
+						break;
+					} catch(Loading l) { }
+				}
+				if(button == 3 && res != null && doorOffsets.containsKey(res.name)) {
+					tgt = destGob.rc.add(doorOffsets.get(res.name).rotate(destGob.a)).sub(origin).round().add(50*11, 50*11);
+					doorOffset = true;
+				} else {
+					tgt = destGob.rc.sub(origin).round().add(50*11, 50*11);
+				}
+			} else {
+				tgt = target.sub(origin).round().add(50*11, 50*11);
+			}
 			synchronized(gui.ui.sess.glob.oc) {
 				for(Gob gob : gui.ui.sess.glob.oc) {
 					BoundingBox bb = BoundingBox.getBoundingBox(gob);
 					if(bb == null || !bb.blocks)
 						continue;
-					if(gob == player || gob == destGob) {
+					if(gob == player || (gob == destGob && !doorOffset)) {
 						continue;
 					}
 					for(BoundingBox.Polygon pol : bb.polygons) {
@@ -198,7 +234,7 @@ public class Pathfinder {
 			grid[player.rc.sub(origin).round().add(50*11, 50*11).x][player.rc.sub(origin).round().add(50*11, 50*11).y] = 0;
 			for(int i=1; i<=1; i++)
 				drawCircle(player.rc.sub(origin).round().add(50*11, 50*11).x, player.rc.sub(origin).round().add(50*11, 50*11).y, i, 0, grid);
-			if(destGob != null) {
+			if(destGob != null && !doorOffset) {
 				BoundingBox bb = BoundingBox.getBoundingBox(destGob);
 				if(bb != null) {
 					for(BoundingBox.Polygon pol : bb.polygons) {
@@ -219,12 +255,6 @@ public class Pathfinder {
 			for(int i=0; i<100*11; i++) {
 				for(int j=0; j<100*11; j++)
 					cost[i][j] = Double.MAX_VALUE;
-			}
-			Coord tgt;
-			if(destGob != null) {
-				tgt = destGob.rc.sub(origin).round().add(50*11, 50*11);
-			} else {
-				tgt = target.sub(origin).round().add(50*11, 50*11);
 			}
 			PriorityQueue<Pair<Pair<Double, Double>, Coord>> q = new PriorityQueue<>((a, b) -> {
 				return Double.compare(a.a.a,b.a.a);
@@ -291,7 +321,7 @@ public class Pathfinder {
 			}
 			Collections.reverse(rte);
 			for(int i=1; i<rte.size() && gui.map.player() != null; i++) {
-				if(destGob != null && (i == rte.size()-1)) {
+				if(destGob != null && (i == rte.size()-1) && !doorOffset) {
 					if(action.length() > 0) {
 						gui.wdgmsg("act", action);
 					}
@@ -300,7 +330,7 @@ public class Pathfinder {
 					break;
 				}
 				Coord2d clickTgt = origin.add(new Coord2d(rte.get(i).sub(50*11, 50*11)));
-				if(i == rte.size()-1)
+				if(i == rte.size()-1 && !doorOffset)
 					gui.map.wdgmsg("click", Coord.z, clickTgt.floor(OCache.posres), button, mod);
 				else
 					gui.map.wdgmsg("click", Coord.z, clickTgt.floor(OCache.posres), 1, 0);
@@ -310,7 +340,9 @@ public class Pathfinder {
 						break;
 				}
 			}
-			}, "PF-thread");
+			if(doorOffset)
+				gui.map.wdgmsg("click", Coord.z, destGob.rc.floor(OCache.posres), button, 0, mod, (int) destGob.id, destGob.rc.floor(OCache.posres), 0, meshid);
+		}, "PF-thread");
 		gui.pathfinder.start();
 	}
 }

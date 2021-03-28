@@ -1997,19 +1997,22 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			modflags &= ~UI.MOD_META;
 		}
 	    Object[] args = {pc, mc.floor(posres), clickb, modflags};
+		if(inf != null)
+			args = Utils.extend(args, inf.clickargs());
 		if(Config.pathfinder.val) {
 			if(inf != null  && inf.ci instanceof Gob.GobClick) {
-				Pathfinder.run(mc, ((Gob.GobClick) inf.ci).gob, clickb, modflags, -1,"", gameui());
+				if(args.length >= 9)
+					Pathfinder.run(mc,((Gob.GobClick) inf.ci).gob, clickb, modflags, (int)args[8],"", gameui());
+				else
+					Pathfinder.run(mc, ((Gob.GobClick) inf.ci).gob, clickb, modflags, -1,"", gameui());
 			} else {
-				Pathfinder.run(mc,null, clickb, modflags,-1,"", gameui());
+				Pathfinder.run(mc,null, clickb, modflags, -1,"", gameui());
 			}
 			return;
 		} else {
 			if(gameui().pathfinder != null)
 				gameui().pathfinder.stop();
 		}
-		if(inf != null)
-		args = Utils.extend(args, inf.clickargs());
 	    if(inf != null && inf.ci instanceof Gob.GobClick && (modflags & UI.MOD_META) == UI.MOD_META) {
 	    	Gob.GobClick gc = (Gob.GobClick) inf.ci;
 	    	if(ui.gui.vhand == null) {
