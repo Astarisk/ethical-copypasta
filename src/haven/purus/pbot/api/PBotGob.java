@@ -38,7 +38,7 @@ public class PBotGob {
 	}};
 
 
-	PBotGob(Gob gob, PBotSession pBotSession) {
+	public PBotGob(Gob gob, PBotSession pBotSession) {
 		this.pBotSession = pBotSession;
 		this.gob = gob;
 	}
@@ -121,7 +121,7 @@ public class PBotGob {
 	 * @param id Id of the gobtext
 	 */
 	public void removeGobText(int id) {
-		gob.ols.remove(gob.findol(id));
+		gob.findol(id).remove();
 	}
 
 	/**

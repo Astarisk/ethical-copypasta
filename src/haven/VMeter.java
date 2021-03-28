@@ -32,7 +32,7 @@ public class VMeter extends Widget {
     static Tex bg = Resource.loadtex("gfx/hud/vm-frame");
     static Tex fg = Resource.loadtex("gfx/hud/vm-tex");
     Color cl;
-    int amount;
+    public int amount;
 	
     @RName("vm")
     public static class $_ implements Factory {

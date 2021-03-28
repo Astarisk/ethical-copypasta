@@ -91,7 +91,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 
 	public Overlay(Gob gob, Sprite spr) {
 	    this.gob = gob;
-	    this.id = -1;
+	    this.id = (int)(Math.random()*Integer.MAX_VALUE);
 	    this.res = null;
 	    this.sdt = null;
 	    this.spr = spr;

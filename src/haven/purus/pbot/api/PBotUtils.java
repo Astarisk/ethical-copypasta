@@ -1,6 +1,6 @@
 package haven.purus.pbot.api;
 
-import haven.FlowerMenu;
+import haven.*;
 
 public class PBotUtils {
 	private PBotSession pBotSession;
@@ -44,6 +44,29 @@ public class PBotUtils {
 	}
 
 	/**
+	 * Itemact with item in hand, for example, to make a stockpile
+	 */
+	public void makePile() {
+		pBotSession.gui.map.wdgmsg("itemact", Coord.z, Coord.z, 0);
+	}
+
+	/**
+	 * Use to place something, for example, a stockpile
+	 * @param x x place stockpile to
+	 * @param y y place stockpile to
+	 */
+	public void placeThing(double x, double y) {
+		pBotSession.gui.map.wdgmsg("place", new Coord2d(x, y).floor(OCache.posres), 0, 1, 0);
+	}
+
+	/**
+	 * Use to cancel stockpile placing for example
+	 */
+	public void cancelPlace() {
+		pBotSession.gui.map.wdgmsg("place", pBotSession.gui.map.player().rc.floor(OCache.posres), 0, 3, 0);
+	}
+
+	/**
 	 * Wait for the given time
 	 * @param time time in milliseconds
 	 */
@@ -54,5 +77,18 @@ public class PBotUtils {
 			e.printStackTrace();
 		}
 	}
+
+
+	/**
+	 * Returns the item currently in the hand
+	 * @return Item at hand
+	 */
+	public PBotItem getItemAtHand() {
+		if(pBotSession.gui.vhand == null)
+			return null;
+		else
+			return new PBotItem(pBotSession.gui.vhand.item, pBotSession);
+	}
+
 
 }

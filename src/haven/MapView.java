@@ -38,6 +38,10 @@ import haven.purus.ClickPath;
 import haven.purus.Config;
 import haven.purus.TileGrid;
 import haven.purus.pathfinder.Pathfinder;
+import haven.purus.pbot.api.GobCallback;
+import haven.purus.pbot.api.PBotGob;
+import haven.purus.pbot.api.PBotGobAPI;
+import haven.purus.pbot.api.PBotSession;
 import haven.render.*;
 import haven.MCache.OverlayInfo;
 import haven.render.sl.Uniform;
@@ -61,6 +65,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
     private static final Map<String, Class<? extends Camera>> camtypes = new HashMap<String, Class<? extends Camera>>();
     private TileGrid tg;
 	public ClickPath cp;
+	public final ArrayList<Pair<GobCallback, PBotSession>> gobCbQueue = new ArrayList<>();
 
 	public interface Delayed {
 	public void run(GOut g);
@@ -2012,6 +2017,17 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		if(inf != null)
 			args = Utils.extend(args, inf.clickargs());
 		cp = null;
+		if(clickb == 1 && (modflags & UI.MOD_META) != 0 && inf != null  && inf.ci instanceof Gob.GobClick) {
+			synchronized(gobCbQueue) {
+				if(!gobCbQueue.isEmpty()) {
+					for(Pair<GobCallback, PBotSession> cb : gobCbQueue) {
+						new Thread(() -> {cb.a.selected(new PBotGob(((Gob.GobClick) inf.ci).gob, cb.b));}, "PBot cb runner").start();
+					}
+					gobCbQueue.clear();
+					return;
+				}
+			}
+		}
 		if(Config.pathfinder.val) {
 			if(inf != null  && inf.ci instanceof Gob.GobClick) {
 				if(args.length >= 9)
