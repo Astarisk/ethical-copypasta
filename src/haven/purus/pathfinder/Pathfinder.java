@@ -30,6 +30,7 @@ public class Pathfinder {
 		put("gfx/terobjs/arch/logcabin", new Coord2d(22, 0).add(MCache.tilesz.div(2.0).x, 0));
 		put("gfx/terobjs/arch/stonetower", new Coord2d(37, 0).add(MCache.tilesz.div(2.0).x, 0));
 		put("gfx/terobjs/arch/greathall", new Coord2d(77, 0).add(MCache.tilesz.div(2.0).x, 0));
+		put("gfx/terobjs/arch/timberhouse", new Coord2d(33, 0).add(MCache.tilesz.div(2.0).x, 0));
 	}};
 
 	private static void setGridTile(int x, int y, int markId, int[][] grid) {
