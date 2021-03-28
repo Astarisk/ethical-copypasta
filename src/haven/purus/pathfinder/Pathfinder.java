@@ -97,29 +97,27 @@ public class Pathfinder {
 		return lineIntersects(c1.x, c1.y, c2.x, c2.y, grid);
 	}
 
-	private static void markPolygon(BoundingBox.Polygon pol, int markId, int[][] grid) {
+	private static void markPolygon(BoundingBox.Polygon pol, int markId, int wd, int cr, int[][] grid) {
 		Coord prev = pol.vertices.get(pol.vertices.size()-1).round().add(50*11, 50*11);
 		for(Coord2d vert: pol.vertices) {
 			Coord c  = vert.round().add(50*11, 50*11);
-			Coord2d nc = new Coord2d(c.sub(prev)).rotate(Math.PI/2);
-			nc = nc.div(nc.dist(Coord2d.z));
-			drawLine(new Coord2d(prev).add(nc).round().x, new Coord2d(prev).add(nc).round().y, new Coord2d(c).add(nc).round().x, new Coord2d(c).add(nc).round().y, 1.0, markId, grid);
+			Coord2d onc = new Coord2d(c.sub(prev)).rotate(Math.PI/2);
+			onc = onc.div(onc.dist(Coord2d.z));
+			for(int i=1; i<=wd; i++) {
+				Coord2d nc = onc.mul(i);
+				drawLine(new Coord2d(prev).add(nc).round().x, new Coord2d(prev).add(nc).round().y, new Coord2d(c).add(nc).round().x, new Coord2d(c).add(nc).round().y, 1.0, markId, grid);
 
-			nc = nc.mul(-1);
-			drawLine(new Coord2d(prev).add(nc).round().x, new Coord2d(prev).add(nc).round().y, new Coord2d(c).add(nc).round().x, new Coord2d(c).add(nc).round().y, 1.0, markId, grid);
-			nc = nc.mul(2);
-			drawLine(new Coord2d(prev).add(nc).round().x, new Coord2d(prev).add(nc).round().y, new Coord2d(c).add(nc).round().x, new Coord2d(c).add(nc).round().y, 1.0, markId, grid);
-
-			nc = nc.mul(-1);
-			drawLine(new Coord2d(prev).add(nc).round().x, new Coord2d(prev).add(nc).round().y, new Coord2d(c).add(nc).round().x, new Coord2d(c).add(nc).round().y, 1.0, markId, grid);
+				nc = nc.mul(-1);
+				drawLine(new Coord2d(prev).add(nc).round().x, new Coord2d(prev).add(nc).round().y, new Coord2d(c).add(nc).round().x, new Coord2d(c).add(nc).round().y, 1.0, markId, grid);
+			}
 
 			drawLine(prev.x, prev.y, c.x, c.y, 1.0, markId, grid);
 			prev = c;
 		}
 		for(Coord2d vert: pol.vertices) {
 			Coord c  = vert.round().add(50*11, 50*11);
-			drawCircle(c.x, c.y, 3, markId, grid);
-			drawCircle(c.x, c.y, 2, markId, grid);
+			for(int i=1; i<=cr; i++)
+				drawCircle(c.x, c.y, i, markId, grid);
 		}
 	}
 
@@ -144,7 +142,7 @@ public class Pathfinder {
 		plist.add(rc.add(MCache.tilesz.x, 0));
 		plist.add(rc.add(MCache.tilesz.x, MCache.tilesz.y));
 		plist.add(rc.add(0, MCache.tilesz.y));
-		markPolygon(new BoundingBox.Polygon(plist), 1,grid);
+		markPolygon(new BoundingBox.Polygon(plist), 1, 0, 0, grid);
 	}
 
 	public static void run(Coord2d target, Gob destGob, int button, int mod, int meshid, String action, GameUI gui) {
@@ -195,7 +193,7 @@ public class Pathfinder {
 				}
 			}
 			for(BoundingBox.Polygon pol : bboxes) {
-				markPolygon(pol, 1, grid);
+				markPolygon(pol, 1, 3, 3, grid);
 			}
 			grid[player.rc.sub(origin).round().add(50*11, 50*11).x][player.rc.sub(origin).round().add(50*11, 50*11).y] = 0;
 			for(int i=1; i<=1; i++)
