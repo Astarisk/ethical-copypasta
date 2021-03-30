@@ -1704,12 +1704,12 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			gridS = null;
 		}
 
-		if(clickpS != null && (cp == null || clickpS.obj() != cp || player().getv() == 0)) {
+		if(clickpS != null && (cp == null || clickpS.obj() != cp || (player() != null && player().getv() == 0))) {
 			clickpS.remove();
 			clickpS = null;
 		}
 
-		if(clickpS == null && cp != null && player().getv() > 0) {
+		if(clickpS == null && cp != null && player() != null && player().getv() > 0) {
 			clickpS = drawadd(cp);
 		}
 	}
