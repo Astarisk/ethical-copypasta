@@ -2,8 +2,10 @@ package haven.purus.pbot.api;
 
 import haven.*;
 import haven.Composite;
+import haven.purus.GobColor;
 import haven.purus.GobText;
 import haven.purus.pathfinder.Pathfinder;
+import haven.render.MixColor;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -12,7 +14,7 @@ import java.util.List;
 
 public class PBotGob {
 
-	private Gob gob;
+	private final Gob gob;
 	private PBotSession pBotSession;
 
 	public static HashMap<String, String> gobWindowMap = new HashMap<String, String>() {{
@@ -50,7 +52,7 @@ public class PBotGob {
 	 * @param mod Key modifier mask 1 = shift 2 = ctrl 4 = alt
 	 */
 	public void doClick(int btn, int mod) {
-		pBotSession.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(OCache.posres), btn, mod, 0, (int)gob.id, gob.rc.floor(OCache.posres), 0, -1);
+		pBotSession.gui.map.wdgmsg("click", pBotSession.PBotUtils().getCenterScreenCoord(), gob.rc.floor(OCache.posres), btn, mod, 0, (int)gob.id, gob.rc.floor(OCache.posres), 0, -1);
 	}
 
 	/**
@@ -60,7 +62,7 @@ public class PBotGob {
 	 * @param meshid can be a door, roasting spit etc.
 	 */
 	public void doClick(int btn, int mod, int meshid) {
-		pBotSession.gui.map.wdgmsg("click", Coord.z, gob.rc.floor(OCache.posres), btn, mod, 0, (int)gob.id, gob.rc.floor(OCache.posres), 0, meshid);
+		pBotSession.gui.map.wdgmsg("click", pBotSession.PBotUtils().getCenterScreenCoord(), gob.rc.floor(OCache.posres), btn, mod, 0, (int)gob.id, gob.rc.floor(OCache.posres), 0, meshid);
 
 	}
 
@@ -176,12 +178,28 @@ public class PBotGob {
 		return gob.rc;
 	}
 
-	/*
-	 * Toggle whether the gob should be marked or not
+
+	/**
+	 * Set gob as colored, replaces previous if color already set
+	 * @param r Red between 0-255
+	 * @param g Green between 0-255
+	 * @param b Blue between 0-255
+	 * @param a Alpha between 0-255
 	 */
-	//public void toggleMarked() {
-		// TODO
-	//}
+	public void setMarked(int r, int g, int b, int a) {
+		synchronized(gob) {
+			gob.setattr(new GobColor(gob, new MixColor(r, g, b, a)));
+		}
+	}
+
+	/**
+	 * Remove color marking
+	 */
+	public void setUnmarked() {
+		synchronized(gob) {
+			gob.delattr(GobColor.class);
+		}
+	}
 
 	/**
 	 * Click a gob with pathfinder, with given button

@@ -61,6 +61,17 @@ public class PBotItem {
 	}
 
 	/**
+	 * Get the inventory that this item is located in
+	 * @return Inventory or null if not found
+	 */
+	public PBotInventory getInventory() {
+		if(item.witem().parent instanceof Inventory)
+			return new PBotInventory((Inventory)item.witem().parent, pBotSession);
+		else
+			return null;
+	}
+
+	/**
 	 * Transfer an item to the active inventory, does not wait for item to transfer
 	 */
 	public void transferItem() {

@@ -8,7 +8,7 @@ public class CraftWindow extends Window {
 	private static final IBox frame = new IBox("hud/tab", "tl", "tr", "bl", "br", "extvl", "extvr", "extht", "exthb");
 	private final TabStrip tabStrip;
 	private final Map<MenuGrid.Pagina, TabStrip.Button> tabs = new HashMap<MenuGrid.Pagina, TabStrip.Button>();
-	private Widget makeWidget;
+	public Makewindow makeWidget;
 	private MenuGrid.Pagina lastAction;
 
 	public CraftWindow() {
@@ -50,7 +50,7 @@ public class CraftWindow extends Window {
 			if (lastAction != null) {
 				addTab(lastAction);
 			}
-			makeWidget = child;
+			makeWidget = (Makewindow) child;
 			makeWidget.c = new Coord(5, tabStrip.sz.y + 5);
 			makeWidget.resize(Math.max(makeWidget.sz.x, tabStrip.sz.x), makeWidget.sz.y);
 		}

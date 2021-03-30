@@ -32,6 +32,9 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.function.*;
 import haven.ItemInfo.AttrCache;
+import haven.purus.pbot.api.Callback;
+import haven.purus.pbot.api.PBotItem;
+import haven.purus.pbot.api.PBotSession;
 import haven.res.ui.tt.q.quality.Quality;
 
 import static haven.ItemInfo.find;
@@ -223,6 +226,15 @@ public class WItem extends Widget implements DTarget {
 
     public boolean mousedown(Coord c, int btn) {
 	if(btn == 1) {
+		synchronized(gameui().itemCallbacks) {
+			if(gameui().itemCallbacks.size() > 0) {
+				for(Pair<Callback, PBotSession> cb : gameui().itemCallbacks) {
+					new Thread(() -> cb.a.callback(new PBotItem(item, cb.b)), "PBot cb runner").start();
+				}
+				gameui().itemCallbacks.clear();
+				return true;
+			}
+		}
 	    if(ui.modshift) {
 	    	if(ui.modmeta) {
 	    		item.wdgmsg("transfer-identical", item.getres().name);

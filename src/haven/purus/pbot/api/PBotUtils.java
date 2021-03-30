@@ -3,6 +3,8 @@ package haven.purus.pbot.api;
 import haven.*;
 import haven.purus.pathfinder.Pathfinder;
 
+import java.awt.*;
+
 public class PBotUtils {
 	private PBotSession pBotSession;
 
@@ -16,6 +18,17 @@ public class PBotUtils {
 	 */
 	public void sysMsg(String msg) {
 		pBotSession.gui.msg(msg);
+	}
+
+	/**
+	 * Send message to be displayed in the client
+	 * @param msg Message content
+	 * @param r Red color 0-255
+	 * @param g Green color 0-255
+	 * @param b Blue color 0-255
+	 */
+	public void sysMsg(String msg, int r, int g, int b) {
+		pBotSession.gui.msg(msg, new Color(r, g, b));
 	}
 
 	/**
@@ -61,10 +74,30 @@ public class PBotUtils {
 	}
 
 	/**
+	 * Click some place on map
+	 * @param x x-coordinate
+	 * @param y y-coordinate
+	 * @param btn 1 = left click, 3 = right click
+	 * @param mod 1 = shift, 2 = ctrl, 4 = alt
+	 */
+
+	public void mapClick(int x, int y, int btn, int mod) {
+		pBotSession.gui.map.wdgmsg("click", getCenterScreenCoord(), new Coord2d(x, y).floor(OCache.posres), btn, mod);
+	}
+
+	/**
 	 * Use to cancel stockpile placing for example
 	 */
 	public void cancelPlace() {
 		pBotSession.gui.map.wdgmsg("place", pBotSession.gui.map.player().rc.floor(OCache.posres), 0, 3, 0);
+	}
+
+	/**
+	 * Coordinates of the center of the screen
+	 * @return Coordinates of the center of the screen
+	 */
+	public Coord getCenterScreenCoord() {
+		return pBotSession.gui.map.sz.div(2);
 	}
 
 	/**
@@ -119,6 +152,31 @@ public class PBotUtils {
 			sleep(25);
 		}
 		return true;
+	}
+
+	/**
+	 * Starts crafting item with the given name
+	 * @param name Name of the item ie. "clogs"
+	 * @param makeAll 0 To craft once, 1 to craft all
+	 */
+	public void craftItem(String name, int makeAll) {
+		openCraftingWnd(name);
+		pBotSession.gui.makewnd.makeWidget.wdgmsg("make", makeAll);
+	}
+
+	/**
+	 * Opens the crafting window for given item
+	 * @param name Name of craft for wdgmsg
+	 */
+	public void openCraftingWnd(String name) {
+		// Close current window and wait for it to close
+		if(pBotSession.gui.makewnd.makeWidget != null)
+			pBotSession.gui.makewnd.makeWidget.reqdestroy();
+		pBotSession.gui.wdgmsg("act", "craft", name);
+		pBotSession.PBotWindowAPI().waitForWindow("Crafting", 60*1000);
+		while(pBotSession.gui.makewnd.makeWidget == null) {
+			PBotUtils.sleep(10);
+		}
 	}
 
 	/**
@@ -182,5 +240,41 @@ public class PBotUtils {
 		}
 	}
 
+	/**
+	 * Next click to item in inventory calls the callback with PBotItem object of the clicked item
+	 */
+	public void selectItem(Callback cb) {
+		pBotSession.PBotUtils().sysMsg("Left click item in inventory to select it!");
+		synchronized(pBotSession.gui.itemCallbacks) {
+			pBotSession.gui.itemCallbacks.add(new Pair<>(cb, pBotSession));
+		}
+	}
 
+	public static class AreaReturn {
+		private Coord a;
+		private Coord b;
+		public AreaReturn(Coord a, Coord b) {
+			this.a = a.min(b.x, b.y);
+			this.b = a.max(b.x, b.y);
+		}
+
+		public Coord getA() {
+			return a;
+		}
+
+		public Coord getB() {
+			return b;
+		}
+	}
+
+	/**
+	 * Select area returns AreaReturn object
+	 * @param cb
+	 */
+	public void selectArea(Callback cb) {
+		sysMsg("Select area by left clicking and dragging ground!");
+		synchronized(pBotSession.gui.map.areaSelectCbQueue) {
+			pBotSession.gui.map.areaSelectCbQueue.add(new Pair<>(cb, pBotSession));
+		}
+	}
 }

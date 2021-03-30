@@ -30,6 +30,8 @@ import haven.purus.*;
 import haven.purus.mapper.Mapper;
 import haven.purus.pathfinder.Pathfinder;
 import haven.purus.pbot.PBotWindow;
+import haven.purus.pbot.api.Callback;
+import haven.purus.pbot.api.PBotSession;
 
 import java.io.File;
 import java.util.*;
@@ -84,6 +86,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	public BetterBelt betterBelt;
 	public HandsWdg handsWdg;
 	public Thread pathfinder;
+
+	public final ArrayList<Pair<Callback, PBotSession>> itemCallbacks = new ArrayList<>();
 
     private static final OwnerContext.ClassResolver<BeltSlot> beltctxr = new OwnerContext.ClassResolver<BeltSlot>()
 	.add(Glob.class, slot -> slot.wdg().ui.sess.glob)

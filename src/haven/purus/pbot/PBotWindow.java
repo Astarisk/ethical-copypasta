@@ -9,7 +9,9 @@ import javax.imageio.ImageIO;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
@@ -35,6 +37,15 @@ public class PBotWindow extends BetterWindow {
 			@Override
 			protected PBotScriptEntry listitem(int i) {
 				return entries.get(i);
+			}
+
+			@Override
+			public Object tooltip(Coord c, Widget prev) {
+				if(c.x > UI.scale(20) && c.x < UI.scale(180)) {
+					if(itemat(c) != null && itemat(c).tooltip != null)
+						return RichText.render(itemat(c).tooltip, 0);
+				}
+				return null;
 			}
 
 			@Override
@@ -208,6 +219,7 @@ public class PBotWindow extends BetterWindow {
 		public File scriptFile;
 		public boolean directory = false;
 		public Tex icon;
+		public String tooltip = null;
 
 		public PBotScriptEntry(File scriptFile) {
 			this.scriptFile = scriptFile;
@@ -221,6 +233,23 @@ public class PBotWindow extends BetterWindow {
 					icon = new TexI(ImageIO.read(iconF));
 				} catch(IOException e) {
 					defaultIcon();
+					e.printStackTrace();
+				}
+			}
+			if(!directory) {
+				try {
+					List<String> lines = Files.readAllLines(scriptFile.toPath());
+					StringBuilder sb = new StringBuilder();
+					for(String line : lines) {
+						if(line.length() == 0 || line.charAt(0) != '#')
+							break;
+						if(sb.length() > 0)
+							sb.append('\n');
+						sb.append(line.substring(1));
+					}
+					if(sb.length() > 0)
+						tooltip = sb.toString();
+				} catch(IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -241,6 +270,11 @@ public class PBotWindow extends BetterWindow {
 			g.image(setKeyIcon, UI.scale(180, 0), UI.scale(20, 20));
 			g.atext(name, UI.scale(25, 0), 0, -0.5);
 			super.draw(g);
+		}
+
+		@Override
+		public Object tooltip(Coord c, Widget prev) {
+			return "testi";
 		}
 
 		public PBotScriptEntry(File scriptFile, String name) {

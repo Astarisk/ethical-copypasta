@@ -36,6 +36,15 @@ public class PBotFlowerMenu {
 	}
 
 	/**
+	 * Choose option by number
+	 * @param num Option number 0-indexed
+	 */
+	public void choosePetal(int num) {
+		menu.choose(menu.opts[num]);
+		menu.destroy();
+	}
+
+	/**
 	 * Get options of flowermenu
 	 * @return Names of the petal options
 	 */
