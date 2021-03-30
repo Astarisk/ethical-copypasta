@@ -26,12 +26,14 @@ public class ClickPath implements RenderTree.Node, TickList.Ticking, TickList.Ti
 	private FillBuffer fill(VertexArray.Buffer dst, Environment env) {
 		FillBuffer ret = env.fillbuf(dst);
 		ByteBuffer buf = ret.push();
-		Coord2d prev = new Coord2d(gob.getc());
-		for(int i=0; i<rte.length; i++) {
-			buf.putFloat((float) prev.x).putFloat((float) -prev.y).putFloat(mCache.getz(prev.floor(MCache.tilesz)));
-			buf.putFloat((float) rte[i].x).putFloat((float) -rte[i].y).putFloat(mCache.getz(rte[i].floor(MCache.tilesz)));
-			prev = rte[i];
-		}
+		try {
+			Coord2d prev = new Coord2d(gob.getc());
+			for(int i=0; i<rte.length; i++) {
+				buf.putFloat((float) prev.x).putFloat((float) -prev.y).putFloat(mCache.getz(prev.floor(MCache.tilesz)));
+				buf.putFloat((float) rte[i].x).putFloat((float) -rte[i].y).putFloat(mCache.getz(rte[i].floor(MCache.tilesz)));
+				prev = rte[i];
+			}
+		} catch(Loading l) {}
 		return (ret);
 	}
 
