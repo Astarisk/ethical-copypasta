@@ -19,6 +19,7 @@ import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.zip.GZIPInputStream;
 
 public class IconService {
 
@@ -31,9 +32,10 @@ public class IconService {
 	public static void getSentIcons() {
 		try {
 			HttpsURLConnection conn = (HttpsURLConnection) new URL(FoodService.API_ENDPOINT + "data/icons.json").openConnection();
+			conn.setRequestProperty("Accept-Encoding", "gzip");
 			conn.setRequestProperty("User-Agent", "H&H Client/" + Config.confid);
 			conn.setRequestProperty("Cache-Control", "no-cache");
-			Scanner scan = new Scanner(conn.getInputStream());
+			Scanner scan = new Scanner(new GZIPInputStream(conn.getInputStream()));
 			StringBuilder sb = new StringBuilder();
 			while(scan.hasNextLine())
 				sb.append(scan.nextLine());

@@ -21,6 +21,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.zip.GZIPInputStream;
 
 public class FoodService {
 	public static final String API_ENDPOINT = "https://hnhfood.vatsul.com/api/";
@@ -65,10 +66,11 @@ public class FoodService {
 			if (System.currentTimeMillis() - lastModified > TimeUnit.MINUTES.toMillis(30)) {
 				try {
 					HttpsURLConnection connection = (HttpsURLConnection) new URL(FOOD_DATA_URL).openConnection();
+					connection.setRequestProperty("Accept-Encoding", "gzip");
 					connection.setRequestProperty("User-Agent", "H&H Client/" + Config.confid);
 					connection.setRequestProperty("Cache-Control", "no-cache");
 					StringBuilder stringBuilder = new StringBuilder();
-					try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+					try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(connection.getInputStream())))) {
 						stringBuilder.append(reader.readLine());
 					} finally {
 						connection.disconnect();
