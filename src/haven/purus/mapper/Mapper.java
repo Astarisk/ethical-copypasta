@@ -66,39 +66,41 @@ public class Mapper {
 	};
 
 	static {
-		boolean regen = false;
-		if(Config.mapperToken.val.length() == 0)
-			regen = true;
-		else
-		try {
-			URL url = new URL(Mapper.apiURL + "/token/" + Config.mapperToken.val + "/valid");
-			Scanner scan = new Scanner(url.openStream());
-			if(scan.hasNextLine() && scan.nextLine().equals("Valid")) {
-			} else {
-				regen = true;
-			}
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-
-		if(regen) {
-			try {
-				HttpsURLConnection conn = (HttpsURLConnection) new URL(apiURL + "token/generate").openConnection();
-				conn.setRequestProperty("User-Agent", "H&H Client/" + haven.Config.confid);
-				String token;
-				try(BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-					token = reader.readLine();
-				} finally {
-					conn.disconnect();
-				}
-				if(conn.getResponseCode() == 200)
-					Config.mapperToken.setVal(token);
-			} catch(IOException e) {
-				e.printStackTrace();
-			}
-		}
 		executor = Executors.newScheduledThreadPool(1);
 		executor.scheduleWithFixedDelay(locUpd, 5, 5, TimeUnit.SECONDS);
+		executor.execute(() -> {
+			boolean regen = false;
+			if(Config.mapperToken.val.length() == 0)
+				regen = true;
+			else
+				try {
+					URL url = new URL(Mapper.apiURL + "/token/" + Config.mapperToken.val + "/valid");
+					Scanner scan = new Scanner(url.openStream());
+					if(scan.hasNextLine() && scan.nextLine().equals("Valid")) {
+					} else {
+						regen = true;
+					}
+				} catch(IOException e) {
+					e.printStackTrace();
+				}
+
+			if(regen) {
+				try {
+					HttpsURLConnection conn = (HttpsURLConnection) new URL(apiURL + "token/generate").openConnection();
+					conn.setRequestProperty("User-Agent", "H&H Client/" + haven.Config.confid);
+					String token;
+					try(BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+						token = reader.readLine();
+					} finally {
+						conn.disconnect();
+					}
+					if(conn.getResponseCode() == 200)
+						Config.mapperToken.setVal(token);
+				} catch(IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 	public static void receiveGrid(MCache map, MCache.Grid grid, MCache.Grid top, MCache.Grid right, MCache.Grid down, MCache.Grid left) {
