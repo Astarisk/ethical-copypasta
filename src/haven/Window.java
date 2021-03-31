@@ -169,7 +169,7 @@ public class Window extends Widget implements DTarget {
     protected void drawframe(GOut g) {
     	try {
 			if(cap.text.equals("Study Desk")) {
-				int sizeY = 250;
+				int sizeY = UI.scale(250);
 				int totalLP = 0;
 				HashMap<String, Double> studyTimes = new HashMap<String, Double>();
 				for(Widget wdg = this.lchild; wdg != null; wdg = wdg.prev) {
@@ -183,18 +183,18 @@ public class Window extends Widget implements DTarget {
 						}
 					}
 				}
-				g.image(Text.render("Total LP: " + String.format("%,d", totalLP)).tex(), new Coord(30, 271));
-				int y = 285;
+				g.image(Text.render("Total LP: " + String.format("%,d", totalLP)).tex(), UI.scale(30, 271));
+				int y = UI.scale(285);
 				List<Map.Entry<String, Double>> lst = studyTimes.entrySet().stream().sorted((e1, e2) -> e1.getValue().compareTo(e2.getValue())).collect(Collectors.toList());
 				for(Map.Entry<String, Double> entry : lst) {
 					if(entry.getValue() > 24 * 60 * 60)
-						g.image(Text.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()), Color.green).tex(), new Coord(30, y));
+						g.image(Text.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()), Color.green).tex(), new Coord(UI.scale(30), y));
 					else
-						g.image(Text.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()), Color.red).tex(), new Coord(30, y));
-					y += 15;
-					sizeY += 15;
+						g.image(Text.render(entry.getKey() + ": " + sensibleTimeFormat(entry.getValue()), Color.red).tex(), new Coord(UI.scale(30), y));
+					y += UI.scale(15);
+					sizeY += UI.scale(15);
 				}
-				resize(230, sizeY);
+				resize(UI.scale(230), sizeY);
 			} else if(cap.text.equals("Table")) {
 				for(Widget w = this.lchild; w != null; w = w.prev) {
 					if(w instanceof Inventory) {
