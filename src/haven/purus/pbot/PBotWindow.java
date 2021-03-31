@@ -115,7 +115,7 @@ public class PBotWindow extends BetterWindow {
 				Config.scriptsKeybinded.setVal(Config.scriptsKeybinded.val);
 			}
 
-			add(new SetButton(200, getKeybinding(entry.scriptFile.getPath())));
+			add(new SetButton(UI.scale(200), getKeybinding(entry.scriptFile.getPath())));
 		}
 
 		public class SetButton extends KeyMatch.Capture {

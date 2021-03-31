@@ -81,14 +81,14 @@ public class AlarmWindow extends Window {
 
 		ArrayList<AlarmItem> items = new ArrayList<>();
 		Scrollbar sb;
-		int rowHeight = 30;
+		int rowHeight = UI.scale(30);
 		int rows, w;
 
 		public AlarmList(int w, int rows) {
 			this.rows = rows;
 			this.w = w;
 			this.sz = UI.scale(w, rowHeight * rows);
-			sb = new Scrollbar(UI.scale(rowHeight) * rows, 0, 100);
+			sb = new Scrollbar(rowHeight * rows, 0, 100);
 			add(sb, UI.scale(0, 0));
 		}
 
@@ -142,7 +142,7 @@ public class AlarmWindow extends Window {
 			for(int i=0; i<rows; i++) {
 				if(i+sb.val >= items.size())
 					break;
-				GOut ig = g.reclip(UI.scale(15, i*rowHeight), UI.scale(w-UI.scale(15), rowHeight));
+				GOut ig = g.reclip(new Coord(UI.scale(15), i*rowHeight), UI.scale(w-UI.scale(15), rowHeight));
 				items.get(i+sb.val).draw(ig);
 			}
 			super.draw(g);

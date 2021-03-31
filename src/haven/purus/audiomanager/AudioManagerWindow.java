@@ -27,7 +27,7 @@ public class AudioManagerWindow extends BetterWindow {
 		add(new Label("Last played"), UI.scale(280, 15));
 		add(new Label("Volume"), UI.scale(520, 15));
 
-		vl = new AudioManagerWindow.VolumeList(825, 10);
+		vl = new AudioManagerWindow.VolumeList(UI.scale(825), 10);
 		refresh();
 		add(vl, UI.scale(25, 35));
 	}
@@ -55,14 +55,14 @@ public class AudioManagerWindow extends BetterWindow {
 
 		ArrayList<AudioManagerWindow.VolumeItem> items = new ArrayList<>();
 		Scrollbar sb;
-		int rowHeight = 30;
+		int rowHeight = UI.scale(30);
 		int rows, w;
 
 		public VolumeList(int w, int rows) {
 			this.rows = rows;
 			this.w = w;
-			this.sz = UI.scale(w, rowHeight * rows);
-			sb = new Scrollbar(UI.scale(rowHeight) * rows, 0, 100);
+			this.sz = new Coord(w, rowHeight * rows);
+			sb = new Scrollbar(rowHeight * rows, 0, 100);
 			add(sb, UI.scale(0, 0));
 		}
 
@@ -116,7 +116,7 @@ public class AudioManagerWindow extends BetterWindow {
 			for(int i=0; i<rows; i++) {
 				if(i+sb.val >= items.size())
 					break;
-				GOut ig = g.reclip(UI.scale(15, i*rowHeight), UI.scale(w-UI.scale(15), rowHeight));
+				GOut ig = g.reclip(new Coord(UI.scale(15), i*rowHeight), new Coord(w-UI.scale(15), rowHeight));
 				items.get(i+sb.val).draw(ig);
 			}
 			super.draw(g);
