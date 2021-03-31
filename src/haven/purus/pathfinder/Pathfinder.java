@@ -178,11 +178,18 @@ public class Pathfinder {
 				for(int j=-45; j<=45; j++) {
 					Coord c = origin.div(MCache.tilesz).round().add(i, j);
 					int t = gui.ui.sess.glob.map.gettile(c);
-					Tiler tl = gui.ui.sess.glob.map.tiler(t);
-					if (tl instanceof Ridges.RidgeTile) {
-						if(Ridges.brokenp(gui.ui.sess.glob.map, c)) {
-							markTileInaccessible(new Coord(i,j), grid);
+					while(true) {
+						try {
+							Tiler tl = gui.ui.sess.glob.map.tiler(t);
+							if(tl instanceof Ridges.RidgeTile) {
+								if(Ridges.brokenp(gui.ui.sess.glob.map, c)) {
+									markTileInaccessible(new Coord(i, j), grid);
+								}
+							}
+							break;
+						} catch(Loading l) {
 						}
+						Thread.onSpinWait();
 					}
 					while(true) {
 						try {
