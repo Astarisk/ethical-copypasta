@@ -655,7 +655,7 @@ public class ChatUI extends Widget {
 	
 	public void resize(Coord sz) {
 	    super.resize(sz);
-	    if(in != null) {
+		if(in != null) {
 		in.c = new Coord(0, this.sz.y - in.sz.y);
 		in.resize(this.sz.x);
 	    }
@@ -1074,7 +1074,7 @@ public class ChatUI extends Widget {
     }
 
     public void select(Channel chan) {
-	select(chan, true);
+		select(chan, true);
     }
 
     private class Notification {
@@ -1188,7 +1188,7 @@ public class ChatUI extends Widget {
     }
 
     public void resize(int w) {
-	resize(new Coord(Math.max(w, selw + marg.x + UI.scale(10) + marg.x), sz.y));
+		resize(new Coord(Math.max(w, selw + marg.x + UI.scale(10) + marg.x), sz.y));
     }
     
     public void move(Coord base) {
@@ -1228,16 +1228,21 @@ public class ChatUI extends Widget {
 	}
     }
 
-    private UI.Grab dm = null;
+    private UI.Grab dm = null, dm2 = null;
     private Coord doff;
-    private static final int minh = 111;
+    private static final int minh = 111, minw = 420;
     public int savedh = UI.scale(Math.max(minh, Utils.getprefi("chatsize", minh)));
-    public boolean mousedown(Coord c, int button) {
+	public int savedw = UI.scale(Math.max(minw, Utils.getprefi("chatsizew", minw)));
+	public boolean mousedown(Coord c, int button) {
 	int bmfx = (sz.x - bmf.sz().x) / 2;
 	if((button == 1) && (c.y < bmf.sz().y) && (c.x >= bmfx) && (c.x <= (bmfx + bmf.sz().x))) {
-	    dm = ui.grabmouse(this);
-	    doff = c;
-	    return(true);
+		dm = ui.grabmouse(this);
+		doff = c;
+		return (true);
+	} else if((button == 1) && c.x > sz.x-UI.scale(10)) {
+		dm2 = ui.grabmouse(this);
+		doff = c;
+		return true;
 	} else {
 	    return(super.mousedown(c, button));
 	}
@@ -1245,18 +1250,28 @@ public class ChatUI extends Widget {
 
     public void mousemove(Coord c) {
 	if(dm != null) {
-	    resize(sz.x, savedh = Math.max(UI.scale(minh), sz.y + doff.y - c.y));
+		resize(sz.x, savedh = Math.max(UI.scale(minh), sz.y + doff.y - c.y));
+	} else if(dm2 != null) {
+		resize(savedw = Math.max(UI.scale(minw), sz.x + (c.x - doff.x)), sz.y);
+		chansel.chls.forEach(ch -> ch.chan.resize(sz.x - marg.x - ch.chan.c.x, sz.y - ch.chan.c.y));
+		doff = c;
 	} else {
 	    super.mousemove(c);
 	}
     }
 
     public boolean mouseup(Coord c, int button) {
+		if(dm2 != null) {
+			dm2.remove();
+			dm2 = null;
+			Utils.setprefi("chatsizew", UI.unscale(savedw));
+			return (true);
+		}
 	if(dm != null) {
-	    dm.remove();
-	    dm = null;
-	    Utils.setprefi("chatsize", UI.unscale(savedh));
-	    return(true);
+		dm.remove();
+		dm = null;
+		Utils.setprefi("chatsize", UI.unscale(savedh));
+		return (true);
 	} else {
 	    return(super.mouseup(c, button));
 	}

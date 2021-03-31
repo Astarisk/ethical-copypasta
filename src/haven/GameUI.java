@@ -1446,7 +1446,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
     public void resize(Coord sz) {
 	this.sz = sz;
-	chat.resize(sz.x - blpw - brpw);
+	chat.resize(Math.min(sz.x - blpw - brpw, chat.savedw));
 	chat.move(new Coord(blpw, sz.y));
 	if(map != null)
 	    map.resize(sz);
