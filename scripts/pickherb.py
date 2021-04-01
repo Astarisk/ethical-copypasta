@@ -1,5 +1,5 @@
 class Script:
-    def run(sess):
+    def run(self, sess):
         PBotUtils = sess.PBotUtils()
         PBotGobAPI = sess.PBotGobAPI()
 

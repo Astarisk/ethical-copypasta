@@ -14,6 +14,6 @@ class GobListener(object):
         implements = ["haven.purus.pbot.api.Callback"]
 
 class Script:
-    def run(sess):
+    def run(self, sess):
         PBotGobAPI = sess.PBotGobAPI()
         PBotGobAPI.selectGob(GobListener())

@@ -11,7 +11,7 @@ class PBotRunner(object):
         importlib.invalidate_caches()
         script = importlib.import_module(scriptName)
         importlib.reload(script)
-        threading.Thread(target=script.Script.run, args=[pBotSession]).start()
+        threading.Thread(target=script.Script().run, args=[pBotSession]).start()
     class Java:
         implements = ["haven.purus.pbot.Py4j.PBotScriptLoader"]
 gateway = JavaGateway(callback_server_parameters=CallbackServerParameters(),

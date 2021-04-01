@@ -18,7 +18,7 @@ class Listener(object):
         implements = ["haven.purus.pbot.api.Callback"]
 
 class Script:
-    def run(sess):
+    def run(self, sess):
         global session
         session = sess
         PBotUtils = sess.PBotUtils()
