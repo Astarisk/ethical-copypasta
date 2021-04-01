@@ -426,6 +426,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    });
 	Debug.log = ui.cons.out;
 	opts.c = sz.sub(opts.sz).div(2);
+	if(ui.root.multiSessionWindow != null)
 		ui.root.multiSessionWindow.destroy();
 		ui.root.multiSessionWindow = add(new MultiSession.MultiSessionWindow());
 		add(new FKeyBelt());
