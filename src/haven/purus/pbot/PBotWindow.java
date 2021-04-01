@@ -201,7 +201,7 @@ public class PBotWindow extends BetterWindow {
 		if(!curPath.equals("scripts"))
 			entries.add(new PBotScriptEntry(new File(curPath).getParentFile(), "../"));
 		for(File f : dir.listFiles()) {
-			if(f.getPath().endsWith("__pycache__") ||  f.equals(new File("scripts/loader.py")) || f.equals(new File("scripts/py4j")) || (!f.isDirectory() && !f.getName().endsWith(".py")))
+			if(f.getName().startsWith("__") ||  f.equals(new File("scripts/loader.py")) || f.equals(new File("scripts/py4j")) || (!f.isDirectory() && !f.getName().endsWith(".py")))
 				continue;
 			entries.add(new PBotScriptEntry(f));
 		}
