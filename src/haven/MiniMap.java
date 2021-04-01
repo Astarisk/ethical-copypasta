@@ -36,6 +36,7 @@ import haven.MapFile.Marker;
 import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
 import haven.purus.alarms.AlarmManager;
+import haven.purus.mapper.Mapper;
 
 import static haven.MCache.cmaps;
 import static haven.MCache.tilesz;
@@ -63,6 +64,7 @@ public class MiniMap extends Widget {
     protected int dlvl;
     protected Location dloc;
     private static final HashSet<Long> alarmPlayed = new HashSet<Long>();
+    private static final HashSet<Long> sent = new HashSet<>();
 
     public MiniMap(Coord sz, MapFile file) {
 	super(sz);
@@ -244,11 +246,21 @@ public class MiniMap extends Widget {
 	    this.icon = icon;
 	    this.gob = icon.gob;
 	    this.img = icon.img();
-	    this.z = this.img.z;
+		this.z = this.img.z;
 	    this.stime = Utils.rtime();
 	}
 
 	public void update(Coord2d rc, double ang) {
+			try {
+				if(icon.res.get().name.equals("gfx/hud/mmap/cave") && !sent.contains(gob.id)) {
+					if(gameui().ui.sess.glob.map.grids != null) {
+						MCache.Grid g;
+						g = gameui().ui.sess.glob.map.getgrid(gob.rc.floor().div(11 * 100));
+						Mapper.sendMarkerData(g.id, gob.rc.div(11).floor().mod(new Coord(100, 100)).x, gob.rc.div(11).floor().mod(new Coord(100, 100)).y, "gfx/hud/mmap/cave", "Cave");
+						sent.add(gob.id);
+					}
+				}
+			} catch(Loading l){}
 	    this.rc = rc;
 	    this.ang = ang;
 	    if((this.rc == null) || (sessloc == null) || (dloc == null) || (dloc.seg != sessloc.seg))
