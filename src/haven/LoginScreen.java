@@ -50,7 +50,7 @@ public class LoginScreen extends Widget {
     private Button optbtn;
     private OptWnd opts;
     private Button statusbtn;
-    private Button pastadiscord;
+    private Button pastadiscord, hnhdiscord;
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
 
@@ -61,9 +61,11 @@ public class LoginScreen extends Widget {
 	optbtn = adda(new Button(UI.scale(100), "Options"), pos("cbl").add(10, -10), 0, 1);
 	optbtn.setgkey(GameUI.kb_opt);
 	add(new Credentials.CredentialsWidget());
-	statusbtn = adda(new Button(UI.scale(200), "Initializing..."), sz.x-UI.scale(210), UI.scale(80), 0, 1);
+	statusbtn = adda(new Button(UI.scale(200), "Initializing..."), sz.x-UI.scale(210), UI.scale(120), 0, 1);
 		executorService.scheduleWithFixedDelay(checkStatus,0, 5, TimeUnit.SECONDS);
 	pastadiscord = adda(new Button(UI.scale(200), "Pasta Discord"), sz.x-UI.scale(210), UI.scale(40), 0, 1);
+	hnhdiscord = adda(new Button(UI.scale(200), "HnH Public Discord"), sz.x-UI.scale(210), UI.scale(80), 0, 1);
+
 
 	}
 
@@ -238,6 +240,15 @@ public class LoginScreen extends Widget {
 		if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
 			try {
 				desktop.browse(new URI("https://discord.gg/S8ZPxJmHXS"));
+			} catch (IOException | URISyntaxException e) {
+				e.printStackTrace();
+			}
+		}
+	} else if(sender == hnhdiscord) {
+		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+		if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+			try {
+				desktop.browse(new URI("https://discord.gg/ctCypnN"));
 			} catch (IOException | URISyntaxException e) {
 				e.printStackTrace();
 			}
