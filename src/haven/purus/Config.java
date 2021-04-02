@@ -94,6 +94,7 @@ public class Config {
 	public static Setting<Boolean> invShowLogin = new Setting<>("invShowLogin", true);
 	public static Setting<Boolean> beltShowLogin = new Setting<>("beltShowLogin", true);
 	public static Setting<Boolean> studyLock = new Setting<>("studyLock", false);
+	public static Setting<Boolean> showmapgrid = new Setting<>("showmapgrid", false);
 
 	public static Setting<Boolean> hideTrees = new Setting<>("hideTrees", true);
 	public static Setting<Boolean> hideBushes = new Setting<>("hideBushes", true);

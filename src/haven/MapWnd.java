@@ -37,6 +37,7 @@ import haven.MapFile.SMarker;
 import haven.MiniMap.*;
 import haven.BuddyWnd.GroupSelector;
 import haven.purus.BetterWindow;
+import haven.purus.Config;
 
 import static haven.MCache.tilesz;
 import static haven.MCache.cmaps;
@@ -110,8 +111,8 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 	toolbar.pack();
 	tool = add(new Toolbox());;
 	add(new ICheckBox("hud/mmap/mapgridbtn","", "-d", "-d", ""), UI.scale(10,10))
-			.state(() -> this.view.showGrid)
-			.set(a -> this.view.showGrid = a)
+			.state(() -> Config.showmapgrid.val)
+			.set(a -> Config.showmapgrid.setVal(a))
 			.settip("Show grid");
 
 		compact(Utils.getprefb("compact-map", false));

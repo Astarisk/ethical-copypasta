@@ -38,6 +38,7 @@ import haven.MapFile.GridInfo;
 import haven.MapFile.Marker;
 import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
+import haven.purus.Config;
 import haven.purus.alarms.AlarmManager;
 import haven.purus.mapper.Mapper;
 
@@ -49,8 +50,6 @@ public class MiniMap extends Widget {
     public static final Tex bg = Resource.loadtex("gfx/hud/mmap/ptex");
     public static final Tex nomap = Resource.loadtex("gfx/hud/mmap/nomap");
     public static final Tex mapgrid = Resource.loadtex("hud/mmap/mapgrid");
-
-	public boolean showGrid = false;
 
 	public static final Tex plp = ((TexI)Resource.loadtex("gfx/hud/mmap/plp")).filter(haven.render.Texture.Filter.LINEAR);
     public final MapFile file;
@@ -486,7 +485,7 @@ public class MiniMap extends Widget {
 	    }
 	    Coord ul = UI.scale(c.mul(cmaps)).sub(dloc.tc.div(scalef())).add(hsz);
 	    g.image(img, ul, UI.scale(img.sz()));
-	    if(showGrid && dlvl == 0) {
+	    if(Config.showmapgrid.val && dlvl == 0) {
 			g.image(mapgrid, ul);
 		}
 	}
