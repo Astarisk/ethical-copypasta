@@ -70,7 +70,10 @@ public class StudyInventory extends Inventory {
 
         public void setOld(Coord c, String resname) {
         	try {
-            	Tex tex = Resource.remote().loadwait(resname).layer(Resource.imgc).tex();
+        		Resource.Image img = Resource.remote().loadwait(resname).layer(Resource.imgc);
+        		if(img == null)
+        			return;
+            	Tex tex = img.tex();
 				clearSlots(c, UI.unscale(tex.sz()).div(30));
 				oldCurios.put(c, new Pair<String, Tex>(resname, tex));
 				save();
