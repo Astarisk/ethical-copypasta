@@ -67,6 +67,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	public ClickPath cp;
 	public final ArrayList<Pair<Callback, PBotSession>> gobCbQueue = new ArrayList<>();
 	public final ArrayList<Pair<Callback, PBotSession>> areaSelectCbQueue = new ArrayList<>();
+	public boolean wrongdir = false;
 
 	public interface Delayed {
 	public void run(GOut g);
@@ -1705,12 +1706,12 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			gridS = null;
 		}
 
-		if(clickpS != null && (cp == null || clickpS.obj() != cp || (player() != null && player().getv() == 0))) {
+		if(clickpS != null && (cp == null || clickpS.obj() != cp || (wrongdir || (player() != null && player().getv() == 0)))) {
 			clickpS.remove();
 			clickpS = null;
 		}
 
-		if(clickpS == null && cp != null && player() != null && player().getv() > 0) {
+		if(clickpS == null && !wrongdir &&  cp != null && player() != null && player().getv() > 0) {
 			clickpS = drawadd(cp);
 		}
 	}
@@ -2022,7 +2023,6 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    Object[] args = {pc, mc.floor(posres), clickb, modflags};
 		if(inf != null)
 			args = Utils.extend(args, inf.clickargs());
-		cp = null;
 		if(clickb == 1 && (modflags & UI.MOD_META) != 0 && inf != null  && inf.ci instanceof Gob.GobClick) {
 			synchronized(gobCbQueue) {
 				if(!gobCbQueue.isEmpty()) {
@@ -2048,7 +2048,9 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			if(gameui().pathfinder != null)
 				gameui().pathfinder.stop();
 		}
-		cp = new ClickPath(player(), new Coord2d[]{mc}, gameui().ui.sess.glob.map);
+		if(clickb == 1) {
+			cp = new ClickPath(player(), new Coord2d[]{mc}, gameui().ui.sess.glob.map);
+		}
 	    if(inf != null && inf.ci instanceof Gob.GobClick && (modflags & UI.MOD_META) == UI.MOD_META) {
 	    	Gob.GobClick gc = (Gob.GobClick) inf.ci;
 	    	if(ui.gui.vhand == null) {

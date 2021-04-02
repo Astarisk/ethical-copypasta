@@ -38,6 +38,7 @@ import haven.MapFile.GridInfo;
 import haven.MapFile.Marker;
 import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
+import haven.purus.ClickPath;
 import haven.purus.Config;
 import haven.purus.alarms.AlarmManager;
 import haven.purus.mapper.Mapper;
@@ -813,17 +814,14 @@ public class MiniMap extends Widget {
     public void mvclick(MapView mv, Coord mc, Location loc, Gob gob, int button) {
 	if(mc == null) mc = ui.mc;
 	if((sessloc != null) && (sessloc.seg == loc.seg)) {
-	    if(gob == null)
-		mv.wdgmsg("click", mc,
-			  loc.tc.sub(sessloc.tc).mul(tilesz).add(tilesz.div(2)).floor(posres),
-			  button, ui.modflags());
-	    else
-		mv.wdgmsg("click", mc,
-			  loc.tc.sub(sessloc.tc).mul(tilesz).add(tilesz.div(2)).floor(posres),
-			  button, ui.modflags(), 0,
-			  (int)gob.id,
-			  gob.rc.floor(posres),
-			  0, -1);
+	    if(gob == null) {
+			mv.wdgmsg("click", mc, loc.tc.sub(sessloc.tc).mul(tilesz).add(tilesz.div(2)).floor(posres), button, ui.modflags());
+			if(button == 1)
+				gameui().map.cp = new ClickPath(gameui().map.player(), new Coord2d[]{loc.tc.sub(sessloc.tc).mul(tilesz).add(tilesz.div(2))}, gameui().ui.sess.glob.map);
+		} else{
+				mv.wdgmsg("click", mc, loc.tc.sub(sessloc.tc).mul(tilesz).add(tilesz.div(2)).floor(posres), button, ui.modflags(), 0, (int) gob.id, gob.rc.floor(posres), 0, -1);
+
+		}
 	}
     }
 }

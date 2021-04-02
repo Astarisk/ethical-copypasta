@@ -11,7 +11,7 @@ public class ClickPath implements RenderTree.Node, TickList.Ticking, TickList.Ti
 	static final VertexArray.Layout pfmt = new VertexArray.Layout(new VertexArray.Layout.Input(Homo3D.vertex, new VectorFormat(3, NumberFormat.FLOAT32), 0,  0, 12));
 	Model emod;
 	Gob gob;
-	private Coord2d[] rte;
+	public Coord2d[] rte;
 	MCache mCache;
 
 	public ClickPath(Gob gob, Coord2d[] rte, MCache mCache) {

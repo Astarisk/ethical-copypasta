@@ -313,11 +313,19 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	if(m != null)
 	    m.move(c);
 	this.rc = c;
+	double olda = this.a;
 	this.a = a;
+		if(isPlayer() && this.a != olda &&  glob.sess.ui != null && glob.sess.ui.gui != null) {
+				if(Math.abs(a - (glob.sess.ui.gui.map.cp.rte[0].angle(this.rc) + Math.PI)) > Math.PI/180) {
+					glob.sess.ui.gui.map.wrongdir = true;
+				} else {
+					glob.sess.ui.gui.map.wrongdir = false;
+				}
+		}
     }
 
     boolean isPlayer() {
-    	return (glob.sess.ui.gui != null && this.id == glob.sess.ui.gui.plid);
+    	return (glob.sess.ui != null && glob.sess.ui.gui != null && this.id == glob.sess.ui.gui.plid);
 	}
 
     public Coord3f getc() {
