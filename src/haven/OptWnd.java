@@ -569,7 +569,7 @@ public class OptWnd extends BetterWindow {
 	Widget prev;
 	y = main.add(new PButton(UI.scale(200), "Video settings", 'v', video), 0, y).pos("bl").adds(0, 5).y;
 	y = main.add(new PButton(UI.scale(200), "Audio settings", 'a', audio), 0, y).pos("bl").adds(0, 5).y;
-	y = main.add(new PButton(UI.scale(200), "Keybindings", 'k', keybind), 0, y).pos("bl").adds(0, 5).y;
+	y = main.add(new PButton(UI.scale(200), "Keybindings", 'k', keybind), 0, y).pos("bl").adds(0, 10).y;
 	y = main.add(new Button(UI.scale(200), "Pasta Settings", () -> {
 		if(optWndPurus == null) {
 			optWndPurus = this.parent.add(new OptWndPurus());
@@ -577,7 +577,7 @@ public class OptWnd extends BetterWindow {
 		} else {
 			optWndPurus.show(!optWndPurus.visible);
 		}
-	}),0 ,y).pos("bl").adds(0, 5).y;
+	}),0 ,y).pos("bl").adds(0, -5).y;
 	y = main.add(new Button(UI.scale(200), "Alarm Manager", () -> {
 		if(aw == null) {
 			aw = this.parent.add(new AlarmWindow());
@@ -585,7 +585,7 @@ public class OptWnd extends BetterWindow {
 		} else {
 			aw.show(!aw.visible);
 		}
-	}),0 ,y).pos("bl").adds(0, 5).y;
+	}),0 ,y).pos("bl").adds(0, -5).y;
 		y = main.add(new Button(UI.scale(200), "Volume Manager", () -> {
 			if(amw == null) {
 				amw = this.parent.add(new AudioManagerWindow());
@@ -593,7 +593,7 @@ public class OptWnd extends BetterWindow {
 			} else {
 				amw.show(!amw.visible);
 			}
-		}),0 ,y).pos("bl").adds(0, 5).y;
+		}),0 ,y).pos("bl").adds(0, -5).y;
 		y = main.add(new Button(UI.scale(200), "Flowermenu Manager", () -> {
 			if(fmw == null) {
 				fmw = this.parent.add(new FlowerManagerWindow());
