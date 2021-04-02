@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <project name="hafen" default="deftgt">
-	<property name="version">0.0.1</property>
+	<property name="version">1.0.0</property>
   <target name="build-env">
     <mkdir dir="build" />
     <mkdir dir="build/classes" />
