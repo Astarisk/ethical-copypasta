@@ -172,7 +172,7 @@ public class Pathfinder {
 			Gob player = gui.map.player();
 			if(player == null)
 				return;
-			Coord2d origin = player.rc.floor(MCache.tilesz).mul(MCache.tilesz);
+			Coord2d origin = player.rc.floor().div(100).mul(new Coord2d(100, 100)).add(45, 45).floor(MCache.tilesz).mul(MCache.tilesz);
 			int[][] grid = new int[100*11][100*11];
 			for(int i=-45; i<=45; i++) {
 				for(int j=-45; j<=45; j++) {
@@ -253,11 +253,11 @@ public class Pathfinder {
 					}
 				}
 			}
-			for(int i=-35*11; i<=35*11; i++) {
-				grid[50*11-i][50*11-35*11] = 1;
-				grid[50*11-35*11][50*11-i] = 1;
-				grid[50*11+i][50*11+35*11] = 1;
-				grid[50*11+35*11][50*11+i] = 1;
+			for(int i=-40*11; i<=40*11; i++) {
+				grid[50*11-i][50*11-40*11] = 1;
+				grid[50*11-40*11][50*11-i] = 1;
+				grid[50*11+i][50*11+40*11] = 1;
+				grid[50*11+40*11][50*11+i] = 1;
 			}
 			Coord[][] src = new Coord[100*11][100*11];
 			double[][] cost = new double[100*11][100*11];
