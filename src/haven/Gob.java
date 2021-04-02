@@ -315,7 +315,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	this.rc = c;
 	double olda = this.a;
 	this.a = a;
-		if(isPlayer() && this.a != olda &&  glob.sess.ui != null && glob.sess.ui.gui != null) {
+		if(isPlayer() && this.a != olda &&  glob.sess.ui != null && glob.sess.ui.gui != null && glob.sess.ui.gui.map.cp != null) {
 				if(Math.abs(a - (glob.sess.ui.gui.map.cp.rte[0].angle(this.rc) + Math.PI)) > Math.PI/180) {
 					glob.sess.ui.gui.map.wrongdir = true;
 				} else {
