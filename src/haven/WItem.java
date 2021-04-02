@@ -32,6 +32,7 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.function.*;
 import haven.ItemInfo.AttrCache;
+import haven.purus.Config;
 import haven.purus.pbot.api.Callback;
 import haven.purus.pbot.api.PBotItem;
 import haven.purus.pbot.api.PBotSession;
@@ -192,7 +193,7 @@ public class WItem extends Widget implements DTarget {
 	}
     }
 
-    public void draw(GOut g) {
+	public void draw(GOut g) {
 	GSprite spr = item.spr();
 	if(spr != null) {
 	    Coord sz = spr.sz();
@@ -226,6 +227,20 @@ public class WItem extends Widget implements DTarget {
 
     public boolean mousedown(Coord c, int btn) {
 	if(btn == 1) {
+		if(gameui().autodropItmCb) {
+			String name = item.resource().name;
+			if(name != null) {
+				Config.autodropItems.val.put(name, true);
+				Config.autodropItems.setVal(Config.autodropItems.val);
+				gameui().msg("Adding item " + name);
+				if(gameui().opts.dw != null)
+					gameui().opts.dw.refresh();
+			} else {
+				gameui().error("Adding item failed! Name of item couldn't be fetched.");
+			}
+			gameui().autodropItmCb = false;
+			return true;
+		}
 		synchronized(gameui().itemCallbacks) {
 			if(gameui().itemCallbacks.size() > 0) {
 				for(Pair<Callback, PBotSession> cb : gameui().itemCallbacks) {

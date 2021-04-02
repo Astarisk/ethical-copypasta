@@ -46,6 +46,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     public String name;
 	public double studytime = 0;
 	public Tex metertex;
+	private boolean dropcheck = false;
 
 
     @RName("item")
@@ -57,7 +58,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 	}
     }
 
-    public interface ColorInfo {
+	public interface ColorInfo {
 	public Color olcol();
     }
 
@@ -155,12 +156,27 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
     }
 
     public void tick(double dt) {
+    	if(!dropcheck) {
+			new Runnable() {
+				@Override
+				public void run() {
+					try {
+						if(haven.purus.Config.autodropItems.val.containsKey(getres().name) && Config.autodropItems.val.get(getres().name)) {
+							wdgmsg("drop", Coord.z, 1);
+						}
+					} catch(Loading l) {
+						l.waitfor(this, waiting -> {});
+					}
+				}
+			}.run();
+			dropcheck = true;
+		}
 	GSprite spr = spr();
 	if(spr != null)
 	    spr.tick(dt);
     }
 
-    public List<ItemInfo> info() {
+	public List<ItemInfo> info() {
 	if(info == null) {
 			info = ItemInfo.buildinfo(this, rawinfo);
 		if(Config.resinfo.val) {

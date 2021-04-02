@@ -87,6 +87,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	public HandsWdg handsWdg;
 	public Thread pathfinder;
 
+	public boolean autodropItmCb = false;
 	public final ArrayList<Pair<Callback, PBotSession>> itemCallbacks = new ArrayList<>();
 
     private static final OwnerContext.ClassResolver<BeltSlot> beltctxr = new OwnerContext.ClassResolver<BeltSlot>()

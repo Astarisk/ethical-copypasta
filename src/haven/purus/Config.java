@@ -109,7 +109,7 @@ public class Config {
 
 	public static Setting<Boolean> pathfinder = new Setting<>("pathfinder", false);
 
-
+	public static Setting<ConcurrentHashMap<String, Boolean>> autodropItems = new Setting<>("autodropItems", new ConcurrentHashMap<>());
 	public static Setting<ConcurrentHashMap<String, Boolean>> flowerOptOpens = new Setting<>("flowerOptOpens", new ConcurrentHashMap<>());
 	public static Setting<ConcurrentHashMap<String, Float>> customVolumes = new Setting<>("customVolumes", new ConcurrentHashMap<>());
 

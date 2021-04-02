@@ -26,11 +26,8 @@
 
 package haven;
 
-import haven.purus.BetterWindow;
+import haven.purus.*;
 import haven.purus.Config;
-import haven.purus.MultiSession;
-import haven.purus.OptWndPurus;
-import haven.purus.TileGrid;
 import haven.purus.alarms.AlarmWindow;
 import haven.purus.audiomanager.AudioManagerWindow;
 import haven.purus.flowermanager.FlowerManagerWindow;
@@ -42,7 +39,8 @@ public class OptWnd extends BetterWindow {
 	AlarmWindow aw;
 	AudioManagerWindow amw;
 	FlowerManagerWindow fmw;
-    public final Panel main, video, audio, keybind;
+	DropperWindow dw;
+	public final Panel main, video, audio, keybind;
     public Panel current;
 
     public void chpanel(Panel p) {
@@ -589,6 +587,7 @@ public class OptWnd extends BetterWindow {
 		y = main.add(new Button(UI.scale(200), "Volume Manager", () -> {
 			if(amw == null) {
 				amw = this.parent.add(new AudioManagerWindow());
+				amw.refresh();
 				amw.show();
 			} else {
 				amw.show(!amw.visible);
@@ -597,9 +596,18 @@ public class OptWnd extends BetterWindow {
 		y = main.add(new Button(UI.scale(200), "Flowermenu Manager", () -> {
 			if(fmw == null) {
 				fmw = this.parent.add(new FlowerManagerWindow());
+				fmw.refresh();
 				fmw.show();
 			} else {
 				fmw.show(!fmw.visible);
+			}
+		}),0 ,y).pos("bl").adds(0, -5).y;
+		y = main.add(new Button(UI.scale(200), "Item autodrop Manager", () -> {
+			if(dw == null) {
+				dw = this.parent.add(new DropperWindow());
+				dw.show();
+			} else {
+				dw.show(!dw.visible);
 			}
 		}),0 ,y).pos("bl").adds(0, 5).y;
 	y += UI.scale(60);
