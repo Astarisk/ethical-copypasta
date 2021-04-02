@@ -403,6 +403,7 @@ public class OptWnd extends BetterWindow {
 		y = addbtn(cont, "Toggle bounding boxes", Config.kb_bbtoggle, y);
 		y = addbtn(cont, "Toggle pathfinder", Config.kb_pathfinder, y);
 		y = addbtn(cont, "Toggle hide", Config.kb_hidetoggle, y);
+		y = addbtn(cont, "Switch camera", Config.kb_camswitch, y);
 
 		/*Composer composer = new Composer(this).vmrgn(UI.scale(5));
 	    composer.adda(scrollport, scrollport.cont.sz.x / 2, 0.5);

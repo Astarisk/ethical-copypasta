@@ -62,7 +62,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
     private Coord3f camoff = new Coord3f(Coord3f.o);
     public double shake = 0.0;
     public static int plobgran = Utils.getprefi("plobgran", 8);
-    private static final Map<String, Class<? extends Camera>> camtypes = new HashMap<String, Class<? extends Camera>>();
+    public static final Map<String, Class<? extends Camera>> camtypes = new HashMap<String, Class<? extends Camera>>();
     private TileGrid tg;
 	public ClickPath cp;
 	public final ArrayList<Pair<Callback, PBotSession>> gobCbQueue = new ArrayList<>();

@@ -1374,6 +1374,14 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 			map.removeCustomSprites(1340);
 			map.refreshGobsAll();
 			return true;
+		} else if(haven.purus.Config.kb_camswitch.key().match(ev)) {
+			try {
+				haven.purus.Config.camCycle.setVal((haven.purus.Config.camCycle.val+1)% haven.purus.Config.camCycles.length);
+				msg("Set camera mode to " + Arrays.toString(haven.purus.Config.camCycles[haven.purus.Config.camCycle.val]));
+				map.findcmds().get("cam").run(null, haven.purus.Config.camCycles[haven.purus.Config.camCycle.val]);
+			} catch(Exception e) {
+			}
+			return true;
 		}
     	for(String s : haven.purus.Config.scriptsKeybinded.val) {
     		KeyBinding kb = PBotWindow.getKeybinding(s);
