@@ -1369,6 +1369,11 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 			haven.purus.Config.pathfinder.setVal(!haven.purus.Config.pathfinder.val);
 			msg("Pathfinder " + (haven.purus.Config.pathfinder.val ? "on" : "off"));
 			return true;
+		} else if(haven.purus.Config.kb_hidetoggle.key().match(ev)) {
+			haven.purus.Config.hideToggle.setVal(!haven.purus.Config.hideToggle.val);
+			map.removeCustomSprites(1340);
+			map.refreshGobsAll();
+			return true;
 		}
     	for(String s : haven.purus.Config.scriptsKeybinded.val) {
     		KeyBinding kb = PBotWindow.getKeybinding(s);

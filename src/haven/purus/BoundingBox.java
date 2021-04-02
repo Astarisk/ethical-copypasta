@@ -11,7 +11,7 @@ public class BoundingBox {
 	public int vertices = 0;
 	public boolean blocks = true;
 
-	private static Polygon acbcPol(Coord ac, Coord bc) {
+	public static Polygon acbcPol(Coord ac, Coord bc) {
 		ArrayList<Coord2d> vertices = new ArrayList<>();
 		vertices.add(new Coord2d(ac.x, ac.y));
 		vertices.add(new Coord2d(bc.x, ac.y));

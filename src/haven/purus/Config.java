@@ -95,6 +95,16 @@ public class Config {
 	public static Setting<Boolean> beltShowLogin = new Setting<>("beltShowLogin", true);
 	public static Setting<Boolean> studyLock = new Setting<>("studyLock", false);
 
+	public static Setting<Boolean> hideTrees = new Setting<>("hideTrees", true);
+	public static Setting<Boolean> hideBushes = new Setting<>("hideBushes", true);
+	public static Setting<Boolean> hideHouses = new Setting<>("hideHouses", false);
+	public static Setting<Boolean> hideWalls = new Setting<>("hideWalls", true);
+	public static Setting<Boolean> hideCrops = new Setting<>("hideCrops", true);
+	public static Setting<Integer> hideRed = new Setting<>("hideRed", 65);
+	public static Setting<Integer> hideGreen = new Setting<>("hideGreen", 180);
+	public static Setting<Integer> hideBlue = new Setting<>("hideBlue", 255);
+	public static Setting<Integer> hideAlpha = new Setting<>("hideAlpha", 200);
+	public static Setting<Boolean> hideToggle = new Setting<>("hideToggle", false);
 
 	public static Setting<Boolean> pathfinder = new Setting<>("pathfinder", false);
 
@@ -115,5 +125,7 @@ public class Config {
 
 	public static KeyBinding kb_bbtoggle = KeyBinding.get("kb_bbtoggle", KeyMatch.forcode(KeyEvent.VK_B, KeyMatch.S));
 	public static KeyBinding kb_pathfinder = KeyBinding.get("kb_pathfinder", KeyMatch.forcode(KeyEvent.VK_S, KeyMatch.C));
+	public static KeyBinding kb_hidetoggle = KeyBinding.get("kb_hidetoggle", KeyMatch.forcode(KeyEvent.VK_H, KeyMatch.C));
+
 
 }

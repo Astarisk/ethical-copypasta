@@ -5,6 +5,9 @@ import haven.Button;
 import haven.Label;
 import haven.Scrollbar;
 import haven.purus.mapper.Mapper;
+import haven.render.BaseColor;
+import haven.render.Pipe;
+import haven.render.States;
 
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
@@ -305,6 +308,120 @@ public class OptWndPurus extends BetterWindow {
 				return super.mousedown(c, button);
 			}
 		}, "Print wdgmsg to console"));
+
+		Entry hideSettings = new Entry(new Label("Hide Settings"), "Hide Settings");
+		((Label)hideSettings.w).setcolor(Color.ORANGE);
+		el.root.addSubentry(hideSettings);
+
+		el.root.addSubentry(new Entry(new Label("Toggle hide by ctrl + h (default keybinding)"), "Toggle hide by"));
+
+		hideSettings.addSubentry(new Entry(new CheckBox("Hide trees"){
+			{a = Config.hideTrees.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.hideTrees.setVal(!this.a);
+				gameui().map.removeCustomSprites(1340);
+				gameui().map.refreshGobsAll();
+				return super.mousedown(c, button);
+			}
+		}, "Hide trees"));
+
+		hideSettings.addSubentry(new Entry(new CheckBox("Hide bushes"){
+			{a = Config.hideBushes.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.hideBushes.setVal(!this.a);
+				gameui().map.removeCustomSprites(1340);
+				gameui().map.refreshGobsAll();
+				return super.mousedown(c, button);
+			}
+		}, "Hide bushes"));
+
+		hideSettings.addSubentry(new Entry(new CheckBox("Hide crops"){
+			{a = Config.hideCrops.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.hideCrops.setVal(!this.a);
+				gameui().map.removeCustomSprites(1340);
+				gameui().map.refreshGobsAll();
+				return super.mousedown(c, button);
+			}
+		}, "Hide crops"));
+
+		hideSettings.addSubentry(new Entry(new CheckBox("Hide walls"){
+			{a = Config.hideWalls.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.hideWalls.setVal(!this.a);
+				gameui().map.removeCustomSprites(1340);
+				gameui().map.refreshGobsAll();
+				return super.mousedown(c, button);
+			}
+		}, "Hide walls"));
+
+		hideSettings.addSubentry(new Entry(new CheckBox("Hide houses"){
+			{a = Config.hideHouses.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.hideHouses.setVal(!this.a);
+				gameui().map.removeCustomSprites(1340);
+				gameui().map.refreshGobsAll();
+				return super.mousedown(c, button);
+			}
+		}, "Hide houses"));
+
+
+		Entry hideRedLbl = new Entry(new Label("Hide red"), "Hide red");
+		hideSettings.addSubentry(hideRedLbl);
+		hideRedLbl.addSubentry(new Entry(new HSlider(UI.scale(400), 0, 255, Config.hideRed.val) {
+			@Override
+			public void changed() {
+				Config.hideRed.setVal(this.val);
+				GobHideBox.HidePol.emat = Pipe.Op.compose(new BaseColor(new java.awt.Color(Config.hideRed.val, Config.hideGreen.val, Config.hideBlue.val, Config.hideAlpha.val)), new States.LineWidth(3));
+				gameui().map.removeCustomSprites(1340);
+				gameui().map.refreshGobsAll();
+				super.changed();
+			}
+		}, ""));
+
+		Entry hideGreenLbl = new Entry(new Label("Hide green"), "Hide green");
+		hideSettings.addSubentry(hideGreenLbl);
+		hideGreenLbl.addSubentry(new Entry(new HSlider(UI.scale(400), 0, 255, Config.hideGreen.val) {
+			@Override
+			public void changed() {
+				Config.hideGreen.setVal(this.val);
+				GobHideBox.HidePol.emat = Pipe.Op.compose(new BaseColor(new java.awt.Color(Config.hideRed.val, Config.hideGreen.val, Config.hideBlue.val, Config.hideAlpha.val)), new States.LineWidth(3));
+				gameui().map.removeCustomSprites(1340);
+				gameui().map.refreshGobsAll();
+				super.changed();
+			}
+		}, ""));
+
+		Entry hideBlueLbl = new Entry(new Label("Hide blue"), "Hide blue");
+		hideSettings.addSubentry(hideBlueLbl);
+		hideBlueLbl.addSubentry(new Entry(new HSlider(UI.scale(400), 0, 255, Config.hideBlue.val) {
+			@Override
+			public void changed() {
+				Config.hideBlue.setVal(this.val);
+				GobHideBox.HidePol.emat = Pipe.Op.compose(new BaseColor(new java.awt.Color(Config.hideRed.val, Config.hideGreen.val, Config.hideBlue.val, Config.hideAlpha.val)), new States.LineWidth(3));
+				gameui().map.removeCustomSprites(1340);
+				gameui().map.refreshGobsAll();
+				super.changed();
+			}
+		}, ""));
+
+		Entry hideAlphaLbl = new Entry(new Label("Hide alpha"), "Hide alpha");
+		hideSettings.addSubentry(hideAlphaLbl);
+		hideAlphaLbl.addSubentry(new Entry(new HSlider(UI.scale(400), 0, 255, Config.hideAlpha.val) {
+			@Override
+			public void changed() {
+				Config.hideAlpha.setVal(this.val);
+				GobHideBox.HidePol.emat = Pipe.Op.compose(new BaseColor(new java.awt.Color(Config.hideRed.val, Config.hideGreen.val, Config.hideBlue.val, Config.hideAlpha.val)), new States.LineWidth(3));
+				gameui().map.removeCustomSprites(1340);
+				gameui().map.refreshGobsAll();
+				super.changed();
+			}
+		}, ""));
 
 		Entry mapSettings = new Entry(new Label("Map Settings"), "Map Settings");
 		((Label)mapSettings.w).setcolor(Color.ORANGE);
