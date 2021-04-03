@@ -1,8 +1,10 @@
+import itertools
+
 class Script:
-    def getBeltInv(self, sess):
-        belt = sess.PBotWindowAPI().getWindow("Belt")
-        if belt != None:
-            inv = belt.getInventories()
+    def getWInv(self, wnd):
+        print(wnd)
+        if wnd != None:
+            inv = wnd.getInventories()
             if len(inv) > 0:
                 return inv[0]
         return None
@@ -10,10 +12,9 @@ class Script:
     def run(self, sess):
         PBotUtils = sess.PBotUtils()
         PBotGobAPI = sess.PBotGobAPI()
-        PBotWindowAPI = sess.PBotWindowAPI()
-        invs = [PBotUtils.playerInventory(), self.getBeltInv(sess)]
+        invs = [PBotUtils.playerInventory(), self.getWInv(sess.PBotWindowAPI().getWindow("Belt")), self.getWInv(sess.PBotWindowAPI().getEquipmentWindow())]
         for inv in filter(None, invs):
-            for itm in filter(lambda x: str(x.getContentsName()).endswith("of Water"), inv.getInventoryItemsByResnames(".*")):
+            for itm in filter(lambda x: x != None and str(x.getContentsName()).endswith("of Water"), itertools.chain(inv.getInventoryItemsByResnames(".*"), sess.PBotCharacterAPI().getEquipment())):
                 itm.activateItem();
                 menu = PBotUtils.getFlowermenu(5000)
                 if menu != None:

@@ -2,9 +2,11 @@ package haven.purus.pbot.api;
 
 import haven.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class PBotCharacterAPI {
+public class
+PBotCharacterAPI {
 
 	private PBotSession pBotSession;
 
@@ -114,6 +116,40 @@ public class PBotCharacterAPI {
 				if(cht.name().equals(chatName))
 					cht.send(msg);
 			}
+		}
+	}
+
+	/**
+	 * Returns content of each slot in players equipment menu
+	 * @return List with each slot containing null or pbotitem
+	 */
+	public List<PBotItem> getEquipment() {
+		Window equwnd = pBotSession.gui.equwnd;
+		if(equwnd == null)
+			return null;
+		Equipory eq = equwnd.getchild(Equipory.class);
+		if(eq == null)
+			return null;
+		ArrayList<PBotItem> ret = new ArrayList<>();
+		for(GItem itm : eq.slots) {
+			if(itm == null)
+				ret.add(null);
+			else
+				ret.add(new PBotItem(itm, pBotSession));
+		}
+		return ret;
+	}
+
+	/**
+	 * Equip item in hand to the given slot
+	 * @param slot equipment slot to equip item to
+	 */
+	public void equipEquipment(int slot) {
+		Window equwnd = pBotSession.gui.equwnd;
+		if(equwnd != null) {
+			Equipory eq = equwnd.getchild(Equipory.class);
+			if(eq != null)
+				eq.wdgmsg("drop", slot);
 		}
 	}
 
