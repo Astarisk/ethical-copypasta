@@ -115,7 +115,9 @@ public class PBotGob {
 	 */
 	public int addGobText(String text, int r, int g, int b, int a, int height) {
 		Gob.Overlay gt = new Gob.Overlay(gob, new GobText(gob, text, new Color(r, g, b, a), height));
-		gob.addol(gt);
+		pBotSession.gui.ui.sess.glob.loader.defer(() -> {synchronized(gob) {
+			gob.addol(gt);
+		}}, null);
 		return gt.id;
 	}
 
@@ -124,7 +126,9 @@ public class PBotGob {
 	 * @param id Id of the gobtext
 	 */
 	public void removeGobText(int id) {
-		gob.findol(id).remove();
+		pBotSession.gui.ui.sess.glob.loader.defer(() -> {synchronized(gob) {
+			gob.findol(id).remove();
+		}}, null);
 	}
 
 	/**
@@ -187,18 +191,18 @@ public class PBotGob {
 	 * @param a Alpha between 0-255
 	 */
 	public void setMarked(int r, int g, int b, int a) {
-		synchronized(gob) {
+		pBotSession.gui.ui.sess.glob.loader.defer(() -> {synchronized(gob) {
 			gob.setattr(new GobColor(gob, new MixColor(r, g, b, a)));
-		}
+		}}, null);
 	}
 
 	/**
 	 * Remove color marking
 	 */
 	public void setUnmarked() {
-		synchronized(gob) {
+		pBotSession.gui.ui.sess.glob.loader.defer(() -> {synchronized(gob) {
 			gob.delattr(GobColor.class);
-		}
+		}}, null);
 	}
 
 	/**

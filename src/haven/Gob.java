@@ -603,10 +603,15 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 				if(Config.bbDisplayState.val > 0) {
 					BoundingBox bb = BoundingBox.getBoundingBox(this);
 					Overlay ol = this.findol(1339);
-					if(ol != null && bb == null)
-						ol.remove();
-					else if(ol == null && bb != null)
-						this.addol(new Overlay(this, new GobBoundingBox(this, bb), 1339));
+					if(ol != null && bb == null) {
+						glob.loader.defer(() -> {synchronized(this) {
+							ol.remove();
+						}}, null);
+					} else if(ol == null && bb != null) {
+						glob.loader.defer(() -> {synchronized(this) {
+							this.addol(new Overlay(this, new GobBoundingBox(this, bb), 1339));
+						}}, null);
+					}
 				}
 				if(Config.hideToggle.val) {
 					if(Config.hideTrees.val && res.name.startsWith("gfx/terobjs/trees") && !res.name.endsWith("log") && !res.name.endsWith("oldtrunk")) {
@@ -624,10 +629,16 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 					if(hide) {
 						BoundingBox bb = BoundingBox.getBoundingBox(this);
 						Overlay ol = this.findol(1340);
-						if(ol != null && bb == null)
-							ol.remove();
-						else if(ol == null)
-							this.addol(new Overlay(this, new GobHideBox(bb), 1340));
+						if(ol != null && bb == null) {
+							glob.loader.defer(() -> {synchronized(this) {
+								ol.remove();
+							}}, null);
+						} else if(ol == null) {
+							glob.loader.defer(() -> {synchronized(this) {
+								this.addol(new Overlay(this, new GobHideBox(bb), 1340));
+
+							}}, null);
+						}
 					}
 				}
 				Drawable d = getattr(Drawable.class);
@@ -689,11 +700,17 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 							int fscale = rd.sdt.peekrbuf(1);
 							if(fscale != -1) {
 								Gob.Overlay ovl = Gob.this.findol(1337);
-								if(ovl == null) {
-									Gob.this.addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
-								} else if(!((GobText) ovl.spr).text.equals(fscale + "%")) {
-									ovl.remove();
-									Gob.this.addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
+								synchronized(this) {
+									if(ovl == null) {
+										glob.loader.defer(() -> {synchronized(this) {
+											Gob.this.addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
+										}}, null);
+									} else if(!((GobText) ovl.spr).text.equals(fscale + "%")) {
+										glob.loader.defer(() -> {synchronized(this) {
+											ovl.remove();
+											Gob.this.addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
+										}}, null);
+									}
 								}
 							}
 						}
@@ -722,11 +739,17 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 							col = Color.YELLOW;
 							text = stage + "/" + cropstgmaxval;
 						}
-						if(ol == null) {
-							addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
-						} else if(!((GobText) ol.spr).text.equals(text)) {
-							ol.remove();
-							addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
+						synchronized(this) {
+							if(ol == null) {
+								glob.loader.defer(() -> {synchronized(this) {
+									addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
+								}}, null);
+							} else if(!((GobText) ol.spr).text.equals(text)) {
+								glob.loader.defer(() -> {synchronized(this) {
+									ol.remove();
+									addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
+								}}, null);
+							}
 						}
 					}
 				}
