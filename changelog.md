@@ -1,5 +1,8 @@
 ## Changelog
 
+### 1.0.1
+- Various bugfixes
+
 ### 1.0.0
 
 - Added PBot API & few basic scripts
