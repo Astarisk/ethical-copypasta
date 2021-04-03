@@ -722,7 +722,7 @@ public class Widget {
     	try {
 			if(msg.equals("click") && args.length >= 5 && ui.sess.glob.oc.getgob((int) args[5]).getres().name.contains("steelcrucible") && (int) args[3] == 1)
 				args[3] = 0;
-		} catch(Loading l) {}
+		} catch(Loading | NullPointerException l) {}
 	if(parent == null)
 	    ui.wdgmsg(sender, msg, args);
 	else
