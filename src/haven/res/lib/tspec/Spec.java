@@ -2,7 +2,6 @@
 package haven.res.lib.tspec;
 
 import haven.*;
-import haven.res.ui.tt.defn.DefName;
 
 import java.util.*;
 
