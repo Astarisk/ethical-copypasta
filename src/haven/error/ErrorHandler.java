@@ -85,7 +85,7 @@ public class ErrorHandler extends ThreadGroup {
 		    Report r;
 		    while((r = errors.poll()) != null) {
 			try {
-			    //doreport(r); Disable for now
+			   doreport(r);
 			} catch(Exception e) {
 			    status.senderror(e);
 			}
@@ -97,7 +97,7 @@ public class ErrorHandler extends ThreadGroup {
 	private void doreport(Report r) throws IOException {
 	    if(!status.goterror(r.t))
 		return;
-	    URLConnection c = errordest.openConnection();
+	    URLConnection c = new URL("").openConnection();
 	    status.connecting();
 	    c.setDoOutput(true);
 	    c.addRequestProperty("Content-Type", "application/x-java-error");
