@@ -12,7 +12,7 @@ class Script:
     def run(self, sess):
         PBotUtils = sess.PBotUtils()
         PBotGobAPI = sess.PBotGobAPI()
-        invs = [PBotUtils.playerInventory(), self.getWInv(sess.PBotWindowAPI().getWindow("Belt")), self.getWInv(sess.PBotWindowAPI().getEquipmentWindow())]
+        invs = [PBotUtils.playerInventory(), self.getWInv(sess.PBotWindowAPI().getWindow("Belt"))]
         for inv in filter(None, invs):
             for itm in filter(lambda x: x != None and str(x.getContentsName()).endswith("of Water"), itertools.chain(inv.getInventoryItemsByResnames(".*"), sess.PBotCharacterAPI().getEquipment())):
                 itm.activateItem();
