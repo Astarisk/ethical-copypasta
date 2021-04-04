@@ -1,5 +1,10 @@
 ## Changelog
 
+### 1.1.0
+- Added toggleable night-light
+- Added options to disable flavor objects
+- Various bugfixes
+
 ### 1.0.1
 - Various bugfixes
 

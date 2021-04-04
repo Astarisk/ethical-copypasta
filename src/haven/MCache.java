@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.function.*;
 import java.lang.ref.*;
 
+import haven.purus.Config;
 import haven.purus.mapper.Mapper;
 import haven.render.*;
 
@@ -329,6 +330,8 @@ public class MCache implements MapSource {
 		    if(set.flavobjs.size() > 0) {
 			if((fp % set.flavprob) == 0) {
 			    Indir<Resource> r = set.flavobjs.pick(rp % set.flavobjs.tw);
+			    if(Config.flavorObjsVisual.val && r.get().name.startsWith("gfx/tiles/"))
+			    	continue;
 			    Gob g = new Flavobj(o.add(gul).mul(tilesz).add(tilesz.div(2)), a * 2 * Math.PI);
 			    g.setattr(new ResDrawable(g, r, Message.nil));
 			    mbuf.add(g);

@@ -14,7 +14,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -254,6 +253,24 @@ public class OptWndPurus extends BetterWindow {
 		((Label)displaySettings.w).setcolor(Color.ORANGE);
 		el.root.addSubentry(displaySettings);
 
+		displaySettings.addSubentry(new Entry(new CheckBox("Hide visual flavor objects [Requires restart]"){
+			{a = Config.flavorObjsVisual.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.flavorObjsVisual.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Hide visual flavor objects [Requires restart]"));
+
+		displaySettings.addSubentry(new Entry(new CheckBox("Hide all flavor objects (including sound) [Requires restart]"){
+			{a = Config.flavorObjsAll.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.flavorObjsAll.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Hide all flavor (including sound) objects [Requires restart]"));
+
 		displaySettings.addSubentry(new Entry(new CheckBox("Highlight tanning tubs and drying frames"){
 			{a = Config.ttfHighlight.val;}
 			@Override
@@ -262,7 +279,7 @@ public class OptWndPurus extends BetterWindow {
 				gameui().map.refreshGobsAll();
 				return super.mousedown(c, button);
 			}
-		}, "Use hardware cursor [Requires restart]"));
+		}, "Highlight tanning tubs and drying frames"));
 
 		Entry combatSettings = new Entry(new Label("Combat Settings"), "Combat Settings");
 		((Label)combatSettings.w).setcolor(Color.ORANGE);

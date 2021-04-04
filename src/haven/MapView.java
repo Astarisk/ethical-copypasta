@@ -774,7 +774,8 @@ public class MapView extends PView implements DTarget, Console.Directory {
 
 	public void added(RenderTree.Slot slot) {
 	    slot.add(main);
-	    slot.add(flavobjs);
+	    if(!Config.flavorObjsAll.val)
+			slot.add(flavobjs);
 	    super.added(slot);
 	}
 
