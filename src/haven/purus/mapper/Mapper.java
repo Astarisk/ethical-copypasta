@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Mapper {
-	public static String apiURL = "https://hnhmap.vatsul.com/api" + "/";
+	public static String apiURL = "";
 
 	private static ScheduledExecutorService executor;
 
@@ -31,13 +31,11 @@ public class Mapper {
 		@Override
 		public void run() {
 			try {
-
 				JSONArray arr = new JSONArray();
 
 				players.forEach((name, pair) -> {
 					if(name != null && pair.b != null && pair.b.a != null && pair.b.b != null) {
 						JSONObject obj = new JSONObject();
-						obj.put("hatres", pair.a);
 						obj.put("ofsX", pair.b.a.x);
 						obj.put("ofsY", pair.b.a.y);
 						obj.put("gridId", pair.b.b);
@@ -45,6 +43,9 @@ public class Mapper {
 						arr.put(obj);
 					}
 				});
+
+				System.out.println("Information was sent....");
+				System.out.println(players);
 				players.clear();
 
 				if(arr.length() == 0) {
@@ -58,50 +59,50 @@ public class Mapper {
 				DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
 				dos.write(arr.toString().getBytes(StandardCharsets.UTF_8));
 				dos.close();
-				conn.getResponseCode();
 			} catch(IOException e) {
 				//e.printStackTrace();
+				;
 			}
 		}
 	};
 
-	static {
-		executor = Executors.newScheduledThreadPool(1);
-		executor.scheduleWithFixedDelay(locUpd, 5, 5, TimeUnit.SECONDS);
-		executor.execute(() -> {
-			boolean regen = false;
-			if(Config.mapperToken.val.length() == 0)
-				regen = true;
-			else
-				try {
-					URL url = new URL(Mapper.apiURL + "/token/" + Config.mapperToken.val + "/valid");
-					Scanner scan = new Scanner(url.openStream());
-					if(scan.hasNextLine() && scan.nextLine().equals("Valid")) {
-					} else {
-						regen = true;
-					}
-				} catch(IOException e) {
-					e.printStackTrace();
-				}
-
-			if(regen) {
-				try {
-					HttpsURLConnection conn = (HttpsURLConnection) new URL(apiURL + "token/generate").openConnection();
-					conn.setRequestProperty("User-Agent", "H&H Client/" + haven.Config.confid);
-					String token;
-					try(BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-						token = reader.readLine();
-					} finally {
-						conn.disconnect();
-					}
-					if(conn.getResponseCode() == 200)
-						Config.mapperToken.setVal(token);
-				} catch(IOException e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+//	static {
+//		executor = Executors.newScheduledThreadPool(1);
+//		executor.scheduleWithFixedDelay(locUpd, 5, 5, TimeUnit.SECONDS);
+//		executor.execute(() -> {
+//			boolean regen = false;
+//			if(Config.mapperToken.val.length() == 0)
+//				regen = true;
+//			else
+//				try {
+//					URL url = new URL(Mapper.apiURL + "/token/" + Config.mapperToken.val + "/valid");
+//					Scanner scan = new Scanner(url.openStream());
+//					if(scan.hasNextLine() && scan.nextLine().equals("Valid")) {
+//					} else {
+//						regen = true;
+//					}
+//				} catch(IOException e) {
+//					e.printStackTrace();
+//				}
+//
+//			if(regen) {
+//				try {
+//					HttpsURLConnection conn = (HttpsURLConnection) new URL(apiURL + "token/generate").openConnection();
+//					conn.setRequestProperty("User-Agent", "H&H Client/" + haven.Config.confid);
+//					String token;
+//					try(BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+//						token = reader.readLine();
+//					} finally {
+//						conn.disconnect();
+//					}
+//					if(conn.getResponseCode() == 200)
+//						Config.mapperToken.setVal(token);
+//				} catch(IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//	}
 
 	public static void receiveGrid(MCache map, MCache.Grid grid, MCache.Grid top, MCache.Grid right, MCache.Grid down, MCache.Grid left) {
 		sendGridData(grid, top, right, down, left);

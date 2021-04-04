@@ -24,19 +24,19 @@ import java.util.concurrent.*;
 import java.util.zip.GZIPInputStream;
 
 public class FoodService {
-	public static final String API_ENDPOINT = "https://hnhfood.vatsul.com/api/";
-	private static final String FOOD_DATA_URL = "https://hnhfood.vatsul.com/api/data/food-info.json";
+	public static final String API_ENDPOINT = "";
+	private static final String FOOD_DATA_URL = "";
 	private static final File FOOD_DATA_CACHE_FILE = new File("food_data.json");
 
 	private static final Map<String, ParsedFoodInfo> cachedItems = new ConcurrentHashMap<>();
 	private static final Queue<HashedFoodInfo> sendQueue = new ConcurrentLinkedQueue<>();
 	public static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
 
-	static {
-		scheduler.execute(FoodService::loadCachedFoodData);
-		scheduler.scheduleAtFixedRate(FoodService::sendItems, 10L, 10, TimeUnit.SECONDS);
-		scheduler.scheduleAtFixedRate(FoodService::requestFoodDataCache, 0L, 30, TimeUnit.MINUTES);
-	}
+//	static {
+//		scheduler.execute(FoodService::loadCachedFoodData);
+//		scheduler.scheduleAtFixedRate(FoodService::sendItems, 10L, 10, TimeUnit.SECONDS);
+//		scheduler.scheduleAtFixedRate(FoodService::requestFoodDataCache, 0L, 30, TimeUnit.MINUTES);
+//	}
 
 	/**
 	 * Load cached food data from the file (only keys for now since we don't use content anyway)

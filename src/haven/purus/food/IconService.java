@@ -25,9 +25,9 @@ public class IconService {
 
 	private static HashSet<String> sentIcons = new HashSet<>();
 
-	static {
-		getSentIcons();
-	}
+//	static {
+//		getSentIcons();
+//	}
 
 	public static void getSentIcons() {
 		try {

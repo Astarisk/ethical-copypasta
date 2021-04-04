@@ -4,7 +4,7 @@ import haven.*;
 import haven.Button;
 import haven.Label;
 import haven.Scrollbar;
-import haven.purus.mapper.Mapper;
+//import haven.purus.mapper.Mapper;
 import haven.render.BaseColor;
 import haven.render.Pipe;
 import haven.render.States;
@@ -445,7 +445,8 @@ public class OptWndPurus extends BetterWindow {
 
 		el.root.addSubentry(mapSettings);
 
-		Entry mapExplanation = new Entry(new RichTextBox(UI.scale(500, 50), "With the token you can save markers and access other map features. If you want to share your markers and tokens in the map with your friends, copy and save your friends token here.\nThe map can be accessed at https://hnhmap.vatsul.com/"), "map");
+		Entry mapExplanation = new Entry(new RichTextBox(UI.scale(500, 50),
+				"Due to ethical concerns with this being an ALWAYS ON AND FORCED-IN Service, this feature has been disabled."), "map");
 		mapSettings.addSubentry(mapExplanation);
 
 		Entry mapTokenStatus = new Entry(new Label("Map Token:"), "map token");
@@ -461,7 +462,8 @@ public class OptWndPurus extends BetterWindow {
 					public boolean mousedown(Coord c, int button) {
 						String newToken = ((TextEntry)mapToken.w).text;
 						try {
-							URL url = new URL(Mapper.apiURL + "/token/" + newToken + "/valid");
+							//URL url = new URL(Mapper.apiURL + "/token/" + newToken + "/valid");
+							URL url = new URL(newToken + "/valid");
 							Scanner scan = new Scanner(url.openStream());
 							if(scan.hasNextLine() && scan.nextLine().equals("Valid")) {
 								Config.mapperToken.setVal(newToken);
