@@ -573,16 +573,18 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     }
 
     public void added(RenderTree.Slot slot) {
-	slot.ostate(curstate());
-	for(Overlay ol : ols) {
-	    if(ol.slots != null)
-		slot.add(ol);
-	}
-	for(GAttrib a : attr.values()) {
-	    if(a instanceof RenderTree.Node && !a.hide)
-		slot.add((RenderTree.Node)a);
-	}
-	slots.add(slot);
+    	synchronized(this) {
+			slot.ostate(curstate());
+			for(Overlay ol : ols) {
+				if(ol.slots != null)
+					slot.add(ol);
+			}
+			for(GAttrib a : attr.values()) {
+				if(a instanceof RenderTree.Node && !a.hide)
+					slot.add((RenderTree.Node) a);
+			}
+			slots.add(slot);
+		}
     }
 
     public void removed(RenderTree.Slot slot) {
