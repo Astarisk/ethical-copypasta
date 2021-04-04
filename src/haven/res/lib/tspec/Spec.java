@@ -7,8 +7,7 @@ import haven.res.ui.tt.defn.DefName;
 import java.util.*;
 
 public class Spec implements GSprite.Owner, ItemInfo.SpriteOwner {
-    private static final Object[] definfo =
-			{new Object[] {new DefName()}};
+	public static final Object[] definfo = {new Object[]{Loading.waitfor(Resource.remote().load("ui/tt/defn", 5))}};
     public final Object[] info;
     public final ResData res;
     public final OwnerContext ctx;
