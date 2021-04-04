@@ -446,7 +446,7 @@ public class OptWndPurus extends BetterWindow {
 		el.root.addSubentry(mapSettings);
 
 		Entry mapExplanation = new Entry(new RichTextBox(UI.scale(500, 50),
-				"Due to ethical concerns with this being an ALWAYS ON AND FORCED-IN Service, this feature has been disabled."), "map");
+				"Due to ethical concerns with this being an ALWAYS ON AND FORCED-IN Service, this feature has been disabled. http://www.havenandhearth.com/forum/viewtopic.php?f=49&t=70170"), "map");
 		mapSettings.addSubentry(mapExplanation);
 
 		Entry mapTokenStatus = new Entry(new Label("Map Token:"), "map token");
