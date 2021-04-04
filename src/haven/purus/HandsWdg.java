@@ -36,8 +36,10 @@ public class HandsWdg extends Widget implements DTarget {
 		Window eqw = gameui().equwnd;
 		if(eqw != null) {
 			Equipory eq = gameui().equwnd.getchild(Equipory.class);
-			if(eq != null && eq.slots[c.x < invsq.sz().x ? 6 : 7] != null)
-				return eq.slots[c.x < invsq.sz().x ? 6 : 7].witem().iteminteract(cc,ul);
+			if(eq != null && eq.slots[cc.x <= invsq.sz().x ? 6 : 7] != null) {
+				eq.slots[cc.x <= invsq.sz().x ? 6 : 7].wdgmsg("itemact", 0);
+				return true;
+			}
 		}
 		return false;
 	}
