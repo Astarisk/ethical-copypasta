@@ -249,6 +249,24 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, ""));
 
+		cameraSettings.addSubentry(new Entry(new CheckBox("Bad Cam: Reverse X Axis"){
+			{a = Config.reverseBadCamX.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.reverseBadCamX.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Bad Cam: Reverse X Axis"));
+
+		cameraSettings.addSubentry(new Entry(new CheckBox("Bad Cam: Reverse Y Axis"){
+			{a = Config.reverseBadCamY.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.reverseBadCamY.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Bad Cam: Reverse Y Axis"));
+
 		Entry displaySettings = new Entry(new Label("Display settings"), "Display settings");
 		((Label)displaySettings.w).setcolor(Color.ORANGE);
 		el.root.addSubentry(displaySettings);
