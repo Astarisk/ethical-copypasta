@@ -85,7 +85,7 @@ public class ErrorHandler extends ThreadGroup {
 		    Report r;
 		    while((r = errors.poll()) != null) {
 			try {
-			    doreport(r);
+			    //doreport(r); Disable for now
 			} catch(Exception e) {
 			    status.senderror(e);
 			}
