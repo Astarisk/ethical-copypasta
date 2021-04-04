@@ -403,6 +403,7 @@ public class OptWnd extends BetterWindow {
 		y = addbtn(cont, "Toggle hide", Config.kb_hidetoggle, y);
 		y = addbtn(cont, "Switch camera", Config.kb_camswitch, y);
 		y = addbtn(cont, "Toggle nightmode", Config.kb_dlighttoggle, y);
+		y = addbtn(cont, "Toggle animal radius", Config.kb_animalradius, y);
 
 		/*Composer composer = new Composer(this).vmrgn(UI.scale(5));
 	    composer.adda(scrollport, scrollport.cont.sz.x / 2, 0.5);

@@ -601,6 +601,20 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 		try {
 			Resource res = Gob.this.getres();
 			if(res != null) {
+				if(res.name.startsWith("gfx/kritter") && knocked == Knocked.FALSE) {
+					Overlay ol = this.findol(1341);
+					if(Config.animalRadiuses.val) {
+						if(ol == null) {
+							glob.loader.defer(() -> {synchronized(this) {
+								this.addol(new Overlay(this, new AnimalRad(this, null, 5 * MCache.tilesz2.y), 1341));
+							}}, null);
+						}
+					} else if(ol != null) {
+						glob.loader.defer(() -> {synchronized(this) {
+							ol.remove();
+						}}, null);
+					}
+				}
 				String resname = res.name;
 				if(Config.bbDisplayState.val > 0) {
 					BoundingBox bb = BoundingBox.getBoundingBox(this);

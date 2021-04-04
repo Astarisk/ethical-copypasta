@@ -1385,6 +1385,9 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 			return true;
 		} else if(haven.purus.Config.kb_dlighttoggle.key().match(ev)) {
     		haven.purus.Config.toggleDlight.setVal(!haven.purus.Config.toggleDlight.val);
+		} else if(haven.purus.Config.kb_animalradius.key().match(ev)) {
+    		haven.purus.Config.animalRadiuses.setVal(!haven.purus.Config.animalRadiuses.val);
+    		map.refreshGobsAll();
 		}
     	for(String s : haven.purus.Config.scriptsKeybinded.val) {
     		KeyBinding kb = PBotWindow.getKeybinding(s);

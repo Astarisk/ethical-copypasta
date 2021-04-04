@@ -115,11 +115,18 @@ public class Composite extends Drawable {
 				Resource posres = resdata.res.get();
 				if(posres != null && (posres.name.endsWith("/knock") || posres.name.endsWith("/dead"))) {
 					gob.knocked = Gob.Knocked.TRUE;
+					synchronized(gob.glob.oc) {
+						gob.updated();
+					}
 					break;
 				}
 			}
-			if(gob.knocked == Gob.Knocked.UNKNOWN)
+			if(gob.knocked == Gob.Knocked.UNKNOWN) {
 				gob.knocked = Gob.Knocked.FALSE;
+				synchronized(gob.glob.oc) {
+					gob.updated();
+				}
+			}
 			prevposes = nposes;
 		nposes = null;
 		updequ();

@@ -1,6 +1,8 @@
 ## Changelog
 
 ### 1.1.0
+- Added animal radiuses
+- Added gilding info to equipment window
 - Added toggleable night-light
 - Added options to disable flavor objects
 - Various bugfixes
