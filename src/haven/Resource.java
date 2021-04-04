@@ -26,9 +26,12 @@
 
 package haven;
 
+import haven.res.ui.tt.armor.Armor;
+import haven.res.ui.tt.attrmod.AttrMod;
 import haven.res.ui.tt.level.Level;
 import haven.res.ui.tt.q.quality.Quality;
 import haven.res.ui.tt.q.quality.ShowQuality;
+import haven.res.ui.tt.slots.ISlots;
 import haven.res.ui.tt.wear.Wear;
 
 import java.lang.reflect.Constructor;
@@ -1243,10 +1246,13 @@ public class Resource implements Serializable {
 		put("ui/tt/q/quality$haven.ItemInfo$InfoFactory", Quality.Fac.class);
 		put("ui/tt/level$haven.ItemInfo$InfoFactory", Level.Fac.class);
 		put("ui/tt/wear$haven.ItemInfo$InfoFactory", Wear.Fac.class);
+		put("ui/tt/armor$haven.ItemInfo$InfoFactory", Armor.Fac.class);
+		put("ui/tt/attrmod$haven.ItemInfo$InfoFactory", AttrMod.Fac.class);
+		put("ui/tt/slots$haven.ItemInfo$InfoFactory", ISlots.Fac.class);
 	}};
     public <T> T getcode(Class<T> cl, boolean fail) {
 		try {
-			// System.out.println(name + cl.getName()); Use this for debug
+			// System.out.println(name + cl.getName()); use for debug
 			Class<?> ret = customClasses.get(name + "$" + cl.getName());
 			if(ret != null)
 				return cl.cast(ret.newInstance());

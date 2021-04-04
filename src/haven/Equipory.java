@@ -27,7 +27,12 @@
 package haven;
 
 import haven.purus.Config;
+import haven.res.ui.tt.armor.Armor;
+import haven.res.ui.tt.attrmod.AttrMod;
+import haven.res.ui.tt.slots.ISlots;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import static haven.Inventory.invsq;
 
@@ -83,7 +88,11 @@ public class Equipory extends Widget implements DTarget {
 	private boolean beltOpened = false;
 	public GItem[] slots = new GItem[ecoords.length];
 
-    @RName("epry")
+	public boolean updBuffs = false;
+	private LinkedList<Tex> gildBufimgs = new LinkedList<>();
+	private Tex armorclass = null;
+
+	@RName("epry")
     public static class $_ implements Factory {
 	public Widget create(UI ui, Object[] args) {
 	    long gobid;
@@ -103,7 +112,7 @@ public class Equipory extends Widget implements DTarget {
     }
 
     public Equipory(long gobid) {
-	super(isz);
+	super(isz.add(UI.scale(160, 0)));
 	ava = add(new Avaview(bg.sz(), gobid, "equcam") {
 		public boolean mousedown(Coord c, int button) {
 		    return(false);
@@ -148,6 +157,7 @@ public class Equipory extends Widget implements DTarget {
 	    }
 	    v.trimToSize();
 	    wmap.put(g, v);
+	    updBuffs = true;
 	} else {
 	    super.addchild(child, args);
 	}
@@ -164,6 +174,7 @@ public class Equipory extends Widget implements DTarget {
 		GItem i = (GItem)w;
 	    for(WItem v : wmap.remove(i))
 		ui.destroy(v);
+	    updBuffs = true;
 	}
     }
 
@@ -240,9 +251,68 @@ public class Equipory extends Widget implements DTarget {
     }
 
     public void draw(GOut g) {
-	drawslots(g);
-	super.draw(g);
-    }
+		drawslots(g);
+		super.draw(g);
+		if(updBuffs) {
+			try {
+				int aHard = 0, aSoft = 0;
+				HashMap<String, AttrMod.Mod> gildBuffs = new HashMap<>();
+				for(int i = 0; i < slots.length; i++) {
+					GItem itm = slots[i];
+					if(itm == null)
+						continue;
+					if(i != 0 && slots[0] != null && slots[0].getres().name.equals(itm.getres().name))
+						continue;
+					for(ItemInfo info : itm.info()) {
+						if(info instanceof Armor) {
+							aHard += ((Armor) info).hard;
+							aSoft += ((Armor) info).soft;
+						} else if(info instanceof AttrMod) {
+							for(AttrMod.Mod mod : ((AttrMod) info).mods) {
+								String attributeName = mod.attr.layer(Resource.tooltip).t;
+								gildBuffs.putIfAbsent(attributeName, new AttrMod.Mod(mod.attr, 0));
+								gildBuffs.get(attributeName).mod += mod.mod;
+							}
+						} else if(info instanceof ISlots) {
+							((ISlots) info).s.forEach((sitem) -> {
+								sitem.info.forEach(info2 -> {
+									for(AttrMod.Mod mod : ((AttrMod) info2).mods) {
+										String attributeName = mod.attr.layer(Resource.tooltip).t;
+										gildBuffs.putIfAbsent(attributeName, new AttrMod.Mod(mod.attr, 0));
+										gildBuffs.get(attributeName).mod += mod.mod;
+									}
+								});
+							});
+						}
+					}
+				}
+				gildBufimgs = new LinkedList<>();
+				gildBufimgs.add(Text.render("Total attributes: ").tex());
+				for(Map.Entry<String, AttrMod.Mod> e : gildBuffs.entrySet()) {
+					if(e.getValue().mod == 0)
+						continue;
+					BufferedImage bufferedImage1 = (RichText.render(String.format("%s $col[%s]{%s%d}", e.getValue().attr.layer(Resource.tooltip).t, (e.getValue().mod < 0) ? AttrMod.debuff : AttrMod.buff, (char) ((e.getValue().mod < 0) ? 45 : 43), Math.abs(e.getValue().mod)), 0)).img;
+					BufferedImage bufferedImage2 = PUtils.convolvedown(((Resource.Image) e.getValue().attr.layer(Resource.imgc)).img, new Coord(bufferedImage1.getHeight(), bufferedImage1.getHeight()), CharWnd.iconfilter);
+					BufferedImage combined = AttrMod.catimgsh(0, bufferedImage2, bufferedImage1);
+					gildBufimgs.add(new TexI(combined));
+				}
+
+				armorclass = Text.render("Armor class: " + aHard + "/" + aSoft, Color.BLACK).tex();
+				updBuffs = false;
+			} catch(Exception e) {
+				e.printStackTrace();// Ignored}
+			}
+		}
+		if(armorclass != null) {
+			g.image(armorclass, new Coord((UI.scale(34) + bg.sz().x / 2) - armorclass.sz().x / 2, bg.sz().y - armorclass.sz().y));
+		}
+		if(gildBufimgs != null) {
+			int ofsY = 0;
+			for(Tex gTex : gildBufimgs) {
+				g.image(gTex, new Coord(UI.scale(320), ofsY += UI.scale(15)));
+			}
+		}
+	}
 
     public boolean iteminteract(Coord cc, Coord ul) {
 	return(false);
