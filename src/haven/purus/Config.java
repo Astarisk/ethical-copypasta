@@ -95,6 +95,7 @@ public class Config {
 	public static Setting<Boolean> beltShowLogin = new Setting<>("beltShowLogin", true);
 	public static Setting<Boolean> studyLock = new Setting<>("studyLock", false);
 	public static Setting<Boolean> showmapgrid = new Setting<>("showmapgrid", false);
+	public static Setting<Boolean> toggleDlight = new Setting<>("toggleDlight", false);
 
 	public static Setting<Boolean> hideTrees = new Setting<>("hideTrees", true);
 	public static Setting<Boolean> hideBushes = new Setting<>("hideBushes", true);
@@ -128,6 +129,7 @@ public class Config {
 	public static KeyBinding kb_pathfinder = KeyBinding.get("kb_pathfinder", KeyMatch.forcode(KeyEvent.VK_S, KeyMatch.C));
 	public static KeyBinding kb_hidetoggle = KeyBinding.get("kb_hidetoggle", KeyMatch.forcode(KeyEvent.VK_H, KeyMatch.C));
 	public static KeyBinding kb_camswitch = KeyBinding.get("kb_camswitch", KeyMatch.forcode(KeyEvent.VK_C, KeyMatch.S));
+	public static KeyBinding kb_dlighttoggle = KeyBinding.get("kb_dlighttoggle", KeyMatch.forcode(KeyEvent.VK_N, KeyMatch.C));
 
 	public static Setting<Integer> camCycle = new Setting<>("camCycle", 0);
 	public static String[][] camCycles = new String[][]{{"cam", "bad"}, {"cam", "worse"}, {"cam", "follow"}, {"cam", "ortho"}, {"cam", "ortho", "-f"}};

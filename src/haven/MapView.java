@@ -1067,10 +1067,17 @@ public class MapView extends PView implements DTarget, Console.Directory {
 
     public DirLight amblight = null;
     private RenderTree.Slot s_amblight = null;
-    private void amblight() {
+    private static final Color dlightamb = new Color(200,200,200);
+	private static final Color dlightspc = new Color(255,255,255);
+
+	private void amblight() {
 	synchronized(glob) {
 	    if(glob.lightamb != null) {
-		amblight = new DirLight(glob.lightamb, glob.lightdif, glob.lightspc, Coord3f.o.sadd((float)glob.lightelev, (float)glob.lightang, 1f));
+			if(Config.toggleDlight.val) {
+				amblight = new DirLight(dlightamb, glob.lightdif, dlightspc, Coord3f.o.sadd((float) glob.lightelev, (float) glob.lightang, 1f));
+			} else {
+				amblight = new DirLight(glob.lightamb, glob.lightdif, glob.lightspc, Coord3f.o.sadd((float) glob.lightelev, (float) glob.lightang, 1f));
+			}
 		amblight.prio(100);
 	    } else {
 		amblight = null;
