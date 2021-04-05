@@ -26,6 +26,7 @@
 
 package haven;
 
+import haven.purus.Config;
 import haven.render.*;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -35,7 +36,7 @@ import java.awt.image.BufferedImage;
 public class FastText {
     public static final VertexArray.Layout vf = new VertexArray.Layout(new VertexArray.Layout.Input(Ortho2D.pos, new VectorFormat(2, NumberFormat.SINT16), 0, 0, 8),
 								       new VertexArray.Layout.Input(ColorTex.texc, new VectorFormat(2, NumberFormat.UNORM16), 0, 4, 8));
-    public static final Font font = UI.scale(Text.sans, 10);
+    public static final Font font = UI.scale(Text.sans, 10 * Config.fontScale.val);
     public static final int h;
     public static final FontMetrics meter;
     private static final TexI ct;
