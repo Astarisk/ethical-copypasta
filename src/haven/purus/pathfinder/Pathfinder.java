@@ -158,6 +158,10 @@ public class Pathfinder {
 	}
 
 	public static void run(Coord2d target, Gob destGob, int button, int mod, int meshid, String action, GameUI gui) {
+		run(target, destGob, button, mod, -1, meshid, action, gui);
+	}
+
+	public static void run(Coord2d target, Gob destGob, int button, int mod, int overlay, int meshid, String action, GameUI gui) {
 		if(gui.pathfinder != null)
 			gui.pathfinder.stop();
 		gui.pathfinder = new Thread(() -> {
@@ -335,7 +339,7 @@ public class Pathfinder {
 						gui.wdgmsg("act", action);
 					}
 					if(destGob.rc != null) {
-						gui.map.wdgmsg("click", gui.map.sz.div(2), destGob.rc.floor(OCache.posres), button, mod, 0, (int) destGob.id, destGob.rc.floor(OCache.posres), 0, meshid);
+						gui.map.wdgmsg("click", gui.map.sz.div(2), destGob.rc.floor(OCache.posres), button, mod, (overlay == -1) ? 0 : 1, (int) destGob.id, destGob.rc.floor(OCache.posres), overlay, meshid);
 						gui.map.cp = new ClickPath(player, new Coord2d[]{destGob.rc}, gui.ui.sess.glob.map);
 					}
 					break;

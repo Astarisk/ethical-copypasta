@@ -63,7 +63,17 @@ public class PBotGob {
 	 */
 	public void doClick(int btn, int mod, int meshid) {
 		pBotSession.gui.map.wdgmsg("click", pBotSession.PBotUtils().getCenterScreenCoord(), gob.rc.floor(OCache.posres), btn, mod, 0, (int)gob.id, gob.rc.floor(OCache.posres), 0, meshid);
+	}
 
+	/**
+	 * Click the gob
+	 * @param btn 1 = left, 2 = middle, 3 = right
+	 * @param mod Key modifier mask 1 = shift 2 = ctrl 4 = alt
+	 * @param meshid can be a door, roasting spit etc.
+	 * @param olid gob overlay to click, for example roasting spit
+	 */
+	public void doClick(int btn, int mod, int meshid, int olid) {
+		pBotSession.gui.map.wdgmsg("click", pBotSession.PBotUtils().getCenterScreenCoord(), gob.rc.floor(OCache.posres), btn, mod, 1, (int)gob.id, gob.rc.floor(OCache.posres), olid, meshid);
 	}
 
 	/**
@@ -213,6 +223,17 @@ public class PBotGob {
 	 */
 	public void pfClick(int btn, int mod, int meshId) {
 		Pathfinder.run(gob.rc, gob, btn, mod, meshId,"", pBotSession.gui);
+	}
+
+	/**
+	 * Click a gob with pathfinder, with given button
+	 * @param btn 1 = left click, 3 = right click
+	 * @param mod 1 = shift, 2 = ctrl, 4 = alt
+	 * @param meshId meshid to click
+	 * @param olid overlay id to click for example roasting spit
+	 */
+	public void pfClick(int btn, int mod, int meshId, int olid) {
+		Pathfinder.run(gob.rc, gob, btn, mod, olid, meshId,"", pBotSession.gui);
 	}
 
 	/**

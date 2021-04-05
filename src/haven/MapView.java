@@ -2044,8 +2044,9 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		}
 		if(Config.pathfinder.val) {
 			if(inf != null  && inf.ci instanceof Gob.GobClick) {
+				System.out.println(Arrays.toString(args));
 				if(args.length >= 9)
-					Pathfinder.run(mc,((Gob.GobClick) inf.ci).gob, clickb, modflags, (int)args[8],"", gameui());
+					Pathfinder.run(mc,((Gob.GobClick) inf.ci).gob, clickb, modflags, (int)args[7], (int)args[8],"", gameui());
 				else
 					Pathfinder.run(mc, ((Gob.GobClick) inf.ci).gob, clickb, modflags, -1,"", gameui());
 			} else {
