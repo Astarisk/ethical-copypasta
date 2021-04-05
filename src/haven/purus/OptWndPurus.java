@@ -195,6 +195,27 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, "Use hardware cursor [Requires restart]"));
 
+		uiSettings.addSubentry(new Entry(new CheckBox("Disable fraktur font (ugly) [Requires restart]"){
+			{a = Config.disableJorbfont.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.disableJorbfont.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Disable fraktur font [Requires restart]"));
+
+		Label fontScaleLbl = new Label("Font size scale [Requires restart]" + Config.fontScale.val + "x [Requires restart]");
+		Entry fontScaleLblEntry = new Entry(fontScaleLbl, "Font size scale [Requires restart] font scaling");
+		uiSettings.addSubentry(fontScaleLblEntry);
+		fontScaleLblEntry.addSubentry(new Entry(new HSlider(UI.scale(400), 0, 100, Math.round(100 * (Config.fontScale.val - 1.0f))) {
+			@Override
+			public void changed() {
+				Config.fontScale.setVal(this.val / 100.0f + 1);
+				fontScaleLbl.settext("Font size scale: " + Config.fontScale.val + "x [Requires restart]");
+				super.changed();
+			}
+		}, ""));
+
 		uiSettings.addSubentry(new Entry(new CheckBox("Show gob damage [Requires restart]"){
 			{a = Config.showGobDecayNum.val;}
 			@Override

@@ -1,5 +1,12 @@
 ## Changelog
 
+### 1.2.0
+- Improved pathfinder
+  - Should work when lifting objects
+  - Right clicks to spitroast etc. should now work
+  - Should work from dugouts and boats in water
+- Various bugfixes
+
 ### 1.1.0
 - Added animal radiuses
 - Added gilding info to equipment window

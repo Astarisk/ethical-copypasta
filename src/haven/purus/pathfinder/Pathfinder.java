@@ -24,7 +24,15 @@ public class Pathfinder {
 		add("gfx/tiles/cave");
 	}};
 
-	private static HashMap<String, Coord2d> doorOffsets = new HashMap<String, Coord2d>() {{
+	private static HashSet<String> accessibleTilesBoating = new HashSet<String>() {{
+		add("gfx/tiles/water");
+		add("gfx/tiles/deep");
+		add("gfx/tiles/odeep");
+		add("gfx/tiles/odeeper");
+	}};
+
+
+		private static HashMap<String, Coord2d> doorOffsets = new HashMap<String, Coord2d>() {{
 		put("gfx/terobjs/arch/windmill", new Coord2d(0, 27).add(0, MCache.tilesz.div(2.0).y));
 		put("gfx/terobjs/arch/stonemansion", new Coord2d(49, 0).add(MCache.tilesz.div(2.0).x, 0));
 		put("gfx/terobjs/arch/stonestead", new Coord2d(46, 0).add(MCache.tilesz.div(2.0).x, 0));
@@ -157,7 +165,31 @@ public class Pathfinder {
 		markPolygon(new BoundingBox.Polygon(plist), 1, 0, 0, grid);
 	}
 
+	public static boolean isMyBoat(Gob gob, Gob player) {
+		while(true) {
+			try {
+				Resource res = gob.getres();
+				if(res == null)
+					return false;
+				if(gob.getres().name.endsWith("e/rowboat") || gob.getres().name.endsWith("e/dugout")) {
+					Coord3f gobLoc = gob.getc();
+					Coord3f plLoc = player.getc(); // Z levels are same if lifted
+					if(gobLoc.z != plLoc.z && new Coord2d(gobLoc).dist(new Coord2d(plLoc)) < 0.1) {
+						return true;
+					}
+				}
+				return false;
+			} catch(Loading l) {
+				Thread.onSpinWait();
+			}
+		}
+	}
+
 	public static void run(Coord2d target, Gob destGob, int button, int mod, int meshid, String action, GameUI gui) {
+		run(target, destGob, button, mod, -1, meshid, action, gui);
+	}
+
+	public static void run(Coord2d target, Gob destGob, int button, int mod, int overlay, int meshid, String action, GameUI gui) {
 		if(gui.pathfinder != null)
 			gui.pathfinder.stop();
 		gui.pathfinder = new Thread(() -> {
@@ -174,6 +206,55 @@ public class Pathfinder {
 				return;
 			Coord2d origin = player.rc.floor().div(100).mul(new Coord2d(100, 100)).add(45, 45).floor(MCache.tilesz).mul(MCache.tilesz);
 			int[][] grid = new int[100*11][100*11];
+			Coord tgt;
+			boolean doorOffset = false;
+			if(destGob != null) {
+				Resource res;
+				while(true) {
+					try {
+						res = destGob.getres();
+						break;
+					} catch(Loading l) { }
+				}
+				if(button == 3 && res != null && doorOffsets.containsKey(res.name)) {
+					tgt = destGob.rc.add(doorOffsets.get(res.name).rotate(destGob.a)).sub(origin).round().add(50*11, 50*11);
+					doorOffset = true;
+				} else {
+					tgt = destGob.rc.sub(origin).round().add(50*11, 50*11);
+				}
+			} else {
+				tgt = target.sub(origin).round().add(50*11, 50*11);
+			}
+			boolean boating = false;
+			synchronized(gui.ui.sess.glob.oc) {
+				for(Gob gob : gui.ui.sess.glob.oc) {
+					BoundingBox bb = BoundingBox.getBoundingBox(gob);
+					if(bb == null || !bb.blocks)
+						continue;
+					if(isMyBoat(gob, player)) {
+						Coord c = origin.div(MCache.tilesz).round();
+						int t = gui.ui.sess.glob.map.gettile(c);
+						if(accessibleTilesBoating.contains(gui.ui.sess.glob.map.tilesetr(t).name))
+							boating = true;
+						continue;
+					}
+					if(gob == player || (gob == destGob && !doorOffset) || (!gob.getres().name.equals("gfx/borka/body") && gob.getc().mul(1,1,0).dist(player.getc().mul(1,1,0)) < 1)) {
+						continue;
+					}
+					for(BoundingBox.Polygon pol : bb.polygons) {
+						bboxes.add(new BoundingBox.Polygon(pol.vertices.stream()
+								.map((v) -> v.rotate(gob.a).add(gob.rc).sub(origin))
+								.collect(Collectors.toCollection(ArrayList::new))));
+					}
+				}
+			}
+
+			// Player probably just wants out of the boat
+			if(boating && button == 1 && (mod & UI.MOD_CTRL) != 0) {
+				gui.map.wdgmsg("click", Coord.z, target.floor(OCache.posres), button, mod);
+				return;
+			}
+
 			for(int i=-45; i<=45; i++) {
 				for(int j=-45; j<=45; j++) {
 					Coord c = origin.div(MCache.tilesz).round().add(i, j);
@@ -194,8 +275,14 @@ public class Pathfinder {
 					while(true) {
 						try {
 							Resource res = gui.ui.sess.glob.map.tilesetr(t);
-							if(res != null && (inaccessibleTiles.contains(res.name) || res.name.startsWith("gfx/tiles/rocks/"))) {
-								markTileInaccessible(new Coord(i,j), grid);
+							if(boating) {
+								if(res != null && !accessibleTilesBoating.contains(res.name)) {
+									markTileInaccessible(new Coord(i, j), grid);
+								}
+							} else {
+								if(res != null && (inaccessibleTiles.contains(res.name) || res.name.startsWith("gfx/tiles/rocks/"))) {
+									markTileInaccessible(new Coord(i, j), grid);
+								}
 							}
 							break;
 						} catch(Loading l) {
@@ -203,40 +290,7 @@ public class Pathfinder {
 					}
 				}
 			}
-			Coord tgt;
-			boolean doorOffset = false;
-			if(destGob != null) {
-				Resource res;
-				while(true) {
-					try {
-						res = destGob.getres();
-						break;
-					} catch(Loading l) { }
-				}
-				if(button == 3 && res != null && doorOffsets.containsKey(res.name)) {
-					tgt = destGob.rc.add(doorOffsets.get(res.name).rotate(destGob.a)).sub(origin).round().add(50*11, 50*11);
-					doorOffset = true;
-				} else {
-					tgt = destGob.rc.sub(origin).round().add(50*11, 50*11);
-				}
-			} else {
-				tgt = target.sub(origin).round().add(50*11, 50*11);
-			}
-			synchronized(gui.ui.sess.glob.oc) {
-				for(Gob gob : gui.ui.sess.glob.oc) {
-					BoundingBox bb = BoundingBox.getBoundingBox(gob);
-					if(bb == null || !bb.blocks)
-						continue;
-					if(gob == player || (gob == destGob && !doorOffset)) {
-						continue;
-					}
-					for(BoundingBox.Polygon pol : bb.polygons) {
-						bboxes.add(new BoundingBox.Polygon(pol.vertices.stream()
-								.map((v) -> v.rotate(gob.a).add(gob.rc).sub(origin))
-								.collect(Collectors.toCollection(ArrayList::new))));
-					}
-				}
-			}
+
 			for(BoundingBox.Polygon pol : bboxes) {
 				markPolygon(pol, 1, 3, 3, grid);
 			}
@@ -335,7 +389,7 @@ public class Pathfinder {
 						gui.wdgmsg("act", action);
 					}
 					if(destGob.rc != null) {
-						gui.map.wdgmsg("click", gui.map.sz.div(2), destGob.rc.floor(OCache.posres), button, mod, 0, (int) destGob.id, destGob.rc.floor(OCache.posres), 0, meshid);
+						gui.map.wdgmsg("click", gui.map.sz.div(2), destGob.rc.floor(OCache.posres), button, mod, (overlay == -1) ? 0 : 1, (int) destGob.id, destGob.rc.floor(OCache.posres), overlay, meshid);
 						gui.map.cp = new ClickPath(player, new Coord2d[]{destGob.rc}, gui.ui.sess.glob.map);
 					}
 					break;

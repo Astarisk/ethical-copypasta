@@ -71,7 +71,7 @@ public class GobText extends Sprite implements RenderTree.Node, PView.Render2D {
 	@Override
 	public void removed(RenderTree.Slot slot) {
 		CachedTexVal ctv = texts.get(new CachedTexKey(text, col));
-		if(--ctv.cnt == 0) {
+		if(ctv != null && --ctv.cnt == 0) {
 			texts.remove(new CachedTexKey(text, col));
 		}
 	}

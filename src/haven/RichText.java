@@ -26,6 +26,8 @@
 
 package haven;
 
+import haven.purus.Config;
+
 import java.io.*;
 import java.util.*;
 import java.text.*;
@@ -44,7 +46,7 @@ public class RichText extends Text {
     static {
 	Map<Attribute, Object> a = new HashMap<Attribute, Object>();
 	a.put(TextAttribute.FAMILY, "SansSerif");
-	a.put(TextAttribute.SIZE, UI.scale(10.0f));
+	a.put(TextAttribute.SIZE, UI.scale(10.0f * Config.fontScale.val));
 	std = new Parser(a);
 	stdf = new Foundry(std);
     }
@@ -758,7 +760,7 @@ public class RichText extends Text {
 		} else if(c == 'w') {
 		    width = Integer.parseInt(opt.arg);
 		} else if(c == 's') {
-		    a.put(TextAttribute.SIZE, UI.scale(Float.parseFloat(opt.arg)));
+		    a.put(TextAttribute.SIZE, UI.scale(Float.parseFloat(opt.arg) * Config.fontScale.val));
 		}
 	    }
 	    Foundry fnd = new Foundry(a);
