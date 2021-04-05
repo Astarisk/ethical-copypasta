@@ -61,7 +61,7 @@ public class Config {
     public static Double uiscale = getfloat("haven.uiscale", null);
     public static byte[] authck = null, inittoken = null;
     public static String prefspec = "hafen";
-    public static final String confid = "Purus-Pasta-the-new-2";
+    public static final String confid = "Ethically-Sourced-CopyPasta";
     
     static {
 	String p;
