@@ -4,7 +4,6 @@ import haven.*;
 import haven.Button;
 import haven.Label;
 import haven.Scrollbar;
-import haven.purus.mapper.Mapper;
 import haven.render.BaseColor;
 import haven.render.Pipe;
 import haven.render.States;
@@ -445,7 +444,7 @@ public class OptWndPurus extends BetterWindow {
 
 		el.root.addSubentry(mapSettings);
 
-		Entry mapExplanation = new Entry(new RichTextBox(UI.scale(500, 50), "With the token you can save markers and access other map features. If you want to share your markers and tokens in the map with your friends, copy and save your friends token here.\nThe map can be accessed at https://hnhmap.vatsul.com/"), "map");
+		Entry mapExplanation = new Entry(new RichTextBox(UI.scale(500, 50), "This feature was patched out due to ethical concerns of it being FORCED upon the user instead of opted"), "map");
 		mapSettings.addSubentry(mapExplanation);
 
 		Entry mapTokenStatus = new Entry(new Label("Map Token:"), "map token");
@@ -459,23 +458,6 @@ public class OptWndPurus extends BetterWindow {
 				add(new Button(UI.scale(100), "Save token") {
 					@Override
 					public boolean mousedown(Coord c, int button) {
-						String newToken = ((TextEntry)mapToken.w).text;
-						try {
-							URL url = new URL(Mapper.apiURL + "/token/" + newToken + "/valid");
-							Scanner scan = new Scanner(url.openStream());
-							if(scan.hasNextLine() && scan.nextLine().equals("Valid")) {
-								Config.mapperToken.setVal(newToken);
-								((Label)mapTokenStatus.w).setcolor(Color.GREEN);
-								((Label)mapTokenStatus.w).settext("Map token was successfully updated!");
-							} else {
-								((Label)mapTokenStatus.w).setcolor(Color.RED);
-								((Label)mapTokenStatus.w).settext("Map token entered was invalid! Changes not saved.");
-							}
-						} catch(IOException e) {
-							((Label)mapTokenStatus.w).setcolor(Color.RED);
-							((Label)mapTokenStatus.w).settext("Error while connecting to server! Changes not saved.");
-							e.printStackTrace();
-						}
 						return super.mousedown(c, button);
 					}
 					{visible = true;}
@@ -493,26 +475,6 @@ public class OptWndPurus extends BetterWindow {
 				add(new Button(UI.scale(200), "Paste token from clipboard") {
 					@Override
 					public boolean mousedown(Coord c, int button) {
-						try {
-							String newToken = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor).toString();
-							if(newToken != null && newToken.length() < 128) {
-									URL url = new URL("https://hnhmap.vatsul.com/api/token/" + newToken + "/valid");
-									Scanner scan = new Scanner(url.openStream());
-									if(scan.hasNextLine() && scan.nextLine().equals("Valid")) {
-										Config.mapperToken.setVal(newToken);
-										((Label) mapTokenStatus.w).setcolor(Color.GREEN);
-										((Label) mapTokenStatus.w).settext("Map token was successfully updated!");
-										((TextEntry)mapToken.w).settext(newToken);
-									} else {
-										((Label) mapTokenStatus.w).setcolor(Color.RED);
-										((Label) mapTokenStatus.w).settext("Map token entered was invalid! Changes not saved.");
-									}
-							}
-						} catch(IOException | UnsupportedFlavorException e) {
-							((Label) mapTokenStatus.w).setcolor(Color.RED);
-							((Label) mapTokenStatus.w).settext("Error while connecting to server! Changes not saved.");
-							e.printStackTrace();
-						}
 						return super.mousedown(c, button);
 					}
 					{visible = true;}
@@ -525,7 +487,7 @@ public class OptWndPurus extends BetterWindow {
 						try {
 							Toolkit.getDefaultToolkit().beep();
 							if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-								Desktop.getDesktop().browse(new URI("https://hnhmap.vatsul.com/map/" + Config.mapperToken.val));
+								Desktop.getDesktop().browse(new URI("https://odditown.com/haven/map/"));
 							}
 						} catch(URISyntaxException | IOException e) {
 						}

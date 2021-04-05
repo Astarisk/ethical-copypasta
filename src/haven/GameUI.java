@@ -27,7 +27,6 @@
 package haven;
 
 import haven.purus.*;
-import haven.purus.mapper.Mapper;
 import haven.purus.pathfinder.Pathfinder;
 import haven.purus.pbot.PBotWindow;
 import haven.purus.pbot.api.Callback;
@@ -757,7 +756,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    }
 	    if(mapstore != null) {
 		MapFile file = MapFile.load(mapstore, mapfilename());
-		Mapper.sendMarkerData(file);
 		mmap = blpanel.add(new CornerMap(UI.scale(new Coord(133, 133)), file), minimapc);
 		mmap.lower();
 		mapfile = new MapWnd(file, map, Utils.getprefc("wndsz-map", UI.scale(new Coord(700, 500))), "Map");

@@ -27,8 +27,6 @@
 package haven;
 
 import haven.purus.Config;
-import haven.purus.food.FoodService;
-import haven.purus.food.IconService;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -186,8 +184,6 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 				// Ignored
 			}
 		}
-		FoodService.checkFood(info, getres().name);
-		IconService.checkIcon(info, spr);
 	}
 	return(info);
     }

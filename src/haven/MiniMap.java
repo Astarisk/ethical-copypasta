@@ -41,7 +41,6 @@ import haven.MapFile.SMarker;
 import haven.purus.ClickPath;
 import haven.purus.Config;
 import haven.purus.alarms.AlarmManager;
-import haven.purus.mapper.Mapper;
 
 import static haven.MCache.cmaps;
 import static haven.MCache.tilesz;
@@ -268,7 +267,6 @@ public class MiniMap extends Widget {
 					if(gameui().ui.sess.glob.map.grids != null) {
 						MCache.Grid g;
 						g = gameui().ui.sess.glob.map.getgrid(gob.rc.floor().div(11 * 100));
-						Mapper.sendMarkerData(g.id, gob.rc.div(11).floor().mod(new Coord(100, 100)).x, gob.rc.div(11).floor().mod(new Coord(100, 100)).y, "gfx/hud/mmap/cave", "Cave");
 						sent.add(gob.id);
 					}
 				}
