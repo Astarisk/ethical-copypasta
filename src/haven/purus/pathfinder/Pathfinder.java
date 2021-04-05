@@ -227,7 +227,7 @@ public class Pathfinder {
 					BoundingBox bb = BoundingBox.getBoundingBox(gob);
 					if(bb == null || !bb.blocks)
 						continue;
-					if(gob == player || (gob == destGob && !doorOffset)) {
+					if(gob == player || (gob == destGob && !doorOffset) || gob.getc().dist(player.getc()) < 1) {
 						continue;
 					}
 					for(BoundingBox.Polygon pol : bb.polygons) {
