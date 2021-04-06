@@ -211,7 +211,7 @@ public class MiniMap extends Widget {
     }
 
     private Locator sesslocator;
-    public void tick(double dt) {
+	public void tick(double dt) {
 	if(setloc != null) {
 	    try {
 		Location loc = resolve(setloc);
@@ -630,6 +630,7 @@ public class MiniMap extends Widget {
 	redisplay(loc);
 	remparty();
 	drawparts(g);
+	super.draw(g);
 	}
 
     private static boolean hascomplete(DisplayGrid[] disp, Area dext, Coord c) {

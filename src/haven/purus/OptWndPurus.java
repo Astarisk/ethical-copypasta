@@ -300,11 +300,11 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, "Hide visual flavor objects [Requires restart]"));
 
-		displaySettings.addSubentry(new Entry(new CheckBox("Hide all flavor objects (including sound) [Requires restart]"){
-			{a = Config.flavorObjsAll.val;}
+		displaySettings.addSubentry(new Entry(new CheckBox("Hide audio flavor objects [Requires restart]"){
+			{a = Config.flavorObjsAudial.val;}
 			@Override
 			public boolean mousedown(Coord c, int button) {
-				Config.flavorObjsAll.setVal(!this.a);
+				Config.flavorObjsAudial.setVal(!this.a);
 				return super.mousedown(c, button);
 			}
 		}, "Hide all flavor (including sound) objects [Requires restart]"));
@@ -318,6 +318,17 @@ public class OptWndPurus extends BetterWindow {
 				return super.mousedown(c, button);
 			}
 		}, "Highlight tanning tubs and drying frames"));
+
+
+		displaySettings.addSubentry(new Entry(new CheckBox("Enable columns above players"){
+			{a = Config.playerRadiuses.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.playerRadiuses.setVal(!this.a);
+				gameui().map.refreshGobsAll();
+				return super.mousedown(c, button);
+			}
+		}, "\"Enable columns above players"));
 
 		Entry combatSettings = new Entry(new Label("Combat Settings"), "Combat Settings");
 		((Label)combatSettings.w).setcolor(Color.ORANGE);
