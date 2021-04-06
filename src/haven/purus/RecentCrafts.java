@@ -43,7 +43,7 @@ public class RecentCrafts extends Widget {
 	}
 
 	public RecentCrafts() {
-		super(UI.scale(new Coord((invsq.sz().x + 2) * 8, 34)));
+		super(new Coord((invsq.sz().x + UI.scale(2)) * 8, UI.scale(34)));
 		if(haven.purus.Config.pref.getBoolean("recentcrafts_flip", false))
 			flip();
 	}
