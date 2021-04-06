@@ -392,6 +392,9 @@ public class Pathfinder {
 						gui.map.wdgmsg("click", gui.map.sz.div(2), destGob.rc.floor(OCache.posres), button, mod, (overlay == -1) ? 0 : 1, (int) destGob.id, destGob.rc.floor(OCache.posres), overlay, meshid);
 						gui.map.cp = new ClickPath(player, new Coord2d[]{destGob.rc}, gui.ui.sess.glob.map);
 					}
+					if(action.length() > 0) {
+						gui.map.wdgmsg("click", Coord.z, Coord.z, 3, 0);
+					}
 					break;
 				}
 				Coord2d[] croute = new Coord2d[rte.size()-i];
