@@ -98,4 +98,11 @@ public class PBotInventory {
 				.sum();
 	}
 
+	/**
+	 * Transfer 1 item by scrolling
+	 */
+	public void xferTo() {
+		pBotSession.PBotUtils().playerInventory().inventory.wdgmsg("invxf", inventory.wdgid(), 1);
+	}
+
 }

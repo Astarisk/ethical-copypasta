@@ -168,14 +168,13 @@ public class PBotGob {
 
 	/**
 	 * Get name of window for gob from gobWindowMap
-	 * @param gob Gob to get inventory of
 	 * @return Inventory window name
 	 */
-	public static String windowNameForGob(Gob gob) {
+	public String windowNameForGob() {
 		while(true) {
 			try {
 				if(gob.getres() == null)
-					return "Window name for gob found!!";
+					return null;
 				else
 					return gobWindowMap.get(gob.getres().name);
 			} catch(Loading l) {

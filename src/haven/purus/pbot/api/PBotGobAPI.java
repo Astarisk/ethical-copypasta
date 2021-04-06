@@ -61,6 +61,8 @@ public class PBotGobAPI {
 		Pattern pat = Pattern.compile(resname);
 		synchronized(pBotSession.gui.ui.sess.glob.oc) {
 			for(Gob gob : pBotSession.gui.ui.sess.glob.oc) {
+				if(gob.isPlayer())
+					continue;
 				Resource res;
 				while(true) {
 					try {
