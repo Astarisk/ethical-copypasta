@@ -320,6 +320,17 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, "Highlight tanning tubs and drying frames"));
 
+
+		displaySettings.addSubentry(new Entry(new CheckBox("Enable columns above players"){
+			{a = Config.playerRadiuses.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.playerRadiuses.setVal(!this.a);
+				gameui().map.refreshGobsAll();
+				return super.mousedown(c, button);
+			}
+		}, "\"Enable columns above players"));
+
 		Entry combatSettings = new Entry(new Label("Combat Settings"), "Combat Settings");
 		((Label)combatSettings.w).setcolor(Color.ORANGE);
 		el.root.addSubentry(combatSettings);

@@ -324,7 +324,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 		}
     }
 
-    boolean isPlayer() {
+    public boolean isPlayer() {
     	return (glob.sess.ui != null && glob.sess.ui.gui != null && this.id == glob.sess.ui.gui.plid);
 	}
 
@@ -613,7 +613,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 						}
 					} else if(res.name.startsWith("gfx/borka/body")) {
 						Overlay ol = this.findol(1342);
-						if(Config.animalRadiuses.val && !isPlayer()) {
+						if(Config.playerRadiuses.val && !isPlayer()) {
 							if(ol == null) {
 								KinInfo kin = getattr(KinInfo.class);
 								if(kin == null)
