@@ -27,7 +27,9 @@ public class ClickPath implements RenderTree.Node, TickList.Ticking, TickList.Ti
 		FillBuffer ret = env.fillbuf(dst);
 		ByteBuffer buf = ret.push();
 		try {
-			Coord2d prev = new Coord2d(gob.getc());
+			Coord2d prev = Coord2d.z;
+			if(gob != null)
+				prev = new Coord2d(gob.getc());
 			for(int i=0; i<rte.length; i++) {
 				buf.putFloat((float) prev.x).putFloat((float) -prev.y).putFloat(mCache.getz(prev.floor(MCache.tilesz)));
 				buf.putFloat((float) rte[i].x).putFloat((float) -rte[i].y).putFloat(mCache.getz(rte[i].floor(MCache.tilesz)));

@@ -181,6 +181,9 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		genus = (String)args[2];
 	    GameUI gui = new GameUI(chrid, plid, genus, ui);
 	    ui.gui = gui;
+	    try {
+			ui.sess.glob.oc.getgob(plid).updated();
+		}catch(Exception e){}
 	    return(gui);
 	}
     }

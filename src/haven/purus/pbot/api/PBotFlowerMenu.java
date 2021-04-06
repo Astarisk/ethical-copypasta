@@ -28,9 +28,11 @@ public class PBotFlowerMenu {
 	public void choosePetal(String name) {
 		for(FlowerMenu.Petal p : this.menu.opts) {
 			if(p.name.equals(name)) {
-				menu.choose(p);
-				menu.destroy();
-				return;
+				try {
+					menu.choose(p);
+					menu.destroy();
+					return;
+				} catch(IndexOutOfBoundsException iee) {}
 			}
 		}
 	}

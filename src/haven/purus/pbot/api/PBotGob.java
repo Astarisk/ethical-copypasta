@@ -240,6 +240,16 @@ public class PBotGob {
 	 * Click a gob with pathfinder, with given button
 	 * @param btn 1 = left click, 3 = right click
 	 * @param mod 1 = shift, 2 = ctrl, 4 = alt
+	 * @param action dig, destroy etc to select before the final click
+	 */
+	public void pfClick(int btn, int mod, List<String> action) {
+		Pathfinder.run(gob.rc, gob, btn, mod, -1, String.join(" ", action), pBotSession.gui);
+	}
+
+	/**
+	 * Click a gob with pathfinder, with given button
+	 * @param btn 1 = left click, 3 = right click
+	 * @param mod 1 = shift, 2 = ctrl, 4 = alt
 	 */
 	public void pfClick(int btn, int mod) {
 		Pathfinder.run(gob.rc, gob, btn, mod, -1,"", pBotSession.gui);
