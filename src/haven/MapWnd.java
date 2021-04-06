@@ -27,6 +27,7 @@
 package haven;
 
 import java.util.*;
+import java.util.concurrent.locks.Lock;
 import java.util.function.*;
 import java.io.*;
 import java.awt.Color;
@@ -230,8 +231,10 @@ public class MapWnd extends BetterWindow implements Console.Directory {
     }
 
     private class View extends MiniMap {
+		private final Label biomeLbl = new Label("");
 	View(MapFile file) {
 	    super(file);
+		add(biomeLbl, UI.scale(5,20));
 	}
 
 	public void drawmarkers(GOut g) {
@@ -276,7 +279,30 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 	    return(false);
 	}
 
-	public boolean mousedown(Coord c, int button) {
+		@Override
+		public void mousemove(Coord c) {
+			if(c.isect(this.c, this.sz)) {
+				Location loc = xlate(c);
+				if(loc != null && loc.seg.file().lock.readLock().tryLock()) {
+					try {
+						MapFile.Grid grid = loc.seg.grid(loc.tc.div(cmaps)).get();
+						if(grid != null) {
+							String resname = grid.tilesets[grid.gettile(loc.tc.mod(cmaps))].res.name;
+							biomeLbl.settext(resname.substring(resname.lastIndexOf("/") + 1));
+						}
+					} catch(Exception e) {
+						e.printStackTrace();
+					} finally {
+						loc.seg.file().lock.readLock().unlock();
+					}
+				}
+			} else {
+				biomeLbl.settext("");
+			}
+			super.mousemove(c);
+		}
+
+		public boolean mousedown(Coord c, int button) {
 	    if(domark && (button == 3)) {
 		domark = false;
 		return(true);
@@ -285,7 +311,7 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 	    return(true);
 	}
 
-	public void draw(GOut g) {
+		public void draw(GOut g) {
 	    g.chcolor(0, 0, 0, 128);
 	    g.frect(Coord.z, sz);
 	    g.chcolor();
