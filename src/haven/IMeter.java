@@ -35,6 +35,8 @@ public class IMeter extends Widget {
     public static final Coord msz = UI.scale(75, 10);
     public final Indir<Resource> bg;
     public List<Meter> meters;
+	private static final Resource horseAlarm = Resource.local().loadwait("sfx/alarms/horsestamina");
+	private boolean alarmPlayed = false;
     
     @RName("im")
     public static class $_ implements Factory {
@@ -90,6 +92,18 @@ public class IMeter extends Widget {
     public void uimsg(String msg, Object... args) {
 	if(msg == "set") {
 	    this.meters = decmeters(args, 0);
+	    if(!alarmPlayed) {
+			try {
+				Resource res = bg.get();
+				if(res != null && res.name.equals("gfx/hud/meter/häst")) {
+					if(meters.get(0).a <= 10) {
+						Audio.play(horseAlarm);
+						alarmPlayed = true;
+					}
+				}
+			} catch(Loading l) {
+			}
+		}
 	} else {
 	    super.uimsg(msg, args);
 	}
