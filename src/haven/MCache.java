@@ -332,6 +332,8 @@ public class MCache implements MapSource {
 			    Indir<Resource> r = set.flavobjs.pick(rp % set.flavobjs.tw);
 			    if(Config.flavorObjsVisual.val && r.get().name.startsWith("gfx/tiles/"))
 			    	continue;
+				if(Config.flavorObjsAudial.val && r.get().name.startsWith("sfx/"))
+					continue;
 			    Gob g = new Flavobj(o.add(gul).mul(tilesz).add(tilesz.div(2)), a * 2 * Math.PI);
 			    g.setattr(new ResDrawable(g, r, Message.nil));
 			    mbuf.add(g);

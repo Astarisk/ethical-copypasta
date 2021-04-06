@@ -97,7 +97,7 @@ public class Config {
 	public static Setting<Boolean> showmapgrid = new Setting<>("showmapgrid", false);
 	public static Setting<Boolean> toggleDlight = new Setting<>("toggleDlight", false);
 	public static Setting<Boolean> flavorObjsVisual = new Setting<>("flavorObjsVisual", false);
-	public static Setting<Boolean> flavorObjsAll = new Setting<>("flavorObjsAudial", false);
+	public static Setting<Boolean> flavorObjsAudial = new Setting<>("flavorObjsAudial", false);
 	public static Setting<Boolean> animalRadiuses = new Setting<>("animalRadiuses", false);
 	public static Setting<Boolean> disableJorbfont = new Setting<>("disableJorbfont", false);
 	public static Setting<Float> fontScale = new Setting<>("fontScale", 1.0f);
