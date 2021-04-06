@@ -147,8 +147,10 @@ public class Equipory extends Widget implements DTarget {
 		if(ep == 0 || ep == 16) {
 			try {
 				GameUI gui = gameui();
-				if(gui != null)
-					gui.hatname = g.res.get().name;
+				if(gui != null) {
+					if(gui.hatname == null || ep == 16)
+						gui.hatname = g.res.get().name;
+				}
 			} catch(Loading l) {}
 		}
 		slots[ep] = g;
