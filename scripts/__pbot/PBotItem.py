@@ -5,7 +5,7 @@ class PBotItem(object):
         self.__item = item
         self._item = item
 
-## Get name of the item
+    ## Get name of the item
     # @return Name of the item or None if the name couldn't be determined
     def get_name(self) -> str:
         return self.__item.getName()
