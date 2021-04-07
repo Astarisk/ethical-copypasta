@@ -1,5 +1,12 @@
 ## Changelog
 
+### 1.3.0
+- Added player columns
+- Display tile on minimap hover
+- Fix horse alarm
+- Add simple transfer Script
+- Minor PBot update
+
 ### 1.2.0
 - Improved pathfinder
   - Should work when lifting objects
