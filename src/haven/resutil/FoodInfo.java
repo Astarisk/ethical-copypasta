@@ -78,9 +78,13 @@ public class FoodInfo extends ItemInfo.Tip {
 	BufferedImage base = RichText.render(head, 0).img;
 	Collection<BufferedImage> imgs = new LinkedList<BufferedImage>();
 	imgs.add(base);
+	double totalFeps = 0;
 	for(int i = 0; i < evs.length; i++) {
+		totalFeps += evs[i].a;
+	}
+		for(int i = 0; i < evs.length; i++) {
 	    Color col = Utils.blendcol(evs[i].ev.col, Color.WHITE, 0.5);
-	    imgs.add(catimgsh(5, evs[i].img, RichText.render(String.format("%s: $col[%d,%d,%d]{%s}", evs[i].ev.nm, col.getRed(), col.getGreen(), col.getBlue(), Utils.odformat2(evs[i].a, 2)), 0).img));
+	    imgs.add(catimgsh(5, evs[i].img, RichText.render(String.format("%s: $col[%d,%d,%d]{%s - %s}", evs[i].ev.nm, col.getRed(), col.getGreen(), col.getBlue(), Utils.odformat2(evs[i].a, 2), Utils.odformat2(evs[i].a/(totalFeps/100.0), 2) + "%"), 0).img));
 	}
 	for(int i = 0; i < efs.length; i++) {
 	    BufferedImage efi = ItemInfo.longtip(efs[i].info);
@@ -88,6 +92,9 @@ public class FoodInfo extends ItemInfo.Tip {
 		efi = catimgsh(5, efi, RichText.render(String.format("$i{($col[192,192,255]{%d%%} chance)}", (int)Math.round(efs[i].p * 100)), 0).img);
 	    imgs.add(efi);
 	}
-	return(catimgs(0, imgs.toArray(new BufferedImage[0])));
+		new Color(0,0,0);
+		imgs.add(RichText.render(String.format("Total FEP: $col[%d,%d,%d]{%s}, FEP/Hunger: $col[%d,%d,%d]{%s}", 0, 180, 0, Utils.odformat2(totalFeps, 2), 0, 180, 0, Utils.odformat2(totalFeps/(glut*100), 2)), 0).img);
+
+		return(catimgs(0, imgs.toArray(new BufferedImage[0])));
     }
 }
