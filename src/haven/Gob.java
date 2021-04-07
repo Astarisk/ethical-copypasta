@@ -34,6 +34,7 @@ import haven.purus.*;
 import haven.purus.Config;
 import haven.purus.mapper.Mapper;
 import haven.render.*;
+import haven.resutil.WaterTile;
 
 public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Skeleton.HasPose {
     public Coord2d rc;
@@ -334,7 +335,14 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	DrawOffset df = getattr(DrawOffset.class);
 	if(df != null)
 	    ret = ret.add(df.off);
-	return(ret);
+		if(knocked != Knocked.UNKNOWN)
+			try {
+				if(glob.map.tiler(glob.map.gettile(new Coord2d(ret).floor(MCache.tilesz))) instanceof WaterTile) {
+					ret.z += 5;
+				}
+			} catch(Loading l) {}
+
+		return(ret);
     }
 
     public Coord3f getrc() {
@@ -849,10 +857,10 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 			Coord3f oc = Gob.this.getc();
 			Coord3f rc = new Coord3f(oc);
 			rc.y = -rc.y;
-			this.flw = null;
+				this.flw = null;
 			this.oc = oc;
 			this.rc = rc;
-			this.a = Gob.this.a;
+				this.a = Gob.this.a;
 			tilestate = Gob.this.getmapstate(oc);
 		    } else {
 			this.flw = flwxf;
@@ -932,7 +940,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 		}
 		if(!Utils.eq(this.cur, np))
 		    update(np);
-	    }
+		}
 	}
 
 	private void update(Placement np) {
