@@ -96,7 +96,7 @@ public class IMeter extends Widget {
 			try {
 				Resource res = bg.get();
 				if(res != null && res.name.equals("gfx/hud/meter/häst")) {
-					if(meters.get(0).a <= 10) {
+					if(meters.get(0).a <= 0.10) {
 						Audio.play(horseAlarm);
 						alarmPlayed = true;
 					}
