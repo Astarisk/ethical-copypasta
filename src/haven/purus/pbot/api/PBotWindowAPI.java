@@ -2,7 +2,9 @@ package haven.purus.pbot.api;
 
 import haven.Window;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class PBotWindowAPI {
 
@@ -31,18 +33,6 @@ public class PBotWindowAPI {
 	}
 
 	/**
-	 * Wait for a window with a specific name to appear
-	 * @param name Name of the window
-	 * @return Returns the window
-	 */
-	public Window waitForWindow(String name) {
-		while(true) {
-			PBotWindow window = getWindow(name);
-			PBotUtils.sleep(25);
-		}
-	}
-
-	/**
 	 * Wait for a window with a specific name to disappear
 	 * @param timeout in milliseconds
 	 * @param name Name of the window
@@ -55,19 +45,9 @@ public class PBotWindowAPI {
 				return false;
 			}
 			retries++;
-			PBotUtils.sleep(50);
+			PBotUtils.sleep(25);
 		}
 		return true;
-	}
-
-	/**
-	 * Wait for a window with a specific name to disappear
-	 * @param name Name of the window
-	 */
-	public void waitForWindowClose(String name) {
-		while(getWindow(name) != null) {
-			PBotUtils.sleep(50);
-		}
 	}
 
 	/**
@@ -81,6 +61,21 @@ public class PBotWindowAPI {
 				return new PBotWindow(w, pBotSession);
 		}
 		return null;
+	}
+
+	/**
+	 * Get a windows that match the given regex pattern
+	 * @param name Pattern to match window titles to
+	 * @return The window or null if not found
+	 */
+	public List<PBotWindow> getWindows(String name) {
+		List<PBotWindow> ret = new ArrayList<>();
+		Pattern pat = Pattern.compile(name);
+		for(Window w : pBotSession.gui.children(Window.class)) {
+			if(pat.matcher(w.cap.text).matches())
+				ret.add(new PBotWindow(w, pBotSession));
+		}
+		return ret;
 	}
 
 }

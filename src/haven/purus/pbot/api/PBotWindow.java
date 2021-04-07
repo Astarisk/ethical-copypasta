@@ -31,7 +31,7 @@ public class PBotWindow {
 	 * Get amounts of meters of the window, from 0 to 100, some windows may have more than 1 meter, like chicken coops
 	 * @return List containing amounts of the meters that were found
 	 */
-	public static List<Integer> getAmounts(Window window) {
+	public List<Integer> getAmounts() {
 		ArrayList<Integer> amounts = new ArrayList<>();
 		for(VMeter vm:window.children(VMeter.class)) {
 			amounts.add(vm.amount);

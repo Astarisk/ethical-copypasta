@@ -50,14 +50,6 @@ public class PBotUtils {
 	}
 
 	/**
-	 * Waits until the flowermenu appears
-	 * @return Flowermenu that was opened
-	 */
-	public PBotFlowerMenu getFlowermenu() {
-		return getFlowermenu(Long.MAX_VALUE);
-	}
-
-	/**
 	 * Itemact with item in hand, for example, to make a stockpile
 	 */
 	public void makePile() {
@@ -80,8 +72,7 @@ public class PBotUtils {
 	 * @param btn 1 = left click, 3 = right click
 	 * @param mod 1 = shift, 2 = ctrl, 4 = alt
 	 */
-
-	public void mapClick(int x, int y, int btn, int mod) {
+	public void mapClick(double x, double y, int btn, int mod) {
 		pBotSession.gui.map.wdgmsg("click", getCenterScreenCoord(), new Coord2d(x, y).floor(OCache.posres), btn, mod);
 	}
 
@@ -214,10 +205,12 @@ public class PBotUtils {
 	 * Drops an item from the hand and waits until it has been dropped
 	 * @param mod 1 = shift, 2 = ctrl, 4 = alt
 	 */
-	public void dropItemFromHand(int mod) {
+	public void dropItemFromHand(int mod, boolean wait) {
 		pBotSession.gui.map.wdgmsg("drop", Coord.z, pBotSession.gui.map.player().rc.floor(OCache.posres), mod);
-		while(getItemAtHand() != null)
-			sleep(25);
+		if(wait) {
+			while(getItemAtHand() != null)
+				sleep(25);
+		}
 	}
 
 	/**
@@ -236,7 +229,9 @@ public class PBotUtils {
 					return res.name;
 				else
 					return null;
-			} catch(Loading l) { }
+			} catch(Loading l) {
+				Thread.onSpinWait();
+			}
 		}
 	}
 
@@ -276,5 +271,26 @@ public class PBotUtils {
 		synchronized(pBotSession.gui.map.areaSelectCbQueue) {
 			pBotSession.gui.map.areaSelectCbQueue.add(new Pair<>(cb, pBotSession));
 		}
+	}
+
+	public void give() {
+		if(pBotSession.gui.fv.current != null) {
+			pBotSession.gui.fv.wdgmsg("give", (int) pBotSession.gui.fv.current.gobid, 1);
+		}
+	}
+
+	public int combatState() {
+		if(pBotSession.gui.fv.current != null) {
+			return pBotSession.gui.fv.curgive.state;
+		}
+		return -1;
+	}
+
+	public boolean hasCombat() {
+		return pBotSession.gui.fv.current != null;
+	}
+
+	public double combatCooldown() {
+		return Math.max(0.0, pBotSession.gui.fv.atkct - Utils.rtime());
 	}
 }

@@ -2,13 +2,16 @@ image: openjdk:15-buster
 
 before_script:
     - apt-get -y update
-    - apt-get -y install ant rsync
+    - apt-get -y install ant rsync doxygen
 
 deploy:
   stage: deploy
   script:
     - ant dist
-    - rsync -r --delete build/doc/javadoc ${RSYNC_DEST_DOC}
+    - cd scripts/__pbot/
+    - doxygen dconfig
+    - rsync -r --delete doc/html/ ${RSYNC_DEST_DOC}
+    - cd ../..
     - unzip -o build/dist.zip -d build/update_temp/
     - cd build/update_temp
     - find -type f -exec sha1sum "{}" \; | sed 's/  / /g' | sed '/listing.txt/d' > listing.txt

@@ -19,6 +19,7 @@ public class PBotFlowerMenu {
 	 */
 	public void closeMenu() {
 		this.menu.choose(null);
+		this.menu.destroy();
 	}
 
 	/**

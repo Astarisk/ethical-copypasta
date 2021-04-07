@@ -201,4 +201,12 @@ public class PBotItem {
 		item.wdgmsg("drop", Coord.z);
 	}
 
+	/**
+	 * Get size of this item
+	 * @return Size of item access x, y
+	 */
+	public Coord getSize() {
+		return item.size();
+	}
+
 }
