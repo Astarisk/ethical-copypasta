@@ -19,5 +19,6 @@ class PBotFlowerMenu(object):
         self.__menu.choosePetal(num)
 
     ## Get options of this flowermenu
+    # @return list of options
     def get_petal_names(self) -> List[str]:
         return list(self.__menu.getPetalNames())

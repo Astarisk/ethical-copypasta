@@ -40,6 +40,7 @@ class PBotWindow(object):
         return self.__window.getStockpileTotalCapacity()
 
     ## Tries to find an inventories attached to the given window, such as cupboard
+    # @return list of inventories attached
     def get_inventories(self) -> List[PBotInventory]:
         return [PBotInventory(x) for x in self.__window.getInventories()]
 

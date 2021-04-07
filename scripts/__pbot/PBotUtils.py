@@ -67,8 +67,8 @@ class PBotUtils(object):
 
     ## Waits for the hourglass timer when crafting or drinking for example
     # Also waits until the hourglass has been seen to change at least once
-    # If hourglass does not appear within timeout, returns false, else true
     # @param timeout timeout in milliseconds
+    # @return If hourglass does not appear within timeout, returns false, else true
     def wait_for_hourglass(self, timeout: int = 3600000) -> bool:
         return self.__session.PBotUtils().waitForHourglass(timeout)
 

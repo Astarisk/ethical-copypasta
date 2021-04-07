@@ -82,7 +82,8 @@ class PBotGob(object):
         return self._gob.isMoving()
 
     ## Get speed of this gob if it is moving
-    def get_speed(self) -> int:
+    # @return speed of gob
+    def get_speed(self) -> float:
         return self._gob.getSpeed()
 
     ## Returns resnames of poses of this gob if it has any poses
