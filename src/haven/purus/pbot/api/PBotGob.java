@@ -71,7 +71,7 @@ public class PBotGob {
 	 * @return Coord object with x and y attributes
 	 */
 	public Coord2d getCoords() {
-		return this.gob.rc;
+		return new Coord2d(this.gob.getc());
 	}
 
 	/**
