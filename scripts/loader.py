@@ -1,4 +1,6 @@
-from __future__ import annotations
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import importlib
 import threading
 from py4j.java_gateway import JavaGateway, CallbackServerParameters, GatewayParameters
