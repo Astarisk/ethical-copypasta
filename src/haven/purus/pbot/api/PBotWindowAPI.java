@@ -22,13 +22,13 @@ public class PBotWindowAPI {
 	 */
 	public PBotWindow waitForWindow(String name, long timeout) {
 		int retries = 0;
-		while(retries * 25L < timeout) {
+		do {
 			PBotWindow window = getWindow(name);
 			if(window != null)
 				return window;
 			retries++;
 			PBotUtils.sleep(25);
-		}
+		} while(retries * 25L < timeout);
 		return null;
 	}
 

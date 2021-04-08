@@ -5,6 +5,9 @@ class PBotItem(object):
         self.__item = item
         self._item = item
 
+    def __eq__(self, other):
+        return self.__item.equals(other._item)
+
     ## Get name of the item
     # @return Name of the item or None if the name couldn't be determined
     def get_name(self) -> str:
@@ -75,8 +78,7 @@ class PBotItem(object):
 
     ## Size of this item
     # @return size x y
-    def getSize(self) -> Tuple[int, int]:
+    def get_size(self) -> Tuple[int, int]:
         c = self.__item.getSize()
         return c.x, c.y,
-
 

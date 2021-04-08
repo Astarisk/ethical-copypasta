@@ -13,6 +13,10 @@ public class PBotItem {
 		this.pBotSession = pBotSession;
 	}
 
+	public boolean equals(PBotItem itm) {
+		return (item.wdgid() == itm.item.wdgid());
+	}
+
 	/**
 	 * Returns name of the item content
 	 * @return Name of the item content or null if not found
@@ -52,7 +56,7 @@ public class PBotItem {
 	 * @param wait Wait for item to appear on hand
 	 */
 	public void takeItem(boolean wait) {
-		item.wdgmsg("take", getInvLoc());
+		item.wdgmsg("take", Coord.z);
 		if(wait) {
 			while(pBotSession.PBotUtils().getItemAtHand() == null) {
 				PBotUtils.sleep(25);

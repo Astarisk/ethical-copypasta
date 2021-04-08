@@ -104,4 +104,11 @@ public class PBotInventory {
 		pBotSession.PBotUtils().playerInventory().inventory.wdgmsg("invxf", inventory.wdgid(), 1);
 	}
 
+	/**
+	 * Size of the inventory
+	 * @return Size
+	 */
+	public Coord size() {
+		return this.inventory.isz;
+	}
 }

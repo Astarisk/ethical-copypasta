@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from .PBotItem import PBotItem
 
 class PBotInventory(object):
@@ -45,6 +45,11 @@ class PBotInventory(object):
     def xfer_to(self):
         self.__inv.xferTo()
 
+    ## Size of the inventory slots
+    # @return x y size
+    def size(self) -> Tuple[int, int]:
+        sz = self.__inv.size()
+        return sz.x, sz.y,
 
 ## Inventory where the item is located in
 # @return inventory or None if not found
