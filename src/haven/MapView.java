@@ -2602,8 +2602,9 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	public void refreshGobsAll() {
 		OCache oc = glob.oc;
 		synchronized(oc) {
-			for(Gob gob : oc)
-				gob.updated();
+			for(Gob gob : oc) {
+				gob.updCustom();
+			}
 		}
 	}
 }
