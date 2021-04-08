@@ -283,7 +283,7 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 		public void mousemove(Coord c) {
 			if(c.isect(this.c, this.sz)) {
 				Location loc = xlate(c);
-				if(loc != null && loc.seg.file().lock.writeLock().tryLock()) {
+				if(loc != null && loc.seg.file().lock.readLock().tryLock()) {
 					try {
 						MapFile.Grid grid = loc.seg.grid(loc.tc.div(cmaps)).get();
 						if(grid != null) {
@@ -293,7 +293,7 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 					} catch(Exception e) {
 						//e.printStackTrace();
 					} finally {
-						loc.seg.file().lock.writeLock().unlock();
+						loc.seg.file().lock.readLock().unlock();
 					}
 				}
 			} else {
