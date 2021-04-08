@@ -6,6 +6,8 @@ class PBotItem(object):
         self._item = item
 
     def __eq__(self, other):
+        if other is None:
+            return False
         return self.__item.equals(other._item)
 
     ## Get name of the item
