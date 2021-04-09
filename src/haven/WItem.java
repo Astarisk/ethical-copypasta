@@ -208,6 +208,9 @@ public class WItem extends Widget implements DTarget {
 		    ol.draw(g);
 	    }
 	    Double meter = (item.meter > 0) ? Double.valueOf(item.meter / 100.0) : itemmeter.get();
+	    if(meter == null && item.wear != null) {
+			meter = item.wear;
+		}
 	    if((meter != null) && (meter > 0)) {
 	    	/*
 		g.chcolor(255, 255, 255, 64);
