@@ -46,7 +46,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     public long id;
     public final Glob glob;
     Map<Class<? extends GAttrib>, GAttrib> attr = new ConcurrentHashMap<>();
-    public final LinkedBlockingDeque<Overlay> ols = new LinkedBlockingDeque<>();
+    public final Collection<Overlay> ols = new LinkedBlockingDeque<>();
     public final Collection<RenderTree.Slot> slots = new ArrayList<>(1);
     private final Collection<SetupMod> setupmods = new ArrayList<>();
     private final Collection<ResAttr.Cell<?>> rdata = new LinkedList<ResAttr.Cell<?>>();
