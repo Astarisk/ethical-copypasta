@@ -255,7 +255,7 @@ public class WItem extends Widget implements DTarget {
 		}
 	    if(ui.modshift) {
 	    	if(ui.modmeta) {
-	    		item.wdgmsg("transfer-identical", item.getres().name);
+	    		item.wdgmsg("transfer-identical", item.getname());
 	    		return true;
 			}
 		int n = ui.modctrl ? -1 : 1;

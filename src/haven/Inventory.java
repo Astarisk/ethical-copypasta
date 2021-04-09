@@ -135,7 +135,7 @@ public class Inventory extends Widget implements DTarget {
 	@Override
 	public void wdgmsg(Widget sender, String msg, Object... args) {
     	if(msg.equals("transfer-identical")) {
-    		children().stream().filter((w) -> w instanceof WItem && ((WItem) w).item.res.get().name.equals((String) args[0]))
+    		children().stream().filter((w) -> w instanceof WItem && ((WItem) w).item.getname().equals((String) args[0]))
 					.sorted(Comparator.comparingDouble(a -> ((WItem) a).quality()))
 					.forEach(item -> ((WItem) item).item.wdgmsg("transfer", Coord.z));
     		return;
