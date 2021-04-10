@@ -45,6 +45,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 	public double studytime = 0;
 	public Tex metertex;
 	private boolean dropcheck = false;
+	public Double wear = null;
 
 
     @RName("item")

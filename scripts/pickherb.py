@@ -1,13 +1,12 @@
-class Script:
-    def run(self, sess):
-        PBotUtils = sess.PBotUtils()
-        PBotGobAPI = sess.PBotGobAPI()
+from __pbot.PBotSession import PBotSession
 
-        closestHerb = PBotGobAPI.getClosestGobByResname("gfx/terobjs/herbs/.*|gfx/kritter/jellyfish/jellyfish")
-        if closestHerb == None or closestHerb.dist(PBotGobAPI.getPlayer()) > 8*11:
-            closestHerb = PBotGobAPI.getClosestGobByResname("gfx/kritter/.*")
-        if closestHerb != None and closestHerb.dist(PBotGobAPI.getPlayer()) < 8*11:
-            closestHerb.doClick(3, 0)
-            menu = PBotUtils.getFlowermenu(5000)
+class Script:
+    def run(self, sess: PBotSession):
+        closestHerb = sess.PBotGobAPI.get_closest_gob_by_resname("gfx/terobjs/herbs/.*|gfx/kritter/jellyfish/jellyfish")
+        if closestHerb == None or closestHerb.dist(sess.PBotGobAPI.get_player()) > 8*11:
+            closestHerb = sess.PBotGobAPI.get_closest_gob_by_resname("gfx/kritter/.*")
+        if closestHerb != None and closestHerb.dist(sess.PBotGobAPI.get_player()) < 8*11:
+            closestHerb.do_click(3, 0)
+            menu = sess.PBotUtils.get_flowermenu(5000)
             if menu != None:
-                menu.choosePetal("Pick")
+                menu.choose_petal("Pick")

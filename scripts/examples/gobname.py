@@ -1,19 +1,17 @@
 #Add text to selected gob
 #used to demonstrate PBot API callbacks
+import sys, os
+sys.path.insert(0, os.path.abspath('..'))
+
+from __pbot.PBotSession import PBotSession
+from __pbot import PBotGob
+
 import time
-class GobListener(object):
-    # This will be called with a new python thread
-    # other callbacks use the same form
-    # they may return different objects, object is mentioned in callback register function
-    def callback(self, gob):
-        id = gob.addGobText("Selected", 255, 255, 0, 128, 12)
-        time.sleep(5)
-        gob.removeGobText(id)
-
-    class Java:
-        implements = ["haven.purus.pbot.api.Callback"]
-
 class Script:
-    def run(self, sess):
-        PBotGobAPI = sess.PBotGobAPI()
-        PBotGobAPI.selectGob(GobListener())
+    def selectGobCb(self, gob: PBotGob.PBotGob):
+        id = gob.add_gob_text("Selected")
+        time.sleep(5)
+        gob.remove_gob_text(id)
+
+    def run(self, sess: PBotSession):
+        sess.PBotGobAPI.select_gob(self.selectGobCb)

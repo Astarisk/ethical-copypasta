@@ -2032,13 +2032,23 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			modflags &= ~UI.MOD_META;
 		}
 	    Object[] args = {pc, mc.floor(posres), clickb, modflags};
-		if(inf != null)
+		Gob clickGob = null;
+		if(inf != null) {
 			args = Utils.extend(args, inf.clickargs());
-		if(clickb == 1 && (modflags & UI.MOD_META) != 0 && inf != null  && inf.ci instanceof Gob.GobClick) {
+			if(inf.ci instanceof Composited.CompositeClick) {
+				clickGob = ((Composited.CompositeClick) inf.ci).gi.gob;
+			} else if(inf.ci instanceof Gob.GobClick) {
+				clickGob = ((Gob.GobClick) inf.ci).gob;
+			}
+		}
+		if(clickb == 1 && (modflags & UI.MOD_META) != 0 && clickGob != null) {
 			synchronized(gobCbQueue) {
 				if(!gobCbQueue.isEmpty()) {
 					for(Pair<Callback, PBotSession> cb : gobCbQueue) {
-						new Thread(() -> {cb.a.callback(new PBotGob(((Gob.GobClick) inf.ci).gob, cb.b));}, "PBot cb runner").start();
+						Gob finalGob = clickGob;
+						new Thread(() -> {
+							cb.a.callback(new PBotGob(finalGob, cb.b));
+						}, "PBot cb runner").start();
 					}
 					gobCbQueue.clear();
 					return;
@@ -2046,12 +2056,12 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			}
 		}
 		if(Config.pathfinder.val) {
-			if(inf != null  && inf.ci instanceof Gob.GobClick) {
+			if(clickGob != null) {
 				System.out.println(Arrays.toString(args));
 				if(args.length >= 9)
-					Pathfinder.run(mc,((Gob.GobClick) inf.ci).gob, clickb, modflags, (int)args[7], (int)args[8],"", gameui());
+					Pathfinder.run(mc, clickGob, clickb, modflags, (int)args[7], (int)args[8],"", gameui());
 				else
-					Pathfinder.run(mc, ((Gob.GobClick) inf.ci).gob, clickb, modflags, -1,"", gameui());
+					Pathfinder.run(mc, clickGob, clickb, modflags, -1,"", gameui());
 			} else {
 				Pathfinder.run(mc,null, clickb, modflags, -1,"", gameui());
 			}
@@ -2063,12 +2073,11 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		if(clickb == 1) {
 			cp = new ClickPath(player(), new Coord2d[]{mc}, gameui().ui.sess.glob.map);
 		}
-	    if(inf != null && inf.ci instanceof Gob.GobClick && (modflags & UI.MOD_META) == UI.MOD_META) {
-	    	Gob.GobClick gc = (Gob.GobClick) inf.ci;
+	    if(clickGob != null && (modflags & UI.MOD_META) == UI.MOD_META) {
 	    	if(ui.gui.vhand == null) {
 	    		for(ChatUI.MultiChat chat : ui.gui.chat.children(ChatUI.MultiChat.class)) {
 	    			if(chat.name().equals("Area Chat"))
-	    				chat.send("@" + gc.gob.id);
+	    				chat.send("@" + clickGob.id);
 				}
 			}
 		}
@@ -2152,7 +2161,9 @@ public class MapView extends PView implements DTarget, Console.Directory {
 
     private long lastmmhittest = 0;
     Coord lasthittestc;
+    public Coord mouseLoc;
     public void mousemove(Coord c) {
+    	mouseLoc = c;
 	if(grab != null)
 	    grab.mmousemove(c);
 	Loader.Future<Plob> placing_l = this.placing;
@@ -2591,8 +2602,9 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	public void refreshGobsAll() {
 		OCache oc = glob.oc;
 		synchronized(oc) {
-			for(Gob gob : oc)
-				gob.updated();
+			for(Gob gob : oc) {
+				gob.updCustom();
+			}
 		}
 	}
 }

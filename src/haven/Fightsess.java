@@ -195,7 +195,7 @@ public class Fightsess extends Widget {
 	    g.aimage(ip.get().tex(), pcc.add(-UI.scale(75), 0), 1, 0.5);
 	    g.aimage(oip.get().tex(), pcc.add(UI.scale(75), 0), 0, 0.5);
 
-	    if(fv.lsrel.size() > 1)
+	    if(fv.lsrel.size() > 0)
 		curtgtfx = fxon(fv.current.gobid, tgtfx, curtgtfx);
 	}
 

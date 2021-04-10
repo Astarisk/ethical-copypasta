@@ -31,8 +31,8 @@ public class PBotGobAPI {
 						break;
 					} catch(Loading l){PBotUtils.sleep(10);}
 				}
-					if(res != null && pat.matcher(res.name).matches())
-						gobs.add(new PBotGob(gob, pBotSession));
+				if(res != null && pat.matcher(res.name).matches())
+					gobs.add(new PBotGob(gob, pBotSession));
 			}
 		}
 		return gobs;
@@ -70,6 +70,8 @@ public class PBotGobAPI {
 						break;
 					} catch(Loading l){PBotUtils.sleep(10);}
 				}
+				if(res != null && res.name.endsWith("/horse") && new Coord2d(gob.getc()).dist(getPlayer().getCoords()) == 0)
+					continue;
 				PBotGob pgob = new PBotGob(gob, pBotSession);
 					if(res != null && pat.matcher(res.name).matches() && pgob.dist(getPlayer()) < bestDistance) {
 						bestDistance = pgob.dist(getPlayer());
@@ -123,30 +125,32 @@ public class PBotGobAPI {
 	// Sorts coordinate array to efficient zig-zag-like sequence for farming etc.
 	private static class CoordSort implements Comparator<PBotGob> {
 		public int compare(PBotGob a, PBotGob b) {
-			if (a.getRcCoords().floor().x == b.getRcCoords().floor().x) {
-				if (a.getRcCoords().floor().x % 2 == 0)
-					return Integer.compare(b.getRcCoords().floor().y, a.getRcCoords().floor().y);
+			if (a.getCoords().floor().x == b.getCoords().floor().x) {
+				if (a.getCoords().floor().x % 2 == 0)
+					return Integer.compare(b.getCoords().floor().y, a.getCoords().floor().y);
 				else
-					return Integer.compare(a.getRcCoords().floor().y, b.getRcCoords().floor().y);
+					return Integer.compare(a.getCoords().floor().y, b.getCoords().floor().y);
 			} else
-				return Integer.compare(a.getRcCoords().floor().x, b.getRcCoords().floor().x);
+				return Integer.compare(a.getCoords().floor().x, b.getCoords().floor().x);
 		}
 	}
 
 
 	/**
 	 * Returns a list of gobs in the rectangle between A and B points
-	 * @param a A-point of the rectangle
-	 * @param b B-point of the rectangle
+	 * @param ax x-coord of A point
+	 * @param ay y-coord of A point
+	 * @param bx x-coord of B point
+	 * @param by y-coord of B point
 	 * @return List of gobs in the area, sorted to zig-zag pattern
 	 */
-	public ArrayList<PBotGob> gobsInArea(Coord a, Coord b) {
+	public ArrayList<PBotGob> gobsInArea(int ax, int ay, int bx, int by) {
 		// Initializes list of crops to harvest between the selected coordinates
 		ArrayList<PBotGob> gobs = new ArrayList<PBotGob>();
-		double bigX = Math.max(a.x, b.x);
-		double smallX = Math.min(a.x, b.x);
-		double bigY = Math.max(a.y, b.y);
-		double smallY = Math.min(a.y, b.y);
+		double bigX = Math.max(ax, bx);
+		double smallX = Math.min(ax, bx);
+		double bigY = Math.max(ay, by);
+		double smallY = Math.min(ay, by);
 		synchronized(pBotSession.gui.ui.sess.glob.oc) {
 			for(Gob gob : pBotSession.gui.ui.sess.glob.oc) {
 				if(gob.rc.x <= bigX && gob.rc.x >= smallX && gob.getres() != null && gob.rc.y <= bigY
@@ -158,6 +162,5 @@ public class PBotGobAPI {
 		gobs.sort(new CoordSort());
 		return gobs;
 	}
-
 
 }

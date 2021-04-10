@@ -1,25 +1,21 @@
 # Quickly rightclicks all items with the same name and chooses the first menu option
 # For example, blocks into sticks
-import time
-session = None
-class Listener(object):
-    def callback(self, itm):
-        inv = itm.getInventory()
-        if inv != None:
-            items = inv.getInventoryItemsByNames(itm.getName())
-            for item in items:
-                item.activateItem()
-                menu = session.PBotUtils().getFlowermenu(1000*15)
-                if menu != None:
-                    menu.choosePetal(0)
-                else:
-                    break
-    class Java:
-        implements = ["haven.purus.pbot.api.Callback"]
+from __pbot.PBotItem import PBotItem
+from __pbot.PBotSession import PBotSession
+from __pbot.PBotInventory import get_inventory_for_item
 
 class Script:
-    def run(self, sess):
-        global session
-        session = sess
-        PBotUtils = sess.PBotUtils()
-        PBotUtils.selectItem(Listener())
+    def cb(self, itm: PBotItem):
+        inv = get_inventory_for_item(itm)
+        if inv is not None:
+            items = inv.get_inventory_items_by_names(itm.get_name())
+            for itm in items:
+                itm.activate_item()
+                menu = self.session.PBotUtils.get_flowermenu(1000*15)
+                if menu is not None:
+                    menu.choose_petal_num(0)
+                else:
+                    break
+    def run(self, sess: PBotSession):
+        self.session = sess
+        sess.PBotUtils.select_item(self.cb)

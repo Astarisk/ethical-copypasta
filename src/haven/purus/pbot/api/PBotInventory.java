@@ -36,7 +36,6 @@ public class PBotInventory {
 	 * @return List of items with name matching given pattern
 	 */
 	public List<PBotItem> getInventoryItemsByNames(String pattern) {
-		List<PBotItem> items = new ArrayList<>();
 		Pattern pat = Pattern.compile(pattern);
 		return inventory.children(WItem.class).stream()
 				.map(witem -> new PBotItem(witem.item, pBotSession))
@@ -105,4 +104,11 @@ public class PBotInventory {
 		pBotSession.PBotUtils().playerInventory().inventory.wdgmsg("invxf", inventory.wdgid(), 1);
 	}
 
+	/**
+	 * Size of the inventory
+	 * @return Size
+	 */
+	public Coord size() {
+		return this.inventory.isz;
+	}
 }

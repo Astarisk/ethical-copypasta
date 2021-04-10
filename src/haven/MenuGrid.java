@@ -280,6 +280,7 @@ public class MenuGrid extends Widget implements KeyBinding.Bindable {
 		super.attach(ui);
 		synchronized(paginae) {
 			paginae.add(paginafor(Resource.local().load("paginae/purus/PBotMenu")));
+			paginae.add(paginafor(Resource.local().load("paginae/purus/timers")));
 		}
 	}
 
@@ -443,6 +444,9 @@ public class MenuGrid extends Widget implements KeyBinding.Bindable {
 				gameui().pBotWindow.show(!gameui().pBotWindow.visible);
 				gameui().pBotWindow.raise();
 				return;
+			} else if(ad[0].equals("@") && ad.length == 2 && ad[1].equals("Timers")) {
+				gameui().timerWnd.show(!gameui().timerWnd.visible);
+				gameui().timerWnd.raise();
 			}
 			if (ad.length > 0 && (ad[0].equals("craft") || ad[0].equals("bp"))) {
 				gameui().recentCrafts.push(r.pag);

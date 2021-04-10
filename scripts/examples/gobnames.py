@@ -1,19 +1,16 @@
 #Color gobs in the selected area
 #used to demonstrate PBot API callbacks
-import time
+import sys, os
+sys.path.insert(0, os.path.abspath('..'))
 import random
-session = None
-class Listener(object):
-    def callback(self, area):
-        for gob in session.PBotGobAPI().gobsInArea(area.getA(), area.getB()):
-            gob.setMarked(*[random.randint(0, 255) for x in range(4)])
 
-    class Java:
-        implements = ["haven.purus.pbot.api.Callback"]
+from __pbot.PBotSession import PBotSession
 
 class Script:
-    def run(self, sess):
-        global session
-        session = sess
-        PBotGobAPI = sess.PBotGobAPI()
-        sess.PBotUtils().selectArea(Listener())
+    def cb(self, a, b):
+        for gob in self.session.PBotGobAPI.gobs_in_area(*a, *b):
+            gob.set_marked(*[random.randint(0, 255) for _ in range(4)])
+
+    def run(self, sess: PBotSession):
+        self.session = sess
+        sess.PBotUtils.select_area(self.cb)

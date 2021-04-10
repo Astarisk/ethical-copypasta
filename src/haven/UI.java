@@ -369,7 +369,8 @@ public class UI {
 	
     public void wdgmsg(Widget sender, String msg, Object... args) {
 	if(haven.purus.Config.debugWdgmsg.val) {
-		System.out.println(msg + Arrays.toString(args));
+		System.out.println(sender
+				 + " " + msg + Arrays.toString(args));
 	}
 	int id = widgetid(sender);
 	if(id < 0) {

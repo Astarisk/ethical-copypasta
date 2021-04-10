@@ -19,23 +19,23 @@ PBotCharacterAPI {
 	 * @return Returns 0-100
 	 */
 	public double getStamina() {
-		return (int) (100 * pBotSession.gui.getmeter("stam", 0).a);
+		return (100 * pBotSession.gui.getmeter("stam", 0).a);
 	}
 
 	/**
 	 * Get the player energy
 	 * @return Returns 0-100
 	 */
-	public int getEnergy() {
-		return (int) (100 * pBotSession.gui.getmeter("nrj", 0).a);
+	public double getEnergy() {
+		return (100 * pBotSession.gui.getmeter("nrj", 0).a);
 	}
 
 	/**
 	 * Get the player hp
 	 * @return Returns 0-100
 	 */
-	public int getHp() {
-		return (int) (100 * pBotSession.gui.getmeter("hp", 0).a);
+	public double getHp() {
+		return (100 * pBotSession.gui.getmeter("hp", 0).a);
 	}
 
 	/**
@@ -47,6 +47,18 @@ PBotCharacterAPI {
 	 */
 	public void doAct(List<String> act) {
 		pBotSession.gui.menu.wdgmsg("act", act.toArray());
+	}
+
+	/**
+	 * Get name of the selected cursor
+	 * @return cursor
+	 */
+	public String getCursName() {
+		try {
+			return pBotSession.gui.map.ui.getcurs(pBotSession.gui.map.mouseLoc).name;
+		} catch(Exception e) {
+			return null;
+		}
 	}
 
 	/**
@@ -97,7 +109,7 @@ PBotCharacterAPI {
 	 * Get maximum speed setting that player can be set to
 	 * @return 1 = crawl, 2 = walk, 3 = run, 4 = sprint
 	 */
-	public  int getMaxSpeed() {
+	public int getMaxSpeed() {
 		Speedget sg = (Speedget) pBotSession.gui.ulpanel.getchild(Speedget.class);
 		if(sg != null)
 			return sg.max;

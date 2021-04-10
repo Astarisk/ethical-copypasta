@@ -12,6 +12,9 @@ public class Wear extends ItemInfo.Tip {
 		super(owner);
 		this.d = d;
 		this.m = m;
+		if(owner instanceof GItem) {
+			((GItem) owner).wear = ((double)d) /m;
+		}
 	}
 
 	public static ItemInfo mkinfo(Owner owner, Object... args) {

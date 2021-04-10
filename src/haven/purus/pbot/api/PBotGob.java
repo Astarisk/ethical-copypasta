@@ -50,25 +50,6 @@ public class PBotGob {
 	 * Click the gob
 	 * @param btn 1 = left, 2 = middle, 3 = right
 	 * @param mod Key modifier mask 1 = shift 2 = ctrl 4 = alt
-	 */
-	public void doClick(int btn, int mod) {
-		pBotSession.gui.map.wdgmsg("click", pBotSession.PBotUtils().getCenterScreenCoord(), gob.rc.floor(OCache.posres), btn, mod, 0, (int)gob.id, gob.rc.floor(OCache.posres), 0, -1);
-	}
-
-	/**
-	 * Click the gob
-	 * @param btn 1 = left, 2 = middle, 3 = right
-	 * @param mod Key modifier mask 1 = shift 2 = ctrl 4 = alt
-	 * @param meshid can be a door, roasting spit etc.
-	 */
-	public void doClick(int btn, int mod, int meshid) {
-		pBotSession.gui.map.wdgmsg("click", pBotSession.PBotUtils().getCenterScreenCoord(), gob.rc.floor(OCache.posres), btn, mod, 0, (int)gob.id, gob.rc.floor(OCache.posres), 0, meshid);
-	}
-
-	/**
-	 * Click the gob
-	 * @param btn 1 = left, 2 = middle, 3 = right
-	 * @param mod Key modifier mask 1 = shift 2 = ctrl 4 = alt
 	 * @param meshid can be a door, roasting spit etc.
 	 * @param olid gob overlay to click, for example roasting spit
 	 */
@@ -90,7 +71,7 @@ public class PBotGob {
 	 * @return Coord object with x and y attributes
 	 */
 	public Coord2d getCoords() {
-		return this.gob.rc;
+		return new Coord2d(this.gob.getc());
 	}
 
 	/**
@@ -140,15 +121,6 @@ public class PBotGob {
 			gob.findol(id).remove();
 		}}, null);
 	}
-
-	/**
-	 * Get stage of the crop from ResDrawable sdt peekrbuf may also be used for tanning tub stage etc.
-	 * @return Stage of the crop
-	 */
-	public int getCropStage() {
-		return gob.getattr(ResDrawable.class).sdt.peekrbuf(0);
-	}
-
 	/**
 	 * Returns the name of the gobs resource file, or null if not found
 	 * @return Name of the gob
@@ -181,14 +153,6 @@ public class PBotGob {
 				PBotUtils.sleep(10);
 			}
 		}
-	}
-
-	/**
-	 * Returns rc-coords of the gob
-	 * @return Coords of the gob
-	 */
-	public Coord2d getRcCoords() {
-		return gob.rc;
 	}
 
 

@@ -28,11 +28,14 @@ package haven;
 
 import java.awt.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.*;
 
 import haven.purus.*;
 import haven.purus.Config;
 import haven.render.*;
+import haven.resutil.WaterTile;
 
 public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Skeleton.HasPose {
     public Coord2d rc;
@@ -41,8 +44,8 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     int clprio = 0;
     public long id;
     public final Glob glob;
-    Map<Class<? extends GAttrib>, GAttrib> attr = new HashMap<Class<? extends GAttrib>, GAttrib>();
-    public final Collection<Overlay> ols = new ArrayList<Overlay>();
+    Map<Class<? extends GAttrib>, GAttrib> attr = new ConcurrentHashMap<>();
+    public final Collection<Overlay> ols = new LinkedBlockingDeque<>();
     public final Collection<RenderTree.Slot> slots = new ArrayList<>(1);
     private final Collection<SetupMod> setupmods = new ArrayList<>();
     private final Collection<ResAttr.Cell<?>> rdata = new LinkedList<ResAttr.Cell<?>>();
@@ -138,6 +141,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	public void remove() {
 	    remove0();
 	    gob.ols.remove(this);
+		gob.updCustom();
 	}
 
 	public void added(RenderTree.Slot slot) {
@@ -229,6 +233,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	this.id = id;
 	if(id < 0)
 	    virtual = true;
+		updwait(this::updCustom, waiting -> {});
     }
 
     public Gob(Glob glob, Coord2d c) {
@@ -273,6 +278,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	    ol.init();
 	ol.add0();
 	ols.add(ol);
+	updCustom();
     }
     public void addol(Overlay ol) {
 	addol(ol, true);
@@ -327,7 +333,14 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	DrawOffset df = getattr(DrawOffset.class);
 	if(df != null)
 	    ret = ret.add(df.off);
-	return(ret);
+		if(knocked != Knocked.UNKNOWN)
+			try {
+				if(glob.map.tiler(glob.map.gettile(new Coord2d(ret).floor(MCache.tilesz))) instanceof WaterTile) {
+					ret.z += 5;
+				}
+			} catch(Loading l) {}
+
+		return(ret);
     }
 
     public Coord3f getrc() {
@@ -358,14 +371,14 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     private void setattr(Class<? extends GAttrib> ac, GAttrib a) {
 	GAttrib prev = attr.remove(ac);
 	if(prev != null) {
-	    if((prev instanceof RenderTree.Node) && (prev.slots != null))
+		if((prev instanceof RenderTree.Node) && (prev.slots != null))
 		RUtils.multirem(new ArrayList<>(prev.slots));
 	    if(prev instanceof SetupMod)
 		setupmods.remove(prev);
 	}
 	if(a != null) {
 	    if(a instanceof RenderTree.Node && !a.hide) {
-		try {
+			try {
 		    RUtils.multiadd(this.slots, (RenderTree.Node)a);
 		} catch(Loading l) {
 		    if(prev instanceof RenderTree.Node && !prev.hide) {
@@ -383,6 +396,8 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	}
 	if(prev != null)
 	    prev.dispose();
+	if(ac == Drawable.class && a != prev)
+		updCustom();
     }
 
     public void setattr(GAttrib a) {
@@ -565,6 +580,182 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	}
     }
 
+    public void updCustom() {
+    	if(updateseq == 0)
+    		return;
+		hide = false;
+		try {
+			Resource res = Gob.this.getres();
+			if(res != null) {
+				if(res.name.startsWith("gfx/kritter")) {
+					Overlay ol = this.findol(1341);
+					if(!Config.animalRads.val.containsKey(res.name)) {
+						Config.animalRads.val.put(res.name, true);
+						Config.animalRads.setVal(Config.animalRads.val);
+					}
+					if(Config.animalRadiuses.val && Config.animalRads.val.getOrDefault(res.name, true) && this.knocked != Knocked.TRUE) {
+						if(ol == null) {
+							this.addol(new Overlay(this, new AnimalRad(this, null, 5 * MCache.tilesz2.y), 1341));
+						}
+					} else if(ol != null) {
+						ol.remove();
+					}
+				} else if(res.name.startsWith("gfx/borka/body")) {
+					Overlay ol = this.findol(1342);
+					if(Config.playerRadiuses.val && !isPlayer()) {
+						if(ol == null) {
+							KinInfo kin = getattr(KinInfo.class);
+							if(kin == null)
+								this.addol(new Overlay(this, new PlayerRad(this, null, Color.WHITE), 1342));
+							else
+								this.addol(new Overlay(this, new PlayerRad(this, null, BuddyWnd.gc[kin.group]), 1342));
+							this.updstate();
+						}
+					} else if(ol != null) {
+						ol.remove();
+					}
+				}
+				String resname = res.name;
+				if(Config.bbDisplayState.val > 0) {
+					BoundingBox bb = BoundingBox.getBoundingBox(this);
+					Overlay ol = this.findol(1339);
+					if(ol != null && bb == null) {
+						ol.remove();
+					} else if(ol == null && bb != null) {
+						this.addol(new Overlay(this, new GobBoundingBox(this, bb), 1339));
+					}
+				}
+				Drawable d = getattr(Drawable.class);
+				if(Config.hideToggle.val && d != null) {
+					if(Config.hideTrees.val && res.name.startsWith("gfx/terobjs/trees") && !res.name.endsWith("log") && !res.name.endsWith("oldtrunk")) {
+						hide = true;
+					} else if(Config.hideHouses.val && (res.name.endsWith("/stonemansion") || res.name.endsWith("/logcabin") || res.name.endsWith("/greathall") || res.name.endsWith("/stonestead") || res.name.endsWith("/timberhouse") || res.name.endsWith("stonetower") || res.name.endsWith("windmill"))) {
+						hide = true;
+					} else if(Config.hideWalls.val && res.name.startsWith("gfx/terobjs/arch/pali") && !res.name.equals("gfx/terobjs/arch/palisadegate") && !res.name.equals("gfx/terobjs/arch/palisadebiggate") || res.name.startsWith("gfx/terobjs/arch/brick") && !res.name.equals("gfx/terobjs/arch/brickwallgate") && !res.name.equals("gfx/terobjs/arch/brickwallbiggate") || res.name.startsWith("gfx/terobjs/arch/pole") && !res.name.equals("gfx/terobjs/arch/polegate") && !res.name.equals("gfx/terobjs/arch/polebiggate")) {
+						hide = true;
+					} else if(Config.hideBushes.val && res.name.startsWith("gfx/terobjs/bushes")) {
+						hide = true;
+					} else if(Config.hideCrops.val && res.name.startsWith("gfx/terobjs/plants") && !res.name.endsWith("trellis")) {
+						hide = true;
+					}
+				}
+				if(d != null && d.hide != hide) {
+					d.hide = hide;
+					glob.loader.defer(() -> {synchronized(Gob.this) {
+						setattr(d);
+					}}, null);
+					Overlay ol = this.findol(1340);
+					if(!hide && ol != null) {
+						ol.remove();
+					} else if(hide && ol == null) {
+						BoundingBox bb = BoundingBox.getBoundingBox(this);
+						this.addol(new Overlay(this, new GobHideBox(bb), 1340));
+					}
+				}
+				ResDrawable rd = getattr(ResDrawable.class);
+				if(Config.ttfHighlight.val) {
+					if(res.name.equals("gfx/terobjs/dframe")) {
+						boolean done = true;
+						for(Overlay ol : ols) {
+							if(ol.res != null) {
+								Resource olres = ol.res.get();
+								if(olres.name.endsWith("-blood") || olres.name.endsWith("-windweed") || olres.name.endsWith("-fishraw")) {
+									done = false;
+								}
+							}
+						}
+						synchronized(this) {
+							if(ols.isEmpty())
+								glob.loader.defer(() -> {synchronized(Gob.this) {
+									this.setattr(new GobColor(this, dFrameEmpty));
+								}}, null);
+							else if(done)
+								glob.loader.defer(() -> {synchronized(Gob.this) {
+									this.setattr(new GobColor(this, dFrameDone));
+								}}, null);
+							else
+								glob.loader.defer(() -> {synchronized(Gob.this) {
+									this.delattr(GobColor.class);
+								}}, null);
+						}
+					} else if(res.name.equals("gfx/terobjs/ttub")) {
+						if(rd != null) {
+							int r = ((ResDrawable) rd).sdt.peekrbuf(0);
+							if((r & (0x8)) == 0x8) {
+								glob.loader.defer(() -> {synchronized(Gob.this) {
+									this.setattr(new GobColor(this, ttDone));
+								}}, null);
+							} else if((r & (0x4)) == 0 || r == 5) {
+								glob.loader.defer(() -> {synchronized(Gob.this) {
+									this.setattr(new GobColor(this, ttEmpty));
+								}}, null);
+							} else {
+								glob.loader.defer(() -> {synchronized(Gob.this) {
+									this.delattr(GobColor.class);
+								}}, null);
+							}
+						}
+					}
+				} else {
+					this.delattr(GobColor.class);
+				}
+
+				if(Config.growthStages.val) {
+					if(resname.startsWith("gfx/terobjs/bushes") || (resname.startsWith("gfx/terobjs/trees") && !resname.endsWith("log") && !resname.endsWith("oldtrunk"))) {
+						if(rd != null) {
+							int fscale = rd.sdt.peekrbuf(1);
+							if(fscale != -1) {
+								Gob.Overlay ovl = Gob.this.findol(1337);
+								synchronized(this) {
+									if(ovl == null) {
+										Gob.this.addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
+									} else if(!((GobText) ovl.spr).text.equals(fscale + "%")) {
+										ovl.remove();
+										Gob.this.addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
+									}
+								}
+							}
+						}
+					} else if(resname.startsWith("gfx/terobjs/plants") && !resname.endsWith("trellis") && rd != null) {
+						int stage = rd.sdt.peekrbuf(0);
+						if(cropstgmaxval == 0) {
+							for(FastMesh.MeshRes layer : getres().layers(FastMesh.MeshRes.class)) {
+								int stg = layer.id / 10;
+								if(stg > cropstgmaxval)
+									cropstgmaxval = stg;
+							}
+						}
+						Overlay ol = findol(1338);
+						String text;
+						Color col;
+						if(resname.endsWith("/fallowplant")) {
+							col = Color.GRAY;
+							text = "-1";
+						} else if(stage == cropstgmaxval) {
+							col = Color.GREEN;
+							text = stage + "/" + cropstgmaxval;
+						} else if(stage == 0) {
+							col = Color.RED;
+							text = stage + "/" + cropstgmaxval;
+						} else {
+							col = Color.YELLOW;
+							text = stage + "/" + cropstgmaxval;
+						}
+						synchronized(this) {
+							if(ol == null) {
+								addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
+							} else if(!((GobText) ol.spr).text.equals(text)) {
+								ol.remove();
+								addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
+							}
+						}
+					}
+				}
+			}
+		} catch(Loading l) {
+		}
+	}
+
     public void added(RenderTree.Slot slot) {
     	synchronized(this) {
 			slot.ostate(curstate());
@@ -589,166 +780,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	int cropstgmaxval = 0;
 	void updated() {
 	synchronized(this) {
-		glob.loader.defer(() -> {synchronized(Gob.this) {
-			// Maybe wrong place to do this
-			hide = false;
-			try {
-				Resource res = Gob.this.getres();
-				if(res != null) {
-					if(res.name.startsWith("gfx/kritter")) {
-						Overlay ol = this.findol(1341);
-						if(Config.animalRadiuses.val && this.knocked != Knocked.TRUE) {
-							if(ol == null) {
-								this.addol(new Overlay(this, new AnimalRad(this, null, 5 * MCache.tilesz2.y), 1341));
-							}
-						} else if(ol != null) {
-							ol.remove();
-						}
-					} else if(res.name.startsWith("gfx/borka/body")) {
-						Overlay ol = this.findol(1342);
-						if(Config.playerRadiuses.val && !isPlayer()) {
-							if(ol == null) {
-								KinInfo kin = getattr(KinInfo.class);
-								if(kin == null)
-									this.addol(new Overlay(this, new PlayerRad(this, null, Color.WHITE), 1342));
-								else
-									this.addol(new Overlay(this, new PlayerRad(this, null, BuddyWnd.gc[kin.group]), 1342));
-								this.updstate();
-							}
-						} else if(ol != null) {
-							ol.remove();
-						}
-					}
-					String resname = res.name;
-					if(Config.bbDisplayState.val > 0) {
-						BoundingBox bb = BoundingBox.getBoundingBox(this);
-						Overlay ol = this.findol(1339);
-						if(ol != null && bb == null) {
-							ol.remove();
-						} else if(ol == null && bb != null) {
-							this.addol(new Overlay(this, new GobBoundingBox(this, bb), 1339));
-						}
-					}
-					if(Config.hideToggle.val) {
-						if(Config.hideTrees.val && res.name.startsWith("gfx/terobjs/trees") && !res.name.endsWith("log") && !res.name.endsWith("oldtrunk")) {
-							hide = true;
-						} else if(Config.hideHouses.val && (res.name.endsWith("/stonemansion") || res.name.endsWith("/logcabin") || res.name.endsWith("/greathall") || res.name.endsWith("/stonestead") || res.name.endsWith("/timberhouse") || res.name.endsWith("stonetower") || res.name.endsWith("windmill"))) {
-							hide = true;
-						} else if(Config.hideWalls.val && res.name.startsWith("gfx/terobjs/arch/pali") && !res.name.equals("gfx/terobjs/arch/palisadegate") && !res.name.equals("gfx/terobjs/arch/palisadebiggate") || res.name.startsWith("gfx/terobjs/arch/brick") && !res.name.equals("gfx/terobjs/arch/brickwallgate") && !res.name.equals("gfx/terobjs/arch/brickwallbiggate") || res.name.startsWith("gfx/terobjs/arch/pole") && !res.name.equals("gfx/terobjs/arch/polegate") && !res.name.equals("gfx/terobjs/arch/polebiggate")) {
-							hide = true;
-						} else if(Config.hideBushes.val && res.name.startsWith("gfx/terobjs/bushes")) {
-							hide = true;
-						} else if(Config.hideCrops.val && res.name.startsWith("gfx/terobjs/plants") && !res.name.endsWith("trellis")) {
-							hide = true;
-						}
-						if(hide) {
-							BoundingBox bb = BoundingBox.getBoundingBox(this);
-							Overlay ol = this.findol(1340);
-							if(ol != null && bb == null) {
-								ol.remove();
-							} else if(ol == null) {
-								this.addol(new Overlay(this, new GobHideBox(bb), 1340));
-							}
-						}
-					}
-					Drawable d = getattr(Drawable.class);
-					if(d != null && d.hide != hide) {
-						d.hide = hide;
-						setattr(d);
-					}
-					ResDrawable rd = getattr(ResDrawable.class);
-					if(Config.ttfHighlight.val) {
-						if(res.name.equals("gfx/terobjs/dframe")) {
-							boolean done = true;
-							for(Overlay ol : ols) {
-								if(ol.res != null) {
-									Resource olres = ol.res.get();
-									if(olres.name.endsWith("-blood") || olres.name.endsWith("-windweed") || olres.name.endsWith("-fishraw")) {
-										done = false;
-									}
-								}
-							}
-							synchronized(this) {
-								setattr(d);
-								if(ols.isEmpty())
-									this.setattr(new GobColor(this, dFrameEmpty));
-								else if(done)
-									this.setattr(new GobColor(this, dFrameDone));
-								else
-									this.delattr(GobColor.class);
-							}
-						} else if(res.name.equals("gfx/terobjs/ttub")) {
-							if(rd != null) {
-								int r = ((ResDrawable) rd).sdt.peekrbuf(0);
-								if((r & (0x8)) == 0x8) {
-									this.setattr(new GobColor(this, ttDone));
-								} else if((r & (0x4)) == 0 || r == 5) {
-									this.setattr(new GobColor(this, ttEmpty));
-								} else {
-									this.delattr(GobColor.class);
-								}
-							}
-						}
-					} else {
-						this.delattr(GobColor.class);
-					}
-
-					if(Config.growthStages.val) {
-						if(resname.startsWith("gfx/terobjs/bushes") || (resname.startsWith("gfx/terobjs/trees") && !resname.endsWith("log") && !resname.endsWith("oldtrunk"))) {
-							if(rd != null) {
-								int fscale = rd.sdt.peekrbuf(1);
-								if(fscale != -1) {
-									Gob.Overlay ovl = Gob.this.findol(1337);
-									synchronized(this) {
-										if(ovl == null) {
-											Gob.this.addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
-										} else if(!((GobText) ovl.spr).text.equals(fscale + "%")) {
-											ovl.remove();
-											Gob.this.addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
-										}
-									}
-								}
-							}
-						} else if(resname.startsWith("gfx/terobjs/plants") && !resname.endsWith("trellis")) {
-							int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-							if(cropstgmaxval == 0) {
-								for(FastMesh.MeshRes layer : getres().layers(FastMesh.MeshRes.class)) {
-									int stg = layer.id / 10;
-									if(stg > cropstgmaxval)
-										cropstgmaxval = stg;
-								}
-							}
-							Overlay ol = findol(1338);
-							String text;
-							Color col;
-							if(resname.endsWith("/fallowplant")) {
-								col = Color.GRAY;
-								text = "-1";
-							} else if(stage == cropstgmaxval) {
-								col = Color.GREEN;
-								text = stage + "/" + cropstgmaxval;
-							} else if(stage == 0) {
-								col = Color.RED;
-								text = stage + "/" + cropstgmaxval;
-							} else {
-								col = Color.YELLOW;
-								text = stage + "/" + cropstgmaxval;
-							}
-							synchronized(this) {
-								if(ol == null) {
-									addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
-								} else if(!((GobText) ol.spr).text.equals(text)) {
-									ol.remove();
-									addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
-								}
-							}
-						}
-					}
-				}
-			} catch(Loading l) {
-			}
-		}}, null);
-	    updateseq++;
+		updateseq++;
 	    if(updwait != null)
 		updwait.wnotify();
 		}
@@ -842,10 +874,10 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 			Coord3f oc = Gob.this.getc();
 			Coord3f rc = new Coord3f(oc);
 			rc.y = -rc.y;
-			this.flw = null;
+				this.flw = null;
 			this.oc = oc;
 			this.rc = rc;
-			this.a = Gob.this.a;
+				this.a = Gob.this.a;
 			tilestate = Gob.this.getmapstate(oc);
 		    } else {
 			this.flw = flwxf;
@@ -873,7 +905,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 			    }
 			});
 		}
-	    }
+		}
 
 	    public boolean equals(Placement that) {
 		if(this.flw != null) {
@@ -925,7 +957,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 		}
 		if(!Utils.eq(this.cur, np))
 		    update(np);
-	    }
+		}
 	}
 
 	private void update(Placement np) {

@@ -26,7 +26,6 @@ public class AttrMod extends ItemInfo.Tip {
 		if(owner instanceof Spec) {
 			if(((Spec) owner).ctx instanceof GItem && ((GItem)((Spec) owner).ctx).parent instanceof Equipory) {
 				((Equipory)((GItem)((Spec) owner).ctx).parent).updBuffs = true;
-				System.out.println("###");
 			}
 		}
 	}

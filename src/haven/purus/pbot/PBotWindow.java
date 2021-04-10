@@ -182,10 +182,11 @@ public class PBotWindow extends BetterWindow {
 			this.show();
 		} else {
 			new Thread(() -> {
-				((Py4j.PBotScriptLoader)Py4j.server.getPythonServerEntryPoint(new Class[] {Py4j.PBotScriptLoader.class})).start(item.scriptFile.getPath()
-						.substring(8)
-						.replaceAll(Matcher.quoteReplacement("\\"), ".")
-						.replaceAll("/", ".").replaceAll(".py", ""), new PBotSession(gameui()));
+				try {
+					((Py4j.PBotScriptLoader) Py4j.server.getPythonServerEntryPoint(new Class[]{Py4j.PBotScriptLoader.class})).start(item.scriptFile.getPath().substring(8).replaceAll(Matcher.quoteReplacement("\\"), ".").replaceAll("/", ".").replaceAll(".py", ""), new PBotSession(gameui()));
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
 			},"PBot script").start();
 		}
 	}
