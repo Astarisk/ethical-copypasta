@@ -12,6 +12,14 @@ class PBotGob(object):
     def do_click(self, btn: int = 1, mod: int = 0, meshid: int = -1, olid: int = 0):
         self._gob.doClick(btn, mod, meshid, olid)
 
+    ## Click the gob with pathfinder
+    # @param btn 1 = left, 2 = middle, 3 = right
+    # @param mod Key modifier mask 1 = shift 2 = ctrl 4 = alt
+    # @param meshid can be a door, roasting spit etc.
+    # @param olid gob overlay to click, for example roasting spit
+    def pf_click(self, btn: int = 1, mod: int = 0, meshid: int = -1, olid: int = 0):
+        self._gob.pfClick(btn, mod, meshid, olid)
+
     ## Euclidean distance between this and target gob
     # @param gob target
     # @return the distance
