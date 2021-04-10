@@ -8,6 +8,7 @@ import java.nio.*;
 
 public class ClickPath implements RenderTree.Node, TickList.Ticking, TickList.TickNode {
 	static final Pipe.Op emat = Pipe.Op.compose(new BaseColor(Color.orange), new States.LineWidth(2));
+	static final Pipe.Op op1 = Pipe.Op.compose(new States.Depthtest(States.Depthtest.Test.TRUE), Rendered.last, emat);
 	static final VertexArray.Layout pfmt = new VertexArray.Layout(new VertexArray.Layout.Input(Homo3D.vertex, new VectorFormat(3, NumberFormat.FLOAT32), 0,  0, 12));
 	Model emod;
 	Gob gob;
@@ -31,8 +32,8 @@ public class ClickPath implements RenderTree.Node, TickList.Ticking, TickList.Ti
 			if(gob != null)
 				prev = new Coord2d(gob.getc());
 			for(int i=0; i<rte.length; i++) {
-				buf.putFloat((float) prev.x).putFloat((float) -prev.y).putFloat(mCache.getz(prev.floor(MCache.tilesz)));
-				buf.putFloat((float) rte[i].x).putFloat((float) -rte[i].y).putFloat(mCache.getz(rte[i].floor(MCache.tilesz)));
+				buf.putFloat((float) prev.x).putFloat((float) -prev.y).putFloat((float) mCache.getfz(prev.floor(MCache.tilesz)));
+				buf.putFloat((float) rte[i].x).putFloat((float) -rte[i].y).putFloat((float) mCache.getfz(rte[i].floor(MCache.tilesz)));
 				prev = rte[i];
 			}
 		} catch(Loading l) {}
@@ -46,7 +47,7 @@ public class ClickPath implements RenderTree.Node, TickList.Ticking, TickList.Ti
 	}
 
 	public void added(RenderTree.Slot slot) {
-		slot.ostate(Pipe.Op.compose(new States.Depthtest(States.Depthtest.Test.TRUE), Rendered.last, emat));
+		slot.ostate(op1);
 		slot.add(emod);
 	}
 

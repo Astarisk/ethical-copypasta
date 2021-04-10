@@ -11,6 +11,7 @@ public class GobBoundingBox extends Sprite implements RenderTree.Node {
 	final Model emod;
 	final Gob gob;
 	private BoundingBox bb;
+	static final Pipe.Op op2 = Pipe.Op.compose(new States.Depthtest(States.Depthtest.Test.TRUE), Rendered.last, emat);
 
 	static final VertexArray.Layout pfmt = new VertexArray.Layout(new VertexArray.Layout.Input(Homo3D.vertex, new VectorFormat(3, NumberFormat.FLOAT32), 0,  0, 12));
 
@@ -40,9 +41,9 @@ public class GobBoundingBox extends Sprite implements RenderTree.Node {
 
 	public void added(RenderTree.Slot slot) {
 		if(Config.bbDisplayState.val == 1) {
-			slot.ostate(Pipe.Op.compose(emat));
+			slot.ostate(emat);
 		} else if(Config.bbDisplayState.val == 2) {
-			slot.ostate(Pipe.Op.compose(new States.Depthtest(States.Depthtest.Test.TRUE), Rendered.last,emat));
+			slot.ostate(op2);
 		}
 		slot.add(emod);
 	}
