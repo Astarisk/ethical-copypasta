@@ -142,6 +142,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	public void remove() {
 	    remove0();
 	    gob.ols.remove(this);
+		gob.updCustom();
 	}
 
 	public void added(RenderTree.Slot slot) {
@@ -284,6 +285,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	    ol.init();
 	ol.add0();
 	ols.add(ol);
+	updCustom();
     }
     public void addol(Overlay ol) {
 	addol(ol, true);
