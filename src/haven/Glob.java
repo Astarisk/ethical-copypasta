@@ -29,7 +29,9 @@ package haven;
 import java.util.*;
 import java.awt.Color;
 
+import haven.purus.MultiSession;
 import haven.purus.TimeWdg;
+import haven.purus.timer.TimerWnd;
 import haven.render.*;
 import haven.render.sl.*;
 
@@ -176,6 +178,8 @@ public class Glob {
 		if(!inc)
 		    lastrep = 0;
 		timewdg.servertimecalc();
+		if(MultiSession.activeSession == sess.ui)
+			TimerWnd.timerCalc(this);
 	    } else if(t == "astro") {
 		double dt = ((Number)a[n++]).doubleValue();
 		double mp = ((Number)a[n++]).doubleValue();

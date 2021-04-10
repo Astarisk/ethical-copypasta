@@ -32,6 +32,7 @@ import haven.purus.pathfinder.Pathfinder;
 import haven.purus.pbot.PBotWindow;
 import haven.purus.pbot.api.Callback;
 import haven.purus.pbot.api.PBotSession;
+import haven.purus.timer.TimerWnd;
 
 import java.io.File;
 import java.util.*;
@@ -83,6 +84,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public StatusWdg statuswdg;
     public RecentCrafts recentCrafts;
 	public PBotWindow pBotWindow;
+	public TimerWnd timerWnd;
 	public BetterBelt betterBelt;
 	public HandsWdg handsWdg;
 	public Thread pathfinder;
@@ -436,6 +438,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		add(new FKeyBelt());
 		pBotWindow = add(new PBotWindow());
 		pBotWindow.hide();
+		timerWnd = add(new TimerWnd());
+		timerWnd.hide();
 		this.recentCrafts = add(new RecentCrafts());
 		handsWdg = add(new HandsWdg());
 	}

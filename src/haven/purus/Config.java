@@ -2,6 +2,7 @@ package haven.purus;
 
 import haven.KeyBinding;
 import haven.KeyMatch;
+import haven.purus.timer.TimerWnd;
 
 import java.awt.event.KeyEvent;
 import java.io.*;
@@ -121,6 +122,7 @@ public class Config {
 	public static Setting<ConcurrentHashMap<String, Boolean>> autodropItems = new Setting<>("autodropItems", new ConcurrentHashMap<>());
 	public static Setting<ConcurrentHashMap<String, Boolean>> flowerOptOpens = new Setting<>("flowerOptOpens", new ConcurrentHashMap<>());
 	public static Setting<ConcurrentHashMap<String, Float>> customVolumes = new Setting<>("customVolumes", new ConcurrentHashMap<>());
+	public static Setting<ArrayList<TimerWnd.Timer>> timersSet = new Setting<>("timersSet", new ArrayList<>());
 
 	public static Setting<Boolean> proximityPlayerAggro = new Setting<>("proximityPlayerAggro", false);
 	public static Setting<Boolean> proximityKritterAggro = new Setting<>("proximityKritterAggro", true);
