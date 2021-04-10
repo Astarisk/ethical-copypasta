@@ -596,7 +596,11 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 			if(res != null) {
 				if(res.name.startsWith("gfx/kritter")) {
 					Overlay ol = this.findol(1341);
-					if(Config.animalRadiuses.val && this.knocked != Knocked.TRUE) {
+					if(!Config.animalRads.val.containsKey(res.name)) {
+						Config.animalRads.val.put(res.name, true);
+						Config.animalRads.setVal(Config.animalRads.val);
+					}
+					if(Config.animalRadiuses.val && Config.animalRads.val.getOrDefault(res.name, true) && this.knocked != Knocked.TRUE) {
 						if(ol == null) {
 							this.addol(new Overlay(this, new AnimalRad(this, null, 5 * MCache.tilesz2.y), 1341));
 						}

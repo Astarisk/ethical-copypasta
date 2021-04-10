@@ -121,6 +121,7 @@ public class Config {
 
 	public static Setting<ConcurrentHashMap<String, Boolean>> autodropItems = new Setting<>("autodropItems", new ConcurrentHashMap<>());
 	public static Setting<ConcurrentHashMap<String, Boolean>> flowerOptOpens = new Setting<>("flowerOptOpens", new ConcurrentHashMap<>());
+	public static Setting<ConcurrentHashMap<String, Boolean>> animalRads = new Setting<>("animalRads", new ConcurrentHashMap<>());
 	public static Setting<ConcurrentHashMap<String, Float>> customVolumes = new Setting<>("customVolumes", new ConcurrentHashMap<>());
 	public static Setting<ArrayList<TimerWnd.Timer>> timersSet = new Setting<>("timersSet", new ArrayList<>());
 

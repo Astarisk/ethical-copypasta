@@ -30,6 +30,7 @@ import haven.purus.*;
 import haven.purus.Config;
 import haven.purus.alarms.AlarmWindow;
 import haven.purus.audiomanager.AudioManagerWindow;
+import haven.purus.dangermanager.DangerManagerWindow;
 import haven.purus.flowermanager.FlowerManagerWindow;
 
 import java.awt.event.KeyEvent;
@@ -39,6 +40,7 @@ public class OptWnd extends BetterWindow {
 	AlarmWindow aw;
 	AudioManagerWindow amw;
 	FlowerManagerWindow fmw;
+	DangerManagerWindow dmw;
 	DropperWindow dw;
 	public final Panel main, video, audio, keybind;
     public Panel current;
@@ -602,6 +604,15 @@ public class OptWnd extends BetterWindow {
 				fmw.show();
 			} else {
 				fmw.show(!fmw.visible);
+			}
+		}),0 ,y).pos("bl").adds(0, -5).y;
+		y = main.add(new Button(UI.scale(200), "Animal radius Manager", () -> {
+			if(dmw == null) {
+				dmw = this.parent.add(new DangerManagerWindow());
+				dmw.refresh();
+				dmw.show();
+			} else {
+				dmw.show(!dmw.visible);
 			}
 		}),0 ,y).pos("bl").adds(0, -5).y;
 		y = main.add(new Button(UI.scale(200), "Item autodrop Manager", () -> {
