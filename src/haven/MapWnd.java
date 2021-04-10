@@ -26,6 +26,8 @@
 
 package haven;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.function.*;
@@ -115,6 +117,20 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 			.state(() -> Config.showmapgrid.val)
 			.set(a -> Config.showmapgrid.setVal(a))
 			.settip("Show grid");
+
+	add(new IButton("hud/mmap/maplocbtn","", "-d", "-d"), UI.scale(30,10))
+			.action(() ->  {
+				if(view != null) {
+					try {
+						MCache.Grid g = gameui().ui.sess.glob.map.grids.get(gameui().map.player().rc.floor(11*100, 11*100));
+						if(g != null)
+							DesktopBrowser.sshow(new URL("https://vatsul.com/HnHMap/whereis/" + g.id));
+					} catch(NullPointerException | MalformedURLException e) {
+						e.printStackTrace();
+					}
+				}
+			})
+			.settip("Open map location");
 
 		compact(Utils.getprefb("compact-map", false));
 	resize(sz);
