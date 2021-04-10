@@ -196,6 +196,16 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, "Use hardware cursor [Requires restart]"));
 
+
+		uiSettings.addSubentry(new Entry(new CheckBox("Disable chat notification sound on party & village chat"){
+			{a = Config.disableMultichatNotification.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.disableMultichatNotification.setVal(!this.a);
+				return super.mousedown(c, button);
+			}
+		}, "Disable chat notification sound on party & village chat"));
+
 		uiSettings.addSubentry(new Entry(new CheckBox("Disable fraktur font (ugly) [Requires restart]"){
 			{a = Config.disableJorbfont.val;}
 			@Override

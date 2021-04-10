@@ -102,6 +102,7 @@ public class Config {
 	public static Setting<Boolean> playerRadiuses = new Setting<>("playerRadiuses", false);
 	public static Setting<Boolean> disableJorbfont = new Setting<>("disableJorbfont", false);
 	public static Setting<Float> fontScale = new Setting<>("fontScale", 1.0f);
+	public static Setting<Boolean> disableMultichatNotification = new Setting<>("disableMultichatNotification", false);
 
 
 	public static Setting<Boolean> hideTrees = new Setting<>("hideTrees", true);

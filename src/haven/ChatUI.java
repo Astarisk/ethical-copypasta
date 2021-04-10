@@ -26,6 +26,7 @@
 
 package haven;
 
+import haven.purus.Config;
 import haven.purus.GobHighlight;
 
 import java.time.LocalDateTime;
@@ -1148,6 +1149,8 @@ public class ChatUI extends Widget {
 	synchronized(notifs) {
 	    notifs.addFirst(new Notification(chan, msg));
 	}
+	if(Config.disableMultichatNotification.val && chan instanceof MultiChat)
+		return;
 	Audio.play(notifsfx);
     }
 
