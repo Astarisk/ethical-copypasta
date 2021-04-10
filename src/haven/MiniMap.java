@@ -33,14 +33,12 @@ import java.util.List;
 
 import haven.MapFile.Segment;
 import haven.MapFile.DataGrid;
-import haven.MapFile.Grid;
 import haven.MapFile.GridInfo;
 import haven.MapFile.Marker;
 import haven.MapFile.PMarker;
 import haven.MapFile.SMarker;
 import haven.purus.ClickPath;
 import haven.purus.Config;
-import haven.purus.alarms.AlarmManager;
 import haven.purus.mapper.Mapper;
 
 import static haven.MCache.cmaps;
@@ -66,7 +64,6 @@ public class MiniMap extends Widget {
     protected Segment dseg;
     protected int dlvl;
     protected Location dloc;
-    private static final HashSet<Long> alarmPlayed = new HashSet<Long>();
     private static final HashSet<Long> sent = new HashSet<>();
     private final TexI loadedGrid;
 
@@ -542,23 +539,6 @@ public class MiniMap extends Widget {
 			}
 		    }
 		} catch(Loading l) {}
-			try {
-				Resource res = gob.getres();
-				if(alarmPlayed.contains(gob.id))
-					continue;
-				if(res != null && AlarmManager.play(res.name, gob))
-					alarmPlayed.add(gob.id);
-				if(gob.type == Gob.Type.PLAYER && gob.id != ui.gui.plid) {
-					KinInfo kin = gob.getattr(KinInfo.class);
-					if(kin == null) {
-						alarmPlayed.add(gob.id);
-						Audio.play(Resource.local().loadwait("sfx/alarms/whitePlayer"));
-					} else if(kin.group == 2) {
-						alarmPlayed.add(gob.id);
-						Audio.play(Resource.local().loadwait("sfx/alarms/redPlayer"));
-					}
-				}
-			} catch(Loading l) {}
 	    }
 	}
 	Collections.sort(ret, (a, b) -> a.z - b.z);

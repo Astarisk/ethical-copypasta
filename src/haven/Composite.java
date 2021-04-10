@@ -116,7 +116,7 @@ public class Composite extends Drawable {
 				if(posres != null && (posres.name.endsWith("/knock") || posres.name.endsWith("/dead"))) {
 					gob.knocked = Gob.Knocked.TRUE;
 					synchronized(gob.glob.oc) {
-						gob.updated();
+						gob.updCustom();
 					}
 					break;
 				}
@@ -124,7 +124,7 @@ public class Composite extends Drawable {
 			if(gob.knocked == Gob.Knocked.UNKNOWN) {
 				gob.knocked = Gob.Knocked.FALSE;
 				synchronized(gob.glob.oc) {
-					gob.updated();
+					gob.updCustom();
 				}
 			}
 			prevposes = nposes;

@@ -34,6 +34,7 @@ import java.util.function.*;
 
 import haven.purus.*;
 import haven.purus.Config;
+import haven.purus.alarms.AlarmManager;
 import haven.purus.mapper.Mapper;
 import haven.render.*;
 import haven.resutil.WaterTile;
@@ -55,6 +56,8 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	private static final MixColor dFrameEmpty =  new MixColor(0, 255, 0, 64);
 	private static final MixColor ttEmpty =  new MixColor(255, 0, 0, 64);
 	private static final MixColor ttDone =  new MixColor(0, 255, 0, 64);
+	private static final HashSet<Long> alarmPlayed = new HashSet<Long>();
+
 	public enum Knocked {
 		UNKNOWN,
 		TRUE,
@@ -594,6 +597,20 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 		try {
 			Resource res = Gob.this.getres();
 			if(res != null) {
+				if(!alarmPlayed.contains(id)) {
+					if(AlarmManager.play(res.name, this))
+						alarmPlayed.add(id);
+					if(type == Gob.Type.PLAYER && id != glob.sess.ui.gui.plid) {
+						KinInfo kin = getattr(KinInfo.class);
+						if(kin == null) {
+							Audio.play(Resource.local().loadwait("sfx/alarms/whitePlayer"));
+							alarmPlayed.add(id);
+						} else if(kin.group == 2) {
+							alarmPlayed.add(id);
+							Audio.play(Resource.local().loadwait("sfx/alarms/redPlayer"));
+						}
+					}
+				}
 				if(res.name.startsWith("gfx/kritter")) {
 					Overlay ol = this.findol(1341);
 					if(!Config.animalRads.val.containsKey(res.name)) {
