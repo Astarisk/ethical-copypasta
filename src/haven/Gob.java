@@ -680,16 +680,20 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 				if(Config.ttfHighlight.val) {
 					if(res.name.equals("gfx/terobjs/dframe")) {
 						boolean done = true;
+						boolean empty = true;
 						for(Overlay ol : ols) {
 							if(ol.res != null) {
 								Resource olres = ol.res.get();
 								if(olres.name.endsWith("-blood") || olres.name.endsWith("-windweed") || olres.name.endsWith("-fishraw")) {
 									done = false;
 								}
+								if(olres.name.startsWith("gfx/terobjs/dframe-")) {
+									empty = false;
+								}
 							}
 						}
 						synchronized(this) {
-							if(ols.isEmpty())
+							if(empty)
 								glob.loader.defer(() -> {synchronized(Gob.this) {
 									this.setattr(new GobColor(this, dFrameEmpty));
 								}}, null);
