@@ -2092,7 +2092,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 						if(gob.isPlayer())
 							continue;
 						try {
-							double dist = player().rc.dist(gob.rc);
+							double dist = mc.dist(gob.rc);
 							if(dist > bestDist || mc.dist(gob.rc) > 5 * tilesz.x)
 								continue;
 							Resource gobres = gob.getres();

@@ -27,8 +27,9 @@ public class AlarmManager {
 
 	// Play an alarm for gob with resname, if it has one
 	public static boolean play(String resname, Gob gob) {
-		if(alarms.containsKey(resname) && (!alarms.get(resname).knocked || gob.knocked == Gob.Knocked.FALSE)) {
-			alarms.get(resname).play();
+		Alarm al = alarms.get(resname);
+		if(al != null && (!al.knocked || gob.knocked == Gob.Knocked.FALSE)) {
+			al.play();
 			return true;
 		} else {
 			return false;
