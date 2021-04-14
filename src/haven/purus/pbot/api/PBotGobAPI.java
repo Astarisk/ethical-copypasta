@@ -70,7 +70,7 @@ public class PBotGobAPI {
 						break;
 					} catch(Loading l){PBotUtils.sleep(10);}
 				}
-				if(res != null && res.name.endsWith("/horse") && new Coord2d(gob.getc()).dist(getPlayer().getCoords()) == 0)
+				if(res != null && res.name.startsWith("gfx/kritter/horse/") && new Coord2d(gob.getc()).dist(getPlayer().getCoords()) == 0)
 					continue;
 				PBotGob pgob = new PBotGob(gob, pBotSession);
 					if(res != null && pat.matcher(res.name).matches() && pgob.dist(getPlayer()) < bestDistance) {
