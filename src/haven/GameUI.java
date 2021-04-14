@@ -1774,7 +1774,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		g.image(invsq, beltc(i));
 		try {
 		    if(belt[slot] != null) {
-			belt[slot].spr().draw(g.reclip(c.add(UI.scale(1), UI.scale(1)), invsq.sz().sub(UI.scale(2), UI.scale(2))));
+				if(belt[slot] instanceof PBotBeltSlot)
+					g.image(((PBotBeltSlot) belt[slot]).scriptEntry.icon, c, invsq.sz().sub(UI.scale(2), UI.scale(2)));
+				else
+					belt[slot].spr().draw(g.reclip(c.add(UI.scale(1), UI.scale(1)), invsq.sz().sub(UI.scale(2), UI.scale(2))));
 		    }
 		} catch(Loading e) {}
 		g.chcolor(156, 180, 158, 255);
