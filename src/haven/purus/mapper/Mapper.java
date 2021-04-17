@@ -67,7 +67,7 @@ public class Mapper {
 
 	static {
 		executor = Executors.newScheduledThreadPool(1);
-		executor.scheduleWithFixedDelay(locUpd, 5, 5, TimeUnit.SECONDS);
+		executor.scheduleWithFixedDelay(locUpd, 5, 15, TimeUnit.SECONDS);
 		executor.execute(() -> {
 			boolean regen = false;
 			if(Config.mapperToken.val.length() == 0)
@@ -118,8 +118,6 @@ public class Mapper {
 			}
 		}
 		sendMaptile2(grid.id, tileinfo);
-
-		//sendMaptile(grid.id, maptile);
 	}
 
 	private static void sendMaptile2(long gridId, MinimapGenerator.Tileinfo tileinfo) {
