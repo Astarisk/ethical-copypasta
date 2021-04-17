@@ -96,6 +96,8 @@ public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
 	    minfilter = LINEAR;
 	    mipfilter = (tex.mipmap == null) ? null : LINEAR;
 	}
+	if(res.name.startsWith("dyn/"))
+		tex.mipmap(Mipmapper.lanczos);
 	tex.img.magfilter(magfilter).minfilter(minfilter).mipfilter(mipfilter);
     }
 
