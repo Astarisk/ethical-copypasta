@@ -38,10 +38,15 @@ class PBotItem(object):
     def activate_item(self):
         self.__item.activateItem()
 
-    ## Itemact
+    ## Iact (Right click item, like open drink flowermenu)
     # @param mod modifier for example 1 = shift etc
-    def itemact(self):
-        self.__item.itemact()
+    def iact(self, mod):
+        self.__item.iact(mod)
+
+    ## Itemact (Act with item in hand, like equip a lure)
+    # @param mod modifier for example 1 = shift etc
+    def itemact(self, mod):
+        self.__item.itemact(mod)
 
     ## Get an amount of something such as seeds in a stack
     # @return amount of something in the item

@@ -144,7 +144,7 @@ public class PBotGobAPI {
 	 * @param by y-coord of B point
 	 * @return List of gobs in the area, sorted to zig-zag pattern
 	 */
-	public ArrayList<PBotGob> gobsInArea(int ax, int ay, int bx, int by) {
+	public ArrayList<PBotGob> gobsInArea(double ax, double ay, double bx, double by) {
 		// Initializes list of crops to harvest between the selected coordinates
 		ArrayList<PBotGob> gobs = new ArrayList<PBotGob>();
 		double bigX = Math.max(ax, bx);
