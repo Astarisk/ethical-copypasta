@@ -215,6 +215,16 @@ public class OptWndPurus extends BetterWindow {
 			}
 		}, "Disable fraktur font [Requires restart]"));
 
+		uiSettings.addSubentry(new Entry(new CheckBox("Disable session wnd"){
+			{a = Config.disableSessWnd.val;}
+			@Override
+			public boolean mousedown(Coord c, int button) {
+				Config.disableSessWnd.setVal(!this.a);
+				MultiSession.activeSession.root.multiSessionWindow.update();
+				return super.mousedown(c, button);
+			}
+		}, "Disable session wnd"));
+
 		Label fontScaleLbl = new Label("Font size scale [Requires restart]" + Config.fontScale.val + "x [Requires restart]");
 		Entry fontScaleLblEntry = new Entry(fontScaleLbl, "Font size scale [Requires restart] font scaling");
 		uiSettings.addSubentry(fontScaleLblEntry);

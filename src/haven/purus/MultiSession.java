@@ -30,9 +30,23 @@ public class MultiSession {
 		}
 
 		@Override
+		public void wdgmsg(Widget sender, String msg, Object... args) {
+			if(sender == cbtn) {
+				reqdestroy();
+				return;
+			}
+			super.wdgmsg(sender, msg, args);
+		}
+
+		@Override
 		public void gtick(Render out) {
 			if(update) {
-				this.visible = true;
+				if(haven.purus.Config.disableSessWnd.val) {
+					hide();
+					super.gtick(out);
+					return;
+				}
+				show();
 				for(Widget w : this.children(Button.class)) {
 					w.destroy();
 				}

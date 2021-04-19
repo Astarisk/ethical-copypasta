@@ -104,6 +104,7 @@ public class Config {
 	public static Setting<Boolean> disableJorbfont = new Setting<>("disableJorbfont", false);
 	public static Setting<Float> fontScale = new Setting<>("fontScale", 1.0f);
 	public static Setting<Boolean> disableMultichatNotification = new Setting<>("disableMultichatNotification", false);
+	public static Setting<Boolean> disableSessWnd = new Setting<>("disableSessWnd", false);
 
 
 	public static Setting<Boolean> hideTrees = new Setting<>("hideTrees", true);
