@@ -73,7 +73,7 @@ public class MiniMap extends Widget {
     public MiniMap(Coord sz, MapFile file) {
 	super(sz);
 	this.file = file;
-		BufferedImage bi = new BufferedImage(84, 84, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage bi = new BufferedImage(UI.scale(84), UI.scale(84), BufferedImage.TYPE_INT_ARGB);
 		Graphics2D gr = bi.createGraphics();
 		gr.setColor(new Color(0, 103, 255, 42));
 		gr.fillRect(0, 0, bi.getWidth()-1, bi.getHeight()-1);
@@ -527,8 +527,8 @@ public class MiniMap extends Widget {
 	}
 		Gob player = gameui().map.player();
 		if (player != null) {
-			Coord pos = p2c(player.rc.floor().div(100).mul(new Coord2d(100, 100)).add(45, 45)).add(dloc.tc.inv()).add(curloc.tc).sub((int) (82/2 * z), (int) (82/2 * z));
-			g.aimage(loadedGrid, pos, 0.5, 0.5,new Coord(84, 84).div(zoomlevel+1));
+			Coord pos = p2c(player.rc.floor().div(100).mul(new Coord2d(100, 100)).add(45, 45)).add(dloc.tc.inv()).add(curloc.tc).sub(loadedGrid.sz().sub(2, 2).div(2).mul(z));
+			g.aimage(loadedGrid, pos, 0.5, 0.5, loadedGrid.sz.div(zoomlevel+1));
 		}
 	}
 
