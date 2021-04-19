@@ -2191,37 +2191,38 @@ public class MapView extends PView implements DTarget, Console.Directory {
 						if(gc != null) {
 							if(gc.gob != null) {
 								Resource res = gc.gob.getres();
-								tooltip = gc.gob.id + " " + gc.clickargs(inf)[3] + " " + gc.clickargs(inf)[4] + "\n";
+								StringBuilder sb = new StringBuilder(gc.gob.id + " " + gc.clickargs(inf)[3] + " " + gc.clickargs(inf)[4] + "\n");
 								if(res != null) {
-									tooltip += res.name;
+									sb.append(gc.gob.getres().toString());
 									for(Gob.Overlay o : gc.gob.ols) {
 										try {
-											tooltip += "\noverlay: " + o.getClass().getName() + " id: " + o.id + (o.res != null && o.res.get() != null ? " res: " + o.res.get().name : "");
+											sb.append("\noverlay : ")
+													.append(o.getClass().getName()).append(" id: ")
+													.append(o.id)
+													.append(o.res != null && o.res.get() != null ? " res: " + o.res.get().name : "");
 										} catch(Loading l) {
 										}
 									}
 									Drawable d = gc.gob.getattr(Drawable.class);
 									if(d instanceof ResDrawable)
-										tooltip += "\n sdt: " +  ((ResDrawable) d).sdt.peekrbuf(0);
+										sb.append("\n sdt: ").append(((ResDrawable) d).sdt.peekrbuf(0));
 									if(d != null) {
 										d.getres().layers(FastMesh.MeshRes.class).stream()
 												.map(mr -> String.format("\n meshid: %s %s %s", mr.id, mr.getres().name, mr.mat.getres().name))
 												.distinct()
-												.forEach(s -> tooltip += String.format(s));
+												.forEach(sb::append);
 									}
 									if(d instanceof Composite) {
 										Composite comp = (Composite)d;
 										for(ResData rd:comp.prevposes) {
 											try {
 												if(rd.res != null && rd.res.get() != null)
-													tooltip += "\npose: " + rd.res.get().name;
+													sb.append("\npose: ").append(rd.res.get().name);
 											} catch(Loading l) {
 											}
 										}
 									}
-									tooltip += "\n" + gc.gob.getrc().toString();
-									tooltip = ((String)tooltip).replaceAll("\\$", "#");
-									System.out.println(tooltip);
+									tooltip = sb.toString().replaceAll("\\$", "#").replaceAll("\\{", "(").replaceAll("}", ")");
 									return;
 								}
 								tooltip = null;
