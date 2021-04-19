@@ -70,7 +70,7 @@ public class PBotGobAPI {
 						break;
 					} catch(Loading l){PBotUtils.sleep(10);}
 				}
-				if(res != null && res.name.endsWith("/horse") && new Coord2d(gob.getc()).dist(getPlayer().getCoords()) == 0)
+				if(res != null && res.name.startsWith("gfx/kritter/horse/") && new Coord2d(gob.getc()).dist(getPlayer().getCoords()) == 0)
 					continue;
 				PBotGob pgob = new PBotGob(gob, pBotSession);
 					if(res != null && pat.matcher(res.name).matches() && pgob.dist(getPlayer()) < bestDistance) {
@@ -144,7 +144,7 @@ public class PBotGobAPI {
 	 * @param by y-coord of B point
 	 * @return List of gobs in the area, sorted to zig-zag pattern
 	 */
-	public ArrayList<PBotGob> gobsInArea(int ax, int ay, int bx, int by) {
+	public ArrayList<PBotGob> gobsInArea(double ax, double ay, double bx, double by) {
 		// Initializes list of crops to harvest between the selected coordinates
 		ArrayList<PBotGob> gobs = new ArrayList<PBotGob>();
 		double bigX = Math.max(ax, bx);

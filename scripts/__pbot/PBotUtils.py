@@ -29,6 +29,13 @@ class PBotUtils(object):
     def make_pile(self):
         self.__session.PBotUtils().makePile()
 
+    ## Itemact with item in hand, for example, to plant a crop or a tree
+    # @param x x to click to
+    # @param y y to click to
+    # @param mod modifier for example 1 = shift etc
+    def itemact(self, x: float, y: float, mod: int = 0):
+        self.__session.PBotUtils().itemact(x, y, mod)
+
     ## Use to place something, for example a stockpile
     # @param x x to place stockpile to
     # @param y y to place stockpile to
@@ -62,7 +69,7 @@ class PBotUtils(object):
     ## Left click somewhere with pathfinder
     # @param x X-Coordinate
     # @param y Y-Coordinate
-    def pf_left_click(self, x: int, y: int):
+    def pf_left_click(self, x: float, y: float):
         self.__session.PBotUtils().pfLeftClick(x, y)
 
     ## Waits for the hourglass timer when crafting or drinking for example

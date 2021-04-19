@@ -50,10 +50,13 @@ public class PBotUtils {
 	}
 
 	/**
-	 * Itemact with item in hand, for example, to make a stockpile
+	 * Itemact with item in hand, for example, to plant a crop or tree
+	 * @param x x to click to
+	 * @param y y to click to
+	 * @param mod modifier for example 1 = shift etc
 	 */
-	public void makePile() {
-		pBotSession.gui.map.wdgmsg("itemact", Coord.z, Coord.z, 0);
+	public void itemact(double x, double y, int mod) {
+		pBotSession.gui.map.wdgmsg("itemact", Coord.z, new Coord2d(x, y).floor(OCache.posres), mod);
 	}
 
 	/**

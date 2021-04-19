@@ -1,5 +1,17 @@
 ## Changelog
 
+### 1.4.0
+- Added wear bars to items
+- Added dream harvest script
+- Added basic sorting script
+- Added more fep info visible
+- Added timers
+- Added option to hide session window
+- Added button to find location on the map
+- Added animal danger radius toggle
+- Minor PBot additions and fixes
+- Minor fixes and improvements
+
 ### 1.3.0
 - Added player columns
 - Display tile on minimap hover

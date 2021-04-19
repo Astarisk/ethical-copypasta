@@ -40,8 +40,9 @@ public class AlarmManager {
 	public static void load() {
 		alarms.clear();
 		File config = new File("alarmConfig");
-		defaultSettings();
-		if(config.exists()) {
+		if(!config.exists()) {
+			defaultSettings();
+		} else {
 			loadFromFile(config);
 		}
 	}

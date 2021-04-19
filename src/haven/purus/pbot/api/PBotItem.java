@@ -86,15 +86,23 @@ public class PBotItem {
 	 * Right clicks the item in the inventory
 	 */
 	public void activateItem() {
-		item.wdgmsg("iact", Coord.z, 3);
+		item.wdgmsg("iact", Coord.z, 0);
 	}
 
 	/**
-	 * Itemact
+	 * Iact (Right click item, like open drink flowermenu)
+	 * @param mod modifier for example 1 = shift etc.
+	 */
+	public void iact(int mod) {
+		item.wdgmsg("iact", Coord.z, mod);
+	}
+
+	/**
+	 * Itemact (Act with item in hand, like equip a lure)
 	 * @param mod modifier for example 1 = shift etc.
 	 */
 	public void itemact(int mod) {
-		item.wdgmsg("itemact",  mod);
+		item.wdgmsg("itemact", mod);
 	}
 
 	/**

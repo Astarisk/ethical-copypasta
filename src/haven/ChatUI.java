@@ -1151,7 +1151,7 @@ public class ChatUI extends Widget {
 	}
 	if(Config.disableMultichatNotification.val && chan instanceof MultiChat)
 		return;
-	Audio.play(notifsfx);
+	ui.sfx(notifsfx);
     }
 
     private class Spring extends NormAnim {

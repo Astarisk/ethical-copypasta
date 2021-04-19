@@ -398,7 +398,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	}
 	if(prev != null)
 	    prev.dispose();
-	if(ac == Drawable.class && a != prev)
+	if((ac == Drawable.class && a != prev) || ac == KinInfo.class)
 		updCustom();
     }
 

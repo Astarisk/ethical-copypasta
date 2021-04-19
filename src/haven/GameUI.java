@@ -1503,7 +1503,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	msg(msg, new Color(192, 0, 0), new Color(255, 0, 0));
 	double now = Utils.rtime();
 	if(now - lasterrsfx > 0.1) {
-	    Audio.play(errsfx);
+	    ui.sfx(errsfx);
 	    lasterrsfx = now;
 	}
     }
@@ -1514,7 +1514,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	msg(msg, Color.WHITE, Color.WHITE);
 	double now = Utils.rtime();
 	if(now - lastmsgsfx > 0.1) {
-	    Audio.play(msgsfx);
+	    ui.sfx(msgsfx);
 	    lastmsgsfx = now;
 	}
     }
@@ -1772,7 +1772,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		g.image(invsq, beltc(i));
 		try {
 		    if(belt[slot] != null) {
-			belt[slot].spr().draw(g.reclip(c.add(UI.scale(1), UI.scale(1)), invsq.sz().sub(UI.scale(2), UI.scale(2))));
+				if(belt[slot] instanceof PBotBeltSlot)
+					g.image(((PBotBeltSlot) belt[slot]).scriptEntry.icon, c, invsq.sz().sub(UI.scale(2), UI.scale(2)));
+				else
+					belt[slot].spr().draw(g.reclip(c.add(UI.scale(1), UI.scale(1)), invsq.sz().sub(UI.scale(2), UI.scale(2))));
 		    }
 		} catch(Loading e) {}
 		g.chcolor(156, 180, 158, 255);
