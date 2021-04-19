@@ -60,6 +60,7 @@ public class Composite extends Drawable {
 			gob.type = gob.determineType(base.get().name);
 			if(gob.type == Gob.Type.PLAYER && gob.attr.containsKey(GobHealth.class))
 				gob.type = Gob.Type.OTHER;
+			gob.updCustom();
 		}
 	super.added(slot);
     }
