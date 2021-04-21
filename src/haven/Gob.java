@@ -763,7 +763,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 							} else if(resname.startsWith("gfx/terobjs/plants") && !resname.endsWith("trellis") && rd != null) {
 								int stage = rd.sdt.peekrbuf(0);
 								if(cropstgmaxval == 0) {
-									for(FastMesh.MeshRes layer : getres().layers(FastMesh.MeshRes.class)) {
+									for(FastMesh.MeshRes layer : res.layers(FastMesh.MeshRes.class)) {
 										int stg = layer.id / 10;
 										if(stg > cropstgmaxval)
 											cropstgmaxval = stg;
