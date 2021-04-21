@@ -531,6 +531,7 @@ public class JOGLPanel extends GLCanvas implements Runnable, UIPanel, Console.Di
 					if(session.sess != null && session != MultiSession.activeSession) {
 						synchronized(session) {
 							session.sess.glob.ctick();
+							session.sess.ui.tick();
 						}
 					}
 				}
