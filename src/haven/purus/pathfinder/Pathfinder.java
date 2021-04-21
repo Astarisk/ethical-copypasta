@@ -13,12 +13,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.RunnableFuture;
 import java.util.stream.Collectors;
 
 public class Pathfinder {
 
-	private static final boolean PF_DEBUG = true;
+	private static final boolean PF_DEBUG = false;
 
 	private static HashSet<String> inaccessibleTiles = new HashSet<String>() {{
 		add("gfx/tiles/nil");
@@ -157,7 +156,7 @@ public class Pathfinder {
 		}
 		for(Coord2d vert: pol.vertices) {
 			Coord c  = vert.round().add(50*11, 50*11);
-			drawCircle(c.x, c.y, 1, 1, grid);
+			drawCircle(c.x, c.y, 1, -1, grid);
 		}
 	}
 
