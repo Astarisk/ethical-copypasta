@@ -112,8 +112,36 @@ class PBotGob(object):
 
     ## Sdt may tell information about things such as tanning tub state, crop stage etc.
     # @return sdt of the gob, -1 if not found
-    def get_sdt(self) -> int:
-        return self._gob.getSdt()
+    def get_sdt(self, idx: int = 0) -> int:
+        return self._gob.getSdt(idx)
+
+    ## Get bounding boxes of the gob if some are found
+    # @return List containing polygons which contain each point of the polygon
+    def get_boundingbox(self) -> List[List[Tuple[float, float]]]:
+        bb = self._gob.getBb()
+        if bb is None:
+            return []
+        ret = []
+        for pol in bb.polygons:
+            ret.append([])
+            for vert in pol.vertices:
+                ret[len(ret)-1].append((vert.x, vert.y))
+        return ret
+
+    ## Get rectangle that covers bounding boxes of the gob if some are found
+    # @return Corners of the rectangle
+    def get_boundingbox_rect(self) -> Tuple[Tuple[float, float], Tuple[float, float]]:
+        bb = self._gob.getBb()
+        ret = [[-1e9,-1e9], [1e9,1e9]]
+        if bb is None:
+            return ((0, 0), (0, 0))
+        for pol in bb.polygons:
+            for vert in pol.vertices:
+                ret[0][0] = max(ret[0][0], vert.x)
+                ret[1][0] = min(ret[1][0], vert.x)
+                ret[0][1] = max(ret[0][1], vert.y)
+                ret[1][1] = min(ret[1][1], vert.y)
+        return tuple([tuple(ret[0]), tuple(ret[1])])
 
     ## Check if the gob is KO/dead
     # @return true if the animal is knocked out, false if not

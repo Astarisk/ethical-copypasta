@@ -12,11 +12,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RunnableFuture;
 import java.util.stream.Collectors;
 
 public class Pathfinder {
 
-	private static final boolean PF_DEBUG = false;
+	private static final boolean PF_DEBUG = true;
 
 	private static HashSet<String> inaccessibleTiles = new HashSet<String>() {{
 		add("gfx/tiles/nil");
@@ -153,6 +155,10 @@ public class Pathfinder {
 			drawLine(prev.x, prev.y, c.x, c.y, 1.0, -1, grid);
 			prev = c;
 		}
+		for(Coord2d vert: pol.vertices) {
+			Coord c  = vert.round().add(50*11, 50*11);
+			drawCircle(c.x, c.y, 1, 1, grid);
+		}
 	}
 
 	private static void markTileInaccessible(Coord c, int[][] grid) {
@@ -192,7 +198,7 @@ public class Pathfinder {
 	public static void run(Coord2d target, Gob destGob, int button, int mod, int overlay, int meshid, String action, GameUI gui) {
 		if(gui.pathfinder != null)
 			gui.pathfinder.stop();
-		gui.pathfinder = new Thread(() -> {
+		gui.map.pf_route_found = new FutureTask<Boolean>(() -> {
 			BufferedImage bi;
 			Graphics g;
 			if(PF_DEBUG) {
@@ -203,7 +209,7 @@ public class Pathfinder {
 			ArrayList<BoundingBox.Polygon> bboxes = new ArrayList<>();
 			Gob player = gui.map.player();
 			if(player == null)
-				return;
+				return false;
 			Coord2d origin = player.rc.floor().div(100).mul(new Coord2d(100, 100)).add(45, 45).floor(MCache.tilesz).mul(MCache.tilesz);
 			int[][] grid = new int[100*11][100*11];
 			Coord tgt;
@@ -252,7 +258,7 @@ public class Pathfinder {
 			// Player probably just wants out of the boat
 			if(boating && button == 1 && (mod & UI.MOD_CTRL) != 0) {
 				gui.map.wdgmsg("click", Coord.z, target.floor(OCache.posres), button, mod);
-				return;
+				return true;
 			}
 
 			for(int i=-45; i<=45; i++) {
@@ -382,6 +388,9 @@ public class Pathfinder {
 				}
 				System.out.println("Finding route took: " + (System.currentTimeMillis()-start) + " ms");
 			}
+			if(rte.size() == 0) {
+				return false;
+			}
 			Collections.reverse(rte);
 			for(int i=1; i<rte.size() && gui.map.player() != null; i++) {
 				if(destGob != null && (i == rte.size()-1) && !doorOffset) {
@@ -403,6 +412,8 @@ public class Pathfinder {
 				}
 				gui.map.cp = new ClickPath(player, croute, gui.ui.sess.glob.map);
 				Coord2d clickTgt = origin.add(new Coord2d(rte.get(i).sub(50*11, 50*11)));
+				if(i != rte.size()-1 && clickTgt.dist(origin.add(new Coord2d(rte.get(rte.size()-1)).sub(50*11, 50*11))) <= 2.0)
+					continue;
 				if(i == rte.size()-1 && !doorOffset)
 					gui.map.wdgmsg("click", Coord.z, clickTgt.floor(OCache.posres), button, mod);
 				else
@@ -415,7 +426,9 @@ public class Pathfinder {
 			}
 			if(doorOffset)
 				gui.map.wdgmsg("click", Coord.z, destGob.rc.floor(OCache.posres), button, mod, 0, (int) destGob.id, destGob.rc.floor(OCache.posres), 0, meshid);
-		}, "PF-thread");
+			return true;
+		});
+		gui.pathfinder = new Thread(gui.map.pf_route_found, "PF-thread");
 		gui.pathfinder.start();
 	}
 }

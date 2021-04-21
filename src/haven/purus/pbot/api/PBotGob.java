@@ -2,6 +2,7 @@ package haven.purus.pbot.api;
 
 import haven.*;
 import haven.Composite;
+import haven.purus.BoundingBox;
 import haven.purus.GobColor;
 import haven.purus.GobText;
 import haven.purus.pathfinder.Pathfinder;
@@ -311,13 +312,13 @@ public class PBotGob {
 	 * Sdt may tell information about things such as tanning tub state, crop stage etc.
 	 * @return sdt of the gob, -1 if not found
 	 */
-	public int getSdt() {
+	public int getSdt(int idx) {
 		while(true) {
 			try {
 				Resource res = gob.getres();
 				if(res != null) {
 					GAttrib rd = gob.getattr(ResDrawable.class);
-					return ((ResDrawable) rd).sdt.peekrbuf(0);
+					return ((ResDrawable) rd).sdt.peekrbuf(idx);
 				} else {
 					return -1;
 				}
@@ -325,6 +326,11 @@ public class PBotGob {
 				PBotUtils.sleep(10);
 			}
 		}
+	}
+
+	// Get boundingbox of this gob, or null if not found
+	public BoundingBox getBb() {
+		return BoundingBox.getBoundingBox(gob);
 	}
 
 	/**

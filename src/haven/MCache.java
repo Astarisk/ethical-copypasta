@@ -164,7 +164,7 @@ public class MCache implements MapSource {
     }
 
     public class Overlay {
-	private Area a;
+	public Area a;
 	private OverlayInfo id;
 
 	public Overlay(Area a, OverlayInfo id) {

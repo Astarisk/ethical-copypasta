@@ -4,6 +4,7 @@ import haven.*;
 import haven.purus.pathfinder.Pathfinder;
 
 import java.awt.*;
+import java.util.concurrent.ExecutionException;
 
 public class PBotUtils {
 	private PBotSession pBotSession;
@@ -136,13 +137,12 @@ public class PBotUtils {
 		double prog = pBotSession.gui.prog;
 		int retries = 0;
 		while(prog == pBotSession.gui.prog) {
-			if(retries > timeout/5)
+			if(retries > timeout / 5)
 				return false;
 			retries++;
-			prog = pBotSession.gui.prog;
 			sleep(5);
 		}
-		while (pBotSession.gui.prog >= 0) {
+		while(pBotSession.gui.prog >= 0) {
 			sleep(25);
 		}
 		return true;
@@ -287,6 +287,17 @@ public class PBotUtils {
 			return pBotSession.gui.fv.curgive.state;
 		}
 		return -1;
+	}
+
+	// Wait for the pathfinder to stop, returns true if route finding was successful false otherwise
+	public boolean pfWait() {
+		try {
+			if(pBotSession.gui.map.pf_route_found == null)
+				return false;
+			return pBotSession.gui.map.pf_route_found.get();
+		} catch(InterruptedException | ExecutionException ie) {
+		}
+		return false;
 	}
 
 	public boolean hasCombat() {

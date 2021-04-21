@@ -25,17 +25,19 @@ public class PBotFlowerMenu {
 	/**
 	 * Choose option
 	 * @param name Exact name of the option
+	 * @return whether the option was chosen or not
 	 */
-	public void choosePetal(String name) {
+	public boolean choosePetal(String name) {
 		for(FlowerMenu.Petal p : this.menu.opts) {
 			if(p.name.equals(name)) {
 				try {
 					menu.choose(p);
 					menu.destroy();
-					return;
+					return true;
 				} catch(IndexOutOfBoundsException iee) {}
 			}
 		}
+		return false;
 	}
 
 	/**

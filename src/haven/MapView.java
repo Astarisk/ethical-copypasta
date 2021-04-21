@@ -31,6 +31,8 @@ import static haven.OCache.posres;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.function.*;
 import java.lang.reflect.*;
 
@@ -68,6 +70,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	public final ArrayList<Pair<Callback, PBotSession>> gobCbQueue = new ArrayList<>();
 	public final ArrayList<Pair<Callback, PBotSession>> areaSelectCbQueue = new ArrayList<>();
 	public boolean wrongdir = false;
+	public FutureTask<Boolean> pf_route_found = null;
 
 	public interface Delayed {
 	public void run(GOut g);
@@ -2204,8 +2207,11 @@ public class MapView extends PView implements DTarget, Console.Directory {
 										}
 									}
 									Drawable d = gc.gob.getattr(Drawable.class);
-									if(d instanceof ResDrawable)
-										sb.append("\n sdt: ").append(((ResDrawable) d).sdt.peekrbuf(0));
+									if(d instanceof ResDrawable) {
+										sb.append("\n sdt:");
+										for(int i=0; i<((ResDrawable) d).sdt.rbuf.length; i++)
+										sb.append(" ").append(((ResDrawable) d).sdt.peekrbuf(i));
+									}
 									if(d != null) {
 										d.getres().layers(FastMesh.MeshRes.class).stream()
 												.map(mr -> String.format("\n meshid: %s %s %s", mr.id, mr.getres().name, mr.mat.getres().name))
@@ -2473,8 +2479,8 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		    wdgmsg("sel", sc, ec, modflags);
 			synchronized(areaSelectCbQueue) {
 				if(areaSelectCbQueue.size() > 0) {
-					Coord scc = sc.mul(tilesz2);
-					Coord ecc = ec.mul(tilesz2);
+					Coord scc = ol.a.ul.mul(tilesz2);
+					Coord ecc = ol.a.br.mul(tilesz2);
 					for(Pair<Callback, PBotSession> cb : areaSelectCbQueue)
 						new Thread(() -> cb.a.callback(new PBotUtils.AreaReturn(scc, ecc)), "PBot cb runner").start();
 					areaSelectCbQueue.clear();

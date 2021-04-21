@@ -10,8 +10,9 @@ class PBotFlowerMenu(object):
 
     ## Choose option
     # @param name Exact name of the option
-    def choose_petal(self, name: str):
-        self.__menu.choosePetal(name)
+    # @return true if the petal was chosen, false if not found
+    def choose_petal(self, name: str) -> bool:
+        return self.__menu.choosePetal(name)
 
     ## Choose option by number
     # @param num option number 0-indexed

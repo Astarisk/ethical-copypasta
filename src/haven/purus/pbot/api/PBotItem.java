@@ -133,17 +133,17 @@ public class PBotItem {
 	 * @return Name of item or null
 	 */
 	public String getName() {
-		synchronized(item.ui) {
-			while(true) {
-				try {
+		while(true) {
+			try {
+				synchronized(item.ui) {
 					for(Object o : item.info().toArray()) {
 						if(o instanceof ItemInfo.Name)
 							return ((ItemInfo.Name) o).str.text;
 					}
 					break;
-				} catch(Loading l) { }
-				PBotUtils.sleep(20);
-			}
+				}
+			} catch(Loading l) { }
+			PBotUtils.sleep(20);
 		}
 		return null;
 	}

@@ -66,7 +66,7 @@ public class PBotWindow {
 	public void takeItemsFromStockpile(int count) {
 		if(window.getchild(ISBox.class) != null)
 			for(int i=0; i<count; i++)
-				window.wdgmsg("xfer");
+				window.getchild(ISBox.class).wdgmsg("xfer");
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class PBotWindow {
 	public void putItemFromInventoryToStockpile(int count) {
 		if(window.getchild(ISBox.class) != null)
 			for(int i=0; i<count; i++)
-				window.wdgmsg("xfer2", 1, 1);
+				window.getchild(ISBox.class).wdgmsg("xfer2", 1, 1);
 	}
 
 	/**

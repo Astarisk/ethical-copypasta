@@ -27,7 +27,7 @@ class PBotUtils(object):
 
     ## Itemact with item in hand, for example to make a stockpile
     def make_pile(self):
-        self.__session.PBotUtils().makePile()
+        self.__session.PBotUtils().itemact(0.0, 0.0, 0)
 
     ## Itemact with item in hand, for example, to plant a crop or a tree
     # @param x x to click to
@@ -118,6 +118,11 @@ class PBotUtils(object):
     def select_area(self, cb: Callable[[Tuple[float, float], Tuple[float, float]], any]):
         self.__session.PBotUtils().selectArea(_SelectAreaCb(cb))
 
+    ## Wait for pathfinder to finish what its doing
+    # @return true if route was found and executed, false if not
+    def pf_wait(self):
+        return self.__session.PBotUtils().pfWait()
+
 class _SelectItemCb(object):
     def __init__(self, cb: Callable[[PBotItem], any]):
         self.cb = cb
@@ -135,7 +140,7 @@ class _SelectAreaCb(object):
         self.cb = cb
 
     def callback(self, area):
-        self.cb((area.getA().x, area.getA().y,), (area.getB().x, area.getB().y,))
+        self.cb((float(area.getA().x), float(area.getA().y),), (float(area.getB().x), float(area.getB().y),))
 
     class Java:
         implements = ["haven.purus.pbot.api.Callback"]
