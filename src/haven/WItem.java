@@ -106,7 +106,7 @@ public class WItem extends Widget implements DTarget {
 	if(prev == this) {
 	} else if(prev instanceof WItem) {
 	    double ps = ((WItem)prev).hoverstart;
-	    if(now - ps < 1.0)
+	    if(now - ps < 0.1)
 		hoverstart = now;
 	    else
 		hoverstart = ps;
@@ -121,7 +121,7 @@ public class WItem extends Widget implements DTarget {
 		shorttip = longtip = null;
 		ttinfo = info;
 	    }
-	    if(now - hoverstart < 1.0) {
+	    if(now - hoverstart < 0.1) {
 		if(shorttip == null)
 		    shorttip = new ShortTip(info);
 		return(shorttip);
