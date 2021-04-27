@@ -1701,7 +1701,8 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	synchronized(glob.map) {
 	    terrain.tick();
 	    oltick();
-	    if(gridlines != null)
+		glob.map.sendreqs();
+		if(gridlines != null)
 		gridlines.tick();
 	    clickmap.tick();
 
@@ -2209,12 +2210,16 @@ public class MapView extends PView implements DTarget, Console.Directory {
 									Drawable d = gc.gob.getattr(Drawable.class);
 									if(d instanceof ResDrawable) {
 										sb.append("\n sdt:");
-										for(int i=0; i<((ResDrawable) d).sdt.rbuf.length; i++)
-										sb.append(" ").append(((ResDrawable) d).sdt.peekrbuf(i));
+										for(int i=0; i<((ResDrawable) d).sdt.rbuf.length; i++) {
+											int sdt = ((ResDrawable) d).sdt.peekrbuf(i);
+											for(int j=7; j>=0; j--)
+												sb.append((sdt & (1<<j)) != 0 ? 1 : 0);
+											sb.append(" ").append(sdt);
+										}
 									}
 									if(d != null) {
 										d.getres().layers(FastMesh.MeshRes.class).stream()
-												.map(mr -> String.format("\n meshid: %s %s %s", mr.id, mr.getres().name, mr.mat.getres().name))
+												.map(mr -> String.format("\n meshid: %s %s %s", mr.id, mr.getres().name, (mr.mat != null ? mr.mat.getres().name : "")))
 												.distinct()
 												.forEach(sb::append);
 									}
@@ -2228,6 +2233,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 											}
 										}
 									}
+									sb.append("\n").append(gc.gob.getc()).append(" ").append(gc.gob.getv());
 									tooltip = sb.toString().replaceAll("\\$", "#").replaceAll("\\{", "(").replaceAll("}", ")");
 									return;
 								}
@@ -2254,7 +2260,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 						int t = map.gettile(mc.floor(tilesz));
 						Resource res = map.tilesetr(t);
 						if (res != null) {
-							tooltip = res.name + "\n" + mc.floor(tilesz);
+							tooltip = res.name + "\n" + map.getgrid(mc.floor(tilesz).div(cmaps)).id + " " + mc.floor(tilesz).mod(cmaps) + "\n" + mc.floor(tilesz);
 							return;
 						}
 					}

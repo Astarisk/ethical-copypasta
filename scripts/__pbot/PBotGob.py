@@ -143,6 +143,14 @@ class PBotGob(object):
                 ret[1][1] = min(ret[1][1], vert.y)
         return tuple([tuple(ret[0]), tuple(ret[1])])
 
+    ## Get mapgrid id of the gobs current location
+    def get_grid_id(self) -> int:
+        return self._gob.getGridId()
+
+    ## Get persistent location which can be translated back to coords with PBotUtils getcoords
+    def get_persistent_loc(self) -> tuple[int, float, float]:
+        return (int(self.get_grid_id()), *tuple(float(c % (11*100)) for c in self.get_coords()))
+
     ## Check if the gob is KO/dead
     # @return true if the animal is knocked out, false if not
     def is_knocked(self) -> bool:

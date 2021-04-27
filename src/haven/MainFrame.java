@@ -264,6 +264,35 @@ public class MainFrame extends java.awt.Frame implements Console.Directory {
 		}, "Session thread").start();
 	}
 
+	public void sessionCreate(RemoteUI rui) {
+		sessions.incrementAndGet();
+		new HackThread(() -> {
+			UI ui = null;
+			try {
+				///
+				sessions.incrementAndGet();
+				UI.Runner fun = rui;
+
+				String t = fun.title();
+				if(t == null)
+					setTitle("Haven and Hearth");
+				setTitle("Haven and Hearth \u2013 " + t);
+				ui = p.newui(fun);
+				MultiSession.addSession(ui);
+				MultiSession.setActiveSession(ui);
+				fun = fun.run(ui);
+				MultiSession.closeSession(ui);
+				sessions.decrementAndGet();
+			} catch(InterruptedException e) {
+
+			} finally {
+				if(sessions.decrementAndGet() == 0)
+					sessionCreate();
+			}
+			savewndstate();
+		}, "Session thread").start();
+	}
+
     /*public void run() {
 		if(Thread.currentThread() != this.mt)
 			throw (new RuntimeException("MainFrame is being run from an invalid context"));

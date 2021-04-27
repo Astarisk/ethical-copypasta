@@ -488,6 +488,33 @@ public class JOGLPanel extends GLCanvas implements Runnable, UIPanel, Console.Di
 		Fence prevframe = null;
 		ProfileCycle rprofc = null;
 		int framep = 0;
+		if(Config.noui) {
+			while(true) {
+				long start = System.currentTimeMillis();
+				UI ui = MultiSession.activeSession;
+				//ed.dispatch(ui);
+				if(ui.sess != null) {
+					//ui.sess.glob.ctick();
+					//ui.sess.glob.gtick(buf);
+				}
+				synchronized(MultiSession.sessions) {
+					for(UI session : MultiSession.sessions) {
+						if(session.sess != null) {
+							session.sess.glob.ctick();
+							session.sess.ui.tick();
+							session.tick();
+						}
+					}
+				}
+				//ui.tick();
+				//ui.gtick(buf);
+				if((ui.root.sz.x != (shape.br.x - shape.ul.x)) || (ui.root.sz.y != (shape.br.y - shape.ul.y)))
+					ui.root.resize(new Coord(shape.br.x - shape.ul.x, shape.br.y - shape.ul.y));
+				long now = System.currentTimeMillis();
+				if(now-start < 50)
+					Thread.sleep(50-(now-start));
+			}
+		}
 		while(true) {
 		    double fwaited = 0;
 		    GLEnvironment env = this.env;

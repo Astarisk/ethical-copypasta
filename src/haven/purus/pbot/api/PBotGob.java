@@ -12,6 +12,10 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class PBotGob {
 
@@ -64,7 +68,7 @@ public class PBotGob {
 	 * @return the distance
 	 */
 	public double dist(PBotGob gob) {
-		return gob.getCoords().dist(this.gob.rc);
+		return gob.getCoords().dist(getCoords());
 	}
 
 	/**
@@ -72,7 +76,27 @@ public class PBotGob {
 	 * @return Coord object with x and y attributes
 	 */
 	public Coord2d getCoords() {
-		return new Coord2d(this.gob.getc());
+		final Coord2d[] ret = {null};
+		Semaphore s = new Semaphore(1);
+		s.acquireUninterruptibly();
+		new Runnable() {
+			@Override
+			public void run() {
+				try {
+					ret[0] = Coord2d.z;
+					ret[0] = new Coord2d(gob.getc());
+				} catch(MCache.LoadingMap lm) {
+					if(ret[0] == null) {
+						lm.waitfor(this, waiting -> {
+						});
+						return;
+					}
+				}
+				s.release();
+			}
+		}.run();
+		s.acquireUninterruptibly();
+		return ret[0];
 	}
 
 	/**
@@ -324,6 +348,20 @@ public class PBotGob {
 				}
 			} catch(Loading l) {
 				PBotUtils.sleep(10);
+			}
+		}
+	}
+
+	public long getGridId() {
+		while(true) {
+			try {
+				return pBotSession.gui.ui.sess.glob.map.getgridt(getCoords().floor(MCache.tilesz)).id;
+			} catch(MCache.LoadingMap l) {
+				try {
+					l.waitfor();
+				} catch(InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

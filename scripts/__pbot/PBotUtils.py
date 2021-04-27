@@ -123,6 +123,20 @@ class PBotUtils(object):
     def pf_wait(self):
         return self.__session.PBotUtils().pfWait()
 
+    ## Get rc coords of some gridid offset pair
+    # @param grid_id mapgrid id
+    # @param ofs_x x offset in mapgrid
+    # @param ofs_y y offset in mapgrid
+    # @param wait until the mapgrid has been loaded
+    # @return coords of None if grid couldn't be found
+    def get_coords(self, grid_id: int, ofs_x: float, ofs_y: float, wait: bool = True) -> Optional[Tuple[float, float]]:
+        c = self.__session.PBotUtils().getCoords(grid_id, float(ofs_x), float(ofs_y), wait)
+        if c is None:
+            return None
+        else:
+            return (c.x, c.y)
+
+
 class _SelectItemCb(object):
     def __init__(self, cb: Callable[[PBotItem], any]):
         self.cb = cb

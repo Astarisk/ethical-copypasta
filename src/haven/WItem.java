@@ -288,10 +288,12 @@ public class WItem extends Widget implements DTarget {
     }
 
     public double quality() {
-    	Optional<ItemInfo> qInfo = this.info().stream().filter((info) -> info instanceof Quality).findFirst();
-    	if(qInfo.isEmpty())
-    		return -1;
-    	else
-    		return ((Quality)qInfo.get()).q;
+    	try {
+			Optional<ItemInfo> qInfo = this.info().stream().filter((info) -> info instanceof Quality).findFirst();
+			if(qInfo.isEmpty())
+				return -1;
+			else
+				return ((Quality) qInfo.get()).q;
+		} catch(Loading l) {return -1;}
 	}
 }

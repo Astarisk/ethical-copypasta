@@ -14,7 +14,7 @@ class PBotCharacterAPI(object):
     ## Returns the player energy
     # @return Player energy between 0-100
     def get_energy(self) -> float:
-        return float(self.__session.PBotCharacterAPI().getEnegry())
+        return float(self.__session.PBotCharacterAPI().getEnergy())
 
     ## Returns the player hp
     # @return Player hp between 0-100

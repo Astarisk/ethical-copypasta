@@ -12,12 +12,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
 public class Pathfinder {
 
-	private static final boolean PF_DEBUG = false;
+	private static final boolean PF_DEBUG = true;
 
 	private static HashSet<String> inaccessibleTiles = new HashSet<String>() {{
 		add("gfx/tiles/nil");
@@ -194,6 +196,8 @@ public class Pathfinder {
 		run(target, destGob, button, mod, -1, meshid, action, gui);
 	}
 
+	ExecutorService ex = Executors.newSingleThreadScheduledExecutor();
+
 	public static void run(Coord2d target, Gob destGob, int button, int mod, int overlay, int meshid, String action, GameUI gui) {
 		if(gui.pathfinder != null)
 			gui.pathfinder.stop();
@@ -231,26 +235,39 @@ public class Pathfinder {
 				tgt = target.sub(origin).round().add(50*11, 50*11);
 			}
 			boolean boating = false;
+			ArrayList<Gob> gobs = new ArrayList<>();
 			synchronized(gui.ui.sess.glob.oc) {
 				for(Gob gob : gui.ui.sess.glob.oc) {
-					BoundingBox bb = BoundingBox.getBoundingBox(gob);
-					if(bb == null || !bb.blocks)
-						continue;
-					if(isMyBoat(gob, player)) {
-						Coord c = origin.div(MCache.tilesz).round();
-						int t = gui.ui.sess.glob.map.gettile(c);
-						if(accessibleTilesBoating.contains(gui.ui.sess.glob.map.tilesetr(t).name))
-							boating = true;
-						continue;
+					gobs.add(gob);
+				}
+			}
+			forgob:
+			for(Gob gob : gobs) {
+				BoundingBox bb = BoundingBox.getBoundingBox(gob);
+				if(bb == null || !bb.blocks)
+					continue;
+				if(isMyBoat(gob, player)) {
+					Coord c = origin.div(MCache.tilesz).round();
+					int t = gui.ui.sess.glob.map.gettile(c);
+					if(accessibleTilesBoating.contains(gui.ui.sess.glob.map.tilesetr(t).name))
+						boating = true;
+					continue;
+				}
+				int retries = 0;
+				while(retries++ < 10) {
+					try {
+						if(gob == player || (gob == destGob && !doorOffset) || (!gob.getres().name.equals("gfx/borka/body") && gob.getc().mul(1, 1, 0).dist(player.getc().mul(1, 1, 0)) < 1)) {
+							continue forgob;
+						}
+						break;
+					} catch(Loading l) {
+						l.waitfor();
 					}
-					if(gob == player || (gob == destGob && !doorOffset) || (!gob.getres().name.equals("gfx/borka/body") && gob.getc().mul(1,1,0).dist(player.getc().mul(1,1,0)) < 1)) {
-						continue;
-					}
-					for(BoundingBox.Polygon pol : bb.polygons) {
-						bboxes.add(new BoundingBox.Polygon(pol.vertices.stream()
-								.map((v) -> v.rotate(gob.a).add(gob.rc).sub(origin))
-								.collect(Collectors.toCollection(ArrayList::new))));
-					}
+				}
+				for(BoundingBox.Polygon pol : bb.polygons) {
+					bboxes.add(new BoundingBox.Polygon(pol.vertices.stream()
+							.map((v) -> v.rotate(gob.a).add(gob.rc).sub(origin))
+							.collect(Collectors.toCollection(ArrayList::new))));
 				}
 			}
 
@@ -263,22 +280,15 @@ public class Pathfinder {
 			for(int i=-45; i<=45; i++) {
 				for(int j=-45; j<=45; j++) {
 					Coord c = origin.div(MCache.tilesz).round().add(i, j);
-					int t = gui.ui.sess.glob.map.gettile(c);
 					while(true) {
 						try {
+							int t = gui.ui.sess.glob.map.gettile(c);
 							Tiler tl = gui.ui.sess.glob.map.tiler(t);
 							if(tl instanceof Ridges.RidgeTile) {
 								if(Ridges.brokenp(gui.ui.sess.glob.map, c)) {
 									markTileInaccessible(new Coord(i, j), grid);
 								}
 							}
-							break;
-						} catch(Loading l) {
-						}
-						Thread.onSpinWait();
-					}
-					while(true) {
-						try {
 							Resource res = gui.ui.sess.glob.map.tilesetr(t);
 							if(boating) {
 								if(res != null && !accessibleTilesBoating.contains(res.name)) {
@@ -289,10 +299,13 @@ public class Pathfinder {
 									markTileInaccessible(new Coord(i, j), grid);
 								}
 							}
-							break;
-						} catch(Loading l) {
+						} catch(Loading l){
+							PBotUtils.sleep(20);
+							continue;
 						}
+						break;
 					}
+
 				}
 			}
 
@@ -428,6 +441,12 @@ public class Pathfinder {
 			return true;
 		});
 		gui.pathfinder = new Thread(gui.map.pf_route_found, "PF-thread");
+		gui.pathfinder.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				System.out.println(t + " " + e);
+			}
+		});
 		gui.pathfinder.start();
 	}
 }

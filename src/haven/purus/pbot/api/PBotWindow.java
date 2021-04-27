@@ -70,6 +70,14 @@ public class PBotWindow {
 	}
 
 	/**
+	 * Click stockpile to get item to hand
+	 */
+	public void takeItemsFromStockpileHand() {
+		if(window.getchild(ISBox.class) != null)
+			window.getchild(ISBox.class).wdgmsg("click");
+	}
+
+	/**
 	 * Attempts to put item that fits form inventory to the stockpile, like when scrolling to stockpile
 	 * @param count How many items to put into the stockpile
 	 */
@@ -106,6 +114,7 @@ public class PBotWindow {
 	 * Close this window
 	 */
 	public void closeWnd() {
+		window.wdgmsg("close");
 		window.reqdestroy();
 	}
 }

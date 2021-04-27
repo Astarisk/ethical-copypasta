@@ -29,8 +29,8 @@ class Script:
         sess.PBotUtils.make_pile()
         x = min(self.area[0][0], self.area[1][0]) + 5.5
         y = min(self.area[0][1], self.area[1][1]) + 5.5
-        x_lim = max(self.area[0][0], self.area[1][0]) + 5.5
-        y_lim = max(self.area[0][1], self.area[1][1]) + 5.5
+        x_lim = max(self.area[0][0], self.area[1][0])
+        y_lim = max(self.area[0][1], self.area[1][1])
         sess.PBotUtils.placeThing(x, y)
         while sess.PBotGobAPI.get_gob_by_coords(x, y) is None:
             time.sleep(0.025)
@@ -39,10 +39,10 @@ class Script:
         bb = sess.PBotGobAPI.get_gob_by_coords(x, y).get_boundingbox_rect()
         for itm in itms:
             x += abs(bb[0][0]) + abs(bb[1][0])
-            if x > x_lim:
+            if x >= x_lim:
                 y += abs(bb[0][1]) + abs(bb[1][1])
                 x = min(self.area[0][0], self.area[1][0]) + 5.5
-            if y > y_lim:
+            if y >= y_lim:
                 break
             loc_found = False
             for loc in [[bb[0][0] + 5.5, 0], [bb[1][0] - 5.5, 0], [0, bb[0][1] + 5.5], [0, bb[1][1] - 5.5]]:

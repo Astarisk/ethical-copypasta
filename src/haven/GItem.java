@@ -191,7 +191,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 		FoodService.checkFood(info, getres().name);
 		IconService.checkIcon(info, spr);
 	}
-	return(info);
+	return(new ArrayList<>(info));
     }
 
     public Resource resource() {

@@ -330,6 +330,12 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 					glob.sess.ui.gui.map.wrongdir = false;
 				}
 		}
+		if(isPlayer() && glob.map != null) {
+			Coord toc = this.rc.floor(MCache.tilesz).div(MCache.cmaps);
+			for(int i=-1; i<=1; i++)
+				for(int j=-1; j<=1; j++)
+					try {glob.map.getgrid(toc.add(i,j));} catch(MCache.LoadingMap l) {}
+		}
     }
 
     public boolean isPlayer() {
