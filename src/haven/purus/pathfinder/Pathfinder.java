@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class Pathfinder {
 
-	private static final boolean PF_DEBUG = true;
+	private static final boolean PF_DEBUG = false;
 
 	private static HashSet<String> inaccessibleTiles = new HashSet<String>() {{
 		add("gfx/tiles/nil");
