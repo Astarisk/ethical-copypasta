@@ -148,7 +148,7 @@ class PBotGob(object):
         return self._gob.getGridId()
 
     ## Get persistent location which can be translated back to coords with PBotUtils getcoords
-    def get_persistent_loc(self) -> tuple[int, float, float]:
+    def get_persistent_loc(self) -> Tuple[int, float, float]:
         return (int(self.get_grid_id()), *tuple(float(c % (11*100)) for c in self.get_coords()))
 
     ## Check if the gob is KO/dead
