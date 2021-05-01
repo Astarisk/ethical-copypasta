@@ -466,7 +466,7 @@ public class CharWnd extends BetterWindow {
 	public final Tex img;
 	public final Color bg;
 	private double lvlt = 0.0;
-	private Text ct;
+	private Text ct, bt;
 	private int cbv = -1, ccv = -1;
 
 	private Attr(Glob glob, String attr, Color bg) {
@@ -493,6 +493,7 @@ public class CharWnd extends BetterWindow {
 		    tooltip = null;
 		}
 		ct = attrf.render(Integer.toString(ccv), c);
+		bt = attrf.render(Integer.toString(attr.base), Color.WHITE);
 	    }
 	    if((lvlt > 0.0) && ((lvlt -= dt) < 0))
 		lvlt = 0.0;
@@ -509,6 +510,7 @@ public class CharWnd extends BetterWindow {
 	    g.aimage(img, cn.add(5, 0), 0, 0.5);
 	    g.aimage(rnm.tex(), cn.add(img.sz().x + margin2, 1), 0, 0.5);
 	    g.aimage(ct.tex(), cn.add(sz.x - UI.scale(7), 1), 1, 0.5);
+		g.aimage(bt.tex(), cn.add(sz.x - UI.scale(7*2) - ct.tex().sz().x, 1), 1, 0.5);
 	}
 
 	public void lvlup() {
