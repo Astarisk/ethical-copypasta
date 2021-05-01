@@ -244,21 +244,38 @@ public class Resource implements Serializable {
     }
 
     public static class FileSource implements ResSource, Serializable {
+	public static final Collection<String> wintraps =
+	    new HashSet<>(Arrays.asList("con", "prn", "aux", "nul",
+					"com0", "com1", "com2", "com3", "com4",
+					"com5", "com6", "com7", "com8", "com9",
+					"lpt0", "lpt1", "lpt2", "lpt3", "lpt4",
+					"lpt5", "lpt6", "lpt7", "lpt8", "lpt9"));
+	public static final boolean windows = System.getProperty("os.name", "").startsWith("Windows");
 	public final Path base;
-	
+
 	public FileSource(Path base) {
 	    this.base = base;
 	}
-	
+
+	private static String checkpart(String part, String whole) throws FileNotFoundException {
+	    if(windows && wintraps.contains(part))
+		throw(new FileNotFoundException(whole));
+	    return(part);
+	}
+
 	public InputStream get(String name) throws IOException {
 	    Path cur = base;
 	    String[] parts = name.split("/");
 	    for(int i = 0; i < parts.length - 1; i++)
-		cur = cur.resolve(parts[i]);
-	    cur = cur.resolve(parts[parts.length - 1] + ".res");
-	    return(Files.newInputStream(cur));
+		cur = cur.resolve(checkpart(parts[i], name));
+	    cur = cur.resolve(checkpart(parts[parts.length - 1], name) + ".res");
+	    try {
+		return(Files.newInputStream(cur));
+	    } catch(NoSuchFileException e) {
+		throw((FileNotFoundException)new FileNotFoundException(name).initCause(e));
+	    }
 	}
-	
+
 	public String toString() {
 	    return("filesystem res source (" + base + ")");
 	}
@@ -285,6 +302,7 @@ public class Resource implements Serializable {
     }
 
     public static class HttpSource implements ResSource, Serializable {
+	public static final String USER_AGENT = "Haven/1.0";
 	private final transient SslHelper ssl;
 	public URL baseurl;
 	
@@ -327,7 +345,10 @@ public class Resource implements Serializable {
 			 * a bug in its internal cache where it refuses to
 			 * reload a URL even when it has changed. */
 			c.setUseCaches(false);
-			c.addRequestProperty("User-Agent", "Haven/1.0");
+			String ua = USER_AGENT;
+			if(!Config.confid.equals(""))
+			    ua += " (" + Config.confid + ")";
+			c.addRequestProperty("User-Agent", ua);
 			return(c.getInputStream());
 		    }
 		});
@@ -712,7 +733,7 @@ public class Resource implements Serializable {
 		    Pool local = new Pool(new JarSource("res"));
 		    try {
 			if(Config.resdir != null)
-			    local.add(new FileSource(Utils.path(Config.resdir)));
+			    local.add(new FileSource(Config.resdir));
 		    } catch(Exception e) {
 			/* Ignore these. We don't want to be crashing the client
 			 * for users just because of errors in development
