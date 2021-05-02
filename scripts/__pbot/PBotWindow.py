@@ -20,9 +20,9 @@ class PBotWindow(object):
     def get_stockpile_used_capacity(self) -> int:
         return self.__window.getStockpileUsedCapacity()
 
-    ## Put an item from the hand to a stockpile window that is currently open
-    def put_item_from_hand_to_stockpile(self):
-        self.__window.putItemFromHandToStockpile()
+    ## Take an item from the stockpile to hand
+    def take_items_from_stockpile_to_hand(self):
+        self.__window.takeItemsFromStockpileHand()
 
     ## Attempts to get items from the stockpile that is currently open
     # @param count how many items to take
@@ -38,6 +38,10 @@ class PBotWindow(object):
     # @return total capacity or -1 if stockpile couldn't be found
     def get_stockpile_total_capacity(self) -> int:
         return self.__window.getStockpileTotalCapacity()
+
+    ## Take item from stockpile to hand or put item from hand into stockpile
+    def hand_click_stockpile(self):
+        self.__window.handClickStockpile()
 
     ## Tries to find an inventories attached to the given window, such as cupboard
     # @return list of inventories attached

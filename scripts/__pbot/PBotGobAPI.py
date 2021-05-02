@@ -53,7 +53,7 @@ class PBotGobAPI(object):
     # @param bx x-coord of B point
     # @param by y-coord of B point
     # @return list of PBotGobs in the area
-    def gobs_in_area(self, ax: int, ay: int, bx: int, by: int) -> List[PBotGob]:
+    def gobs_in_area(self, ax: float, ay: float, bx: float, by: float) -> List[PBotGob]:
         return [PBotGob(x) for x in self.__session.PBotGobAPI().gobsInArea(ax, ay, bx, by)]
 
 

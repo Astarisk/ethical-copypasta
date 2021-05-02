@@ -4,6 +4,8 @@ import haven.*;
 import haven.purus.pathfinder.Pathfinder;
 
 import java.awt.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
 
 public class PBotUtils {
 	private PBotSession pBotSession;
@@ -136,13 +138,12 @@ public class PBotUtils {
 		double prog = pBotSession.gui.prog;
 		int retries = 0;
 		while(prog == pBotSession.gui.prog) {
-			if(retries > timeout/5)
+			if(retries > timeout / 5)
 				return false;
 			retries++;
-			prog = pBotSession.gui.prog;
 			sleep(5);
 		}
-		while (pBotSession.gui.prog >= 0) {
+		while(pBotSession.gui.prog >= 0) {
 			sleep(25);
 		}
 		return true;
@@ -276,6 +277,21 @@ public class PBotUtils {
 		}
 	}
 
+	// RC coords for this session, may return null if grid id not found
+	public Coord2d getCoords(long gridId, double ofsX, double ofsY, boolean wait) {
+		while(true) {
+			MCache.Grid g = pBotSession.gui.ui.sess.glob.map.getgrid(gridId);
+			if(g == null)
+				if(!wait)
+					return null;
+				else {
+					PBotUtils.sleep(50);
+				}
+			else
+				return g.gc.mul(MCache.cmaps).mul(MCache.tilesz).add(ofsX, ofsY);
+		}
+	}
+
 	public void give() {
 		if(pBotSession.gui.fv.current != null) {
 			pBotSession.gui.fv.wdgmsg("give", (int) pBotSession.gui.fv.current.gobid, 1);
@@ -287,6 +303,18 @@ public class PBotUtils {
 			return pBotSession.gui.fv.curgive.state;
 		}
 		return -1;
+	}
+
+	// Wait for the pathfinder to stop, returns true if route finding was successful false otherwise
+	public boolean pfWait() {
+		try {
+			if(pBotSession.gui.map.pf_route_found == null)
+				return false;
+			return pBotSession.gui.map.pf_route_found.get();
+		} catch(InterruptedException | ExecutionException ie) {
+			ie.printStackTrace();
+		}
+		return false;
 	}
 
 	public boolean hasCombat() {

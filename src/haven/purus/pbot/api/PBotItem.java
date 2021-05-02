@@ -22,16 +22,22 @@ public class PBotItem {
 	 * @return Name of the item content or null if not found
 	 */
 	public String getContentsName() {
-		for(ItemInfo info : item.info()) {
-			if(info instanceof ItemInfo.Contents) {
-				for(ItemInfo info2: ((ItemInfo.Contents)info).sub) {
-					if(info2 instanceof ItemInfo.Name) {
-						return ((ItemInfo.Name) info2).str.text;
+		while(true) {
+			try {
+				for(ItemInfo info : item.info()) {
+					if(info instanceof ItemInfo.Contents) {
+						for(ItemInfo info2 : ((ItemInfo.Contents) info).sub) {
+							if(info2 instanceof ItemInfo.Name) {
+								return ((ItemInfo.Name) info2).str.text;
+							}
+						}
 					}
 				}
+			} catch(Loading l) {
+				PBotUtils.sleep(25);
 			}
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -133,17 +139,17 @@ public class PBotItem {
 	 * @return Name of item or null
 	 */
 	public String getName() {
-		synchronized(item.ui) {
-			while(true) {
-				try {
+		while(true) {
+			try {
+				synchronized(item.ui) {
 					for(Object o : item.info().toArray()) {
 						if(o instanceof ItemInfo.Name)
 							return ((ItemInfo.Name) o).str.text;
 					}
 					break;
-				} catch(Loading l) { }
-				PBotUtils.sleep(20);
-			}
+				}
+			} catch(Loading l) { }
+			PBotUtils.sleep(20);
 		}
 		return null;
 	}

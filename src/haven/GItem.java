@@ -161,7 +161,8 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 				public void run() {
 					try {
 						if(haven.purus.Config.autodropItems.val.containsKey(getres().name) && Config.autodropItems.val.get(getres().name)) {
-							wdgmsg("drop", Coord.z, 1);
+							if(!getres().name.equals("gfx/invobjs/leech") || (parent != null && parent instanceof Equipory))
+								wdgmsg("drop", Coord.z, 1);
 						}
 					} catch(Loading l) {
 						l.waitfor(this, waiting -> {});
@@ -186,7 +187,7 @@ public class GItem extends AWidget implements ItemInfo.SpriteOwner, GSprite.Owne
 			}
 		}
 	}
-	return(info);
+	return(new ArrayList<>(info));
     }
 
     public Resource resource() {

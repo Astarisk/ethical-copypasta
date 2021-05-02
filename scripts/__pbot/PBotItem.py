@@ -45,7 +45,7 @@ class PBotItem(object):
 
     ## Itemact (Act with item in hand, like equip a lure)
     # @param mod modifier for example 1 = shift etc
-    def itemact(self, mod):
+    def itemact(self, mod = 0):
         self.__item.itemact(mod)
 
     ## Get an amount of something such as seeds in a stack

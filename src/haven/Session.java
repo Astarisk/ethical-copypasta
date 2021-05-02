@@ -73,8 +73,9 @@ public class Session implements Resource.Resolver {
     public final Glob glob;
     public byte[] sesskey;
 	public UI ui;
+	public String charAutoSel = null;
 
-    @SuppressWarnings("serial")
+	@SuppressWarnings("serial")
     public static class MessageException extends RuntimeException {
 	public Message msg;
 		

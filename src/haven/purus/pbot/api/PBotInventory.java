@@ -93,7 +93,7 @@ public class PBotInventory {
 	public int freeSlotsInv() {
 		return inventory.isz.x * inventory.isz.y -  inventory.children(WItem.class)
 				.stream().map(witem -> witem.sz.div(UI.scale(33)))
-				.mapToInt((c) -> c.x + c.y)
+				.mapToInt((c) -> c.x * c.y)
 				.sum();
 	}
 

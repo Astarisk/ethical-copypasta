@@ -12,6 +12,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
 public class Pathfinder {
@@ -153,6 +156,10 @@ public class Pathfinder {
 			drawLine(prev.x, prev.y, c.x, c.y, 1.0, -1, grid);
 			prev = c;
 		}
+		for(Coord2d vert: pol.vertices) {
+			Coord c  = vert.round().add(50*11, 50*11);
+			drawCircle(c.x, c.y, 1, -1, grid);
+		}
 	}
 
 	private static void markTileInaccessible(Coord c, int[][] grid) {
@@ -189,10 +196,12 @@ public class Pathfinder {
 		run(target, destGob, button, mod, -1, meshid, action, gui);
 	}
 
+	ExecutorService ex = Executors.newSingleThreadScheduledExecutor();
+
 	public static void run(Coord2d target, Gob destGob, int button, int mod, int overlay, int meshid, String action, GameUI gui) {
 		if(gui.pathfinder != null)
 			gui.pathfinder.stop();
-		gui.pathfinder = new Thread(() -> {
+		gui.map.pf_route_found = new FutureTask<Boolean>(() -> {
 			BufferedImage bi;
 			Graphics g;
 			if(PF_DEBUG) {
@@ -203,7 +212,7 @@ public class Pathfinder {
 			ArrayList<BoundingBox.Polygon> bboxes = new ArrayList<>();
 			Gob player = gui.map.player();
 			if(player == null)
-				return;
+				return false;
 			Coord2d origin = player.rc.floor().div(100).mul(new Coord2d(100, 100)).add(45, 45).floor(MCache.tilesz).mul(MCache.tilesz);
 			int[][] grid = new int[100*11][100*11];
 			Coord tgt;
@@ -226,54 +235,60 @@ public class Pathfinder {
 				tgt = target.sub(origin).round().add(50*11, 50*11);
 			}
 			boolean boating = false;
+			ArrayList<Gob> gobs = new ArrayList<>();
 			synchronized(gui.ui.sess.glob.oc) {
 				for(Gob gob : gui.ui.sess.glob.oc) {
-					BoundingBox bb = BoundingBox.getBoundingBox(gob);
-					if(bb == null || !bb.blocks)
-						continue;
-					if(isMyBoat(gob, player)) {
-						Coord c = origin.div(MCache.tilesz).round();
-						int t = gui.ui.sess.glob.map.gettile(c);
-						if(accessibleTilesBoating.contains(gui.ui.sess.glob.map.tilesetr(t).name))
-							boating = true;
-						continue;
+					gobs.add(gob);
+				}
+			}
+			forgob:
+			for(Gob gob : gobs) {
+				BoundingBox bb = BoundingBox.getBoundingBox(gob);
+				if(bb == null || !bb.blocks)
+					continue;
+				if(isMyBoat(gob, player)) {
+					Coord c = origin.div(MCache.tilesz).round();
+					int t = gui.ui.sess.glob.map.gettile(c);
+					if(accessibleTilesBoating.contains(gui.ui.sess.glob.map.tilesetr(t).name))
+						boating = true;
+					continue;
+				}
+				int retries = 0;
+				while(retries++ < 10) {
+					try {
+						if(gob == player || (gob == destGob && !doorOffset) || (!gob.getres().name.equals("gfx/borka/body") && gob.getc().mul(1, 1, 0).dist(player.getc().mul(1, 1, 0)) < 1)) {
+							continue forgob;
+						}
+						break;
+					} catch(Loading l) {
+						l.waitfor();
 					}
-					if(gob == player || (gob == destGob && !doorOffset) || (!gob.getres().name.equals("gfx/borka/body") && gob.getc().mul(1,1,0).dist(player.getc().mul(1,1,0)) < 1)) {
-						continue;
-					}
-					for(BoundingBox.Polygon pol : bb.polygons) {
-						bboxes.add(new BoundingBox.Polygon(pol.vertices.stream()
-								.map((v) -> v.rotate(gob.a).add(gob.rc).sub(origin))
-								.collect(Collectors.toCollection(ArrayList::new))));
-					}
+				}
+				for(BoundingBox.Polygon pol : bb.polygons) {
+					bboxes.add(new BoundingBox.Polygon(pol.vertices.stream()
+							.map((v) -> v.rotate(gob.a).add(gob.rc).sub(origin))
+							.collect(Collectors.toCollection(ArrayList::new))));
 				}
 			}
 
 			// Player probably just wants out of the boat
 			if(boating && button == 1 && (mod & UI.MOD_CTRL) != 0) {
 				gui.map.wdgmsg("click", Coord.z, target.floor(OCache.posres), button, mod);
-				return;
+				return true;
 			}
 
 			for(int i=-45; i<=45; i++) {
 				for(int j=-45; j<=45; j++) {
 					Coord c = origin.div(MCache.tilesz).round().add(i, j);
-					int t = gui.ui.sess.glob.map.gettile(c);
 					while(true) {
 						try {
+							int t = gui.ui.sess.glob.map.gettile(c);
 							Tiler tl = gui.ui.sess.glob.map.tiler(t);
 							if(tl instanceof Ridges.RidgeTile) {
 								if(Ridges.brokenp(gui.ui.sess.glob.map, c)) {
 									markTileInaccessible(new Coord(i, j), grid);
 								}
 							}
-							break;
-						} catch(Loading l) {
-						}
-						Thread.onSpinWait();
-					}
-					while(true) {
-						try {
 							Resource res = gui.ui.sess.glob.map.tilesetr(t);
 							if(boating) {
 								if(res != null && !accessibleTilesBoating.contains(res.name)) {
@@ -284,10 +299,13 @@ public class Pathfinder {
 									markTileInaccessible(new Coord(i, j), grid);
 								}
 							}
-							break;
-						} catch(Loading l) {
+						} catch(Loading l){
+							PBotUtils.sleep(20);
+							continue;
 						}
+						break;
 					}
+
 				}
 			}
 
@@ -382,6 +400,9 @@ public class Pathfinder {
 				}
 				System.out.println("Finding route took: " + (System.currentTimeMillis()-start) + " ms");
 			}
+			if(rte.size() == 0) {
+				return false;
+			}
 			Collections.reverse(rte);
 			for(int i=1; i<rte.size() && gui.map.player() != null; i++) {
 				if(destGob != null && (i == rte.size()-1) && !doorOffset) {
@@ -403,6 +424,8 @@ public class Pathfinder {
 				}
 				gui.map.cp = new ClickPath(player, croute, gui.ui.sess.glob.map);
 				Coord2d clickTgt = origin.add(new Coord2d(rte.get(i).sub(50*11, 50*11)));
+				if(i != rte.size()-1 && clickTgt.dist(origin.add(new Coord2d(rte.get(rte.size()-1)).sub(50*11, 50*11))) <= 2.0)
+					continue;
 				if(i == rte.size()-1 && !doorOffset)
 					gui.map.wdgmsg("click", Coord.z, clickTgt.floor(OCache.posres), button, mod);
 				else
@@ -415,7 +438,15 @@ public class Pathfinder {
 			}
 			if(doorOffset)
 				gui.map.wdgmsg("click", Coord.z, destGob.rc.floor(OCache.posres), button, mod, 0, (int) destGob.id, destGob.rc.floor(OCache.posres), 0, meshid);
-		}, "PF-thread");
+			return true;
+		});
+		gui.pathfinder = new Thread(gui.map.pf_route_found, "PF-thread");
+		gui.pathfinder.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				System.out.println(t + " " + e);
+			}
+		});
 		gui.pathfinder.start();
 	}
 }

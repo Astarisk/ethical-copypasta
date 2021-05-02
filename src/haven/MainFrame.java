@@ -34,6 +34,7 @@ import io.sentry.Sentry;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.nio.file.*;
 import java.util.*;
 import java.lang.reflect.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -247,6 +248,35 @@ public class MainFrame extends java.awt.Frame implements Console.Directory {
 				fun = fun.run(ui);
 				MultiSession.closeSession(ui);
 
+				setTitle("Haven and Hearth \u2013 " + t);
+				ui = p.newui(fun);
+				MultiSession.addSession(ui);
+				MultiSession.setActiveSession(ui);
+				fun = fun.run(ui);
+				MultiSession.closeSession(ui);
+				sessions.decrementAndGet();
+			} catch(InterruptedException e) {
+
+			} finally {
+				if(sessions.decrementAndGet() == 0)
+					sessionCreate();
+			}
+			savewndstate();
+		}, "Session thread").start();
+	}
+
+	public void sessionCreate(RemoteUI rui) {
+		sessions.incrementAndGet();
+		new HackThread(() -> {
+			UI ui = null;
+			try {
+				///
+				sessions.incrementAndGet();
+				UI.Runner fun = rui;
+
+				String t = fun.title();
+				if(t == null)
+					setTitle("Haven and Hearth");
 				setTitle("Haven and Hearth \u2013 " + t);
 				ui = p.newui(fun);
 				MultiSession.addSession(ui);
@@ -554,14 +584,11 @@ public class MainFrame extends java.awt.Frame implements Console.Directory {
 		AlarmManager.init();
     }
 	
-    private static void dumplist(Collection<Resource> list, String fn) {
+    private static void dumplist(Collection<Resource> list, Path fn) {
 	try {
 	    if(fn != null) {
-		Writer w = new OutputStreamWriter(new FileOutputStream(fn), "UTF-8");
-		try {
+		try(Writer w = Files.newBufferedWriter(fn, Utils.utf8)) {
 		    Resource.dumplist(list, w);
-		} finally {
-		    w.close();
 		}
 	    }
 	} catch(IOException e) {

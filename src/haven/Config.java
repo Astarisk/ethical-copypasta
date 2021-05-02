@@ -31,6 +31,8 @@ import haven.error.ErrorHandler;
 import java.io.InputStream;
 import java.net.URL;
 import java.io.PrintStream;
+
+import java.nio.file.Path;
 import static haven.Utils.getprop;
 
 public class Config {
@@ -51,19 +53,21 @@ public class Config {
     public static boolean profilegpu = getprop("haven.profilegpu", "off").equals("on");
     public static boolean par = true;
     public static boolean fscache = getprop("haven.fscache", "on").equals("on");
-    public static String resdir = getprop("haven.resdir", System.getenv("HAFEN_RESDIR"));
+    public static Path resdir = getpath("haven.resdir", System.getenv("HAFEN_RESDIR"));
     public static boolean nopreload = getprop("haven.nopreload", "no").equals("yes");
-    public static String loadwaited = getprop("haven.loadwaited", null);
-    public static String allused = getprop("haven.allused", null);
+    public static Path loadwaited = getpath("haven.loadwaited", null);
+    public static Path allused = getpath("haven.allused", null);
     public static int mainport = getint("haven.mainport", 1870);
     public static int authport = getint("haven.authport", 1871);
     public static boolean softres = getprop("haven.softres", "on").equals("on");
     public static Double uiscale = getfloat("haven.uiscale", null);
     public static byte[] authck = null, inittoken = null;
     public static String prefspec = "hafen";
-    public static final String confid = "Ethically-Sourced-CopyPasta";
-    
-    static {
+	public static final String confid = "Ethically-Sourced-CopyPasta";
+    public static String script;
+	public static boolean noui = false;
+
+	static {
 	String p;
 	if((p = getprop("haven.authck", null)) != null)
 	    authck = Utils.hex2byte(p);
@@ -89,6 +93,13 @@ public class Config {
 	}
     }
 
+    private static Path getpath(String name, String def) {
+	String val = getprop(name, def);
+	if((val == null) || val.equals(""))
+	    return(null);
+	return(Utils.path(val));
+    }
+
     private static Double getfloat(String name, Double def) {
 	String val = getprop(name, null);
 	if(val == null)
@@ -111,7 +122,7 @@ public class Config {
     }
 
     public static void cmdline(String[] args) {
-	PosixArgs opt = PosixArgs.getopt(args, "hdPGU:r:A:u:C:");
+	PosixArgs opt = PosixArgs.getopt(args, "hdPGU:r:A:u:C:S:N:");
 	if(opt == null) {
 	    usage(System.err);
 	    System.exit(1);
@@ -132,7 +143,7 @@ public class Config {
 		profilegpu = true;
 		break;
 	    case 'r':
-		resdir = opt.arg;
+		resdir = Utils.path(opt.arg);
 		break;
 	    case 'A':
 		int p = opt.arg.indexOf(':');
@@ -157,9 +168,17 @@ public class Config {
 	    case 'C':
 		authck = Utils.hex2byte(opt.arg);
 		break;
+			case 'S':
+				script = opt.arg;
+				break;
+			case 'N':
+				noui = true;
+				break;
 	    }
 	}
-	if(opt.rest.length > 0) {
+		// Loftar pls
+		/*
+		if(opt.rest.length > 0) {
 	    int p = opt.rest[0].indexOf(':');
 	    if(p >= 0) {
 		defserv = opt.rest[0].substring(0, p);
@@ -169,7 +188,7 @@ public class Config {
 	    }
 	}
 	if(opt.rest.length > 1)
-	    servargs = Utils.splice(opt.rest, 1);
+	    servargs = Utils.splice(opt.rest, 1);*/
     }
 
     static {

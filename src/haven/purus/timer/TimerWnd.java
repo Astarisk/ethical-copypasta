@@ -6,7 +6,9 @@ import haven.purus.Config;
 import haven.purus.MultiSession;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +18,8 @@ public class TimerWnd extends BetterWindow {
 	private TimerList vl;
 
 	private static final Resource timerNotify = Resource.local().loadwait("sfx/alarms/timer");
+
+	private static final SimpleDateFormat dfmt = new SimpleDateFormat("dd.MM HH:mm");
 
 
 	public static ScheduledExecutorService timerNotifiers = Executors.newSingleThreadScheduledExecutor();
@@ -286,7 +290,7 @@ public class TimerWnd extends BetterWindow {
 		@Override
 		public void draw(GOut g) {
 			if(timer.startedAt != null) {
-				remaining.settext(String.format("%02d : %02d : %02d", timer.remaining() / 3600, timer.remaining() % 3600 / 60, timer.remaining() % 60));
+				remaining.settext(String.format("%02d : %02d : %02d", timer.remaining() / 3600, timer.remaining() % 3600 / 60, timer.remaining() % 60) + "  " + dfmt.format(new Date(System.currentTimeMillis() + timer.remaining() * 1000)));
 			}
 			super.draw(g);
 		}

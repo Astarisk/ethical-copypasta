@@ -104,7 +104,7 @@ public class Charlist extends Widget {
 				super.click();
 			}
 		}, UI.scale(120, 553));
-    }
+	}
 
     public void scroll(int amount) {
 	y += amount;
@@ -202,6 +202,10 @@ public class Charlist extends Widget {
 	    }
 	    c.plb = add(new Button(btnw, "Play"));
 	    c.plb.hide();
+		if(ui.sess.charAutoSel != null && c.name.equals(ui.sess.charAutoSel)) {
+			wdgmsg("play", c.name);
+			ui.sess.charAutoSel = null;
+		}
 	    synchronized(chars) {
 		int idx = chars.size();
 		chars.add(c);

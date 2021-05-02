@@ -6,3 +6,4 @@
 *.iml
 **/__pycache__
 /scripts/__pbot/doc
+/scripts/wip

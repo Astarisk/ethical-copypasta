@@ -32,6 +32,8 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.function.*;
 import java.io.*;
+import java.nio.file.*;
+import java.nio.channels.*;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import haven.MapFile.Marker;
@@ -676,13 +678,20 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 	}
     }
 
-    public void exportmap(File path) {
+    public void exportmap(Path path) {
 	GameUI gui = getparent(GameUI.class);
 	ExportWindow prog = new ExportWindow();
 	Thread th = new HackThread(() -> {
+		boolean complete = false;
 		try {
-		    try(OutputStream out = new BufferedOutputStream(new FileOutputStream(path))) {
-			file.export(out, MapFile.ExportFilter.all, prog);
+		    try {
+			try(OutputStream out = new BufferedOutputStream(Files.newOutputStream(path))) {
+			    file.export(out, MapFile.ExportFilter.all, prog);
+			}
+			complete = true;
+		    } finally {
+			if(!complete)
+			    Files.deleteIfExists(path);
 		    }
 		} catch(IOException e) {
 		    e.printStackTrace(Debug.log);
@@ -694,27 +703,26 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 	gui.adda(prog, gui.sz.div(2), 0.5, 1.0);
     }
 
-    public void importmap(File path) {
+    public void importmap(Path path) {
 	GameUI gui = getparent(GameUI.class);
 	ImportWindow prog = new ImportWindow();
 	Thread th = new HackThread(() -> {
-		long size = path.length();
-		class Updater extends CountingInputStream {
-		    Updater(InputStream bk) {super(bk);}
-
-		    protected void update(long val) {
-			super.update(val);
-			prog.sprog((double)pos / (double)size);
-		    }
-		}
 		try {
-		    prog.prog("Validating map data");
-		    try(InputStream in = new Updater(new FileInputStream(path))) {
-			file.reimport(in, MapFile.ImportFilter.readonly);
-		    }
-		    prog.prog("Importing map data");
-		    try(InputStream in = new Updater(new FileInputStream(path))) {
-			file.reimport(in, MapFile.ImportFilter.all);
+		    try(SeekableByteChannel fp = Files.newByteChannel(path)) {
+			long size = fp.size();
+			class Updater extends CountingInputStream {
+			    Updater(InputStream bk) {super(bk);}
+
+			    protected void update(long val) {
+				super.update(val);
+				prog.sprog((double)pos / (double)size);
+			    }
+			}
+			prog.prog("Validating map data");
+			file.reimport(new Updater(new BufferedInputStream(Channels.newInputStream(fp))), MapFile.ImportFilter.readonly);
+			prog.prog("Importing map data");
+			fp.position(0);
+			file.reimport(new Updater(new BufferedInputStream(Channels.newInputStream(fp))), MapFile.ImportFilter.all);
 		    }
 		} catch(InterruptedException e) {
 		} catch(Exception e) {
@@ -732,9 +740,9 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 		fc.setFileFilter(new FileNameExtensionFilter("Exported Haven map data", "hmap"));
 		if(fc.showSaveDialog(null) != JFileChooser.APPROVE_OPTION)
 		    return;
-		File path = fc.getSelectedFile();
-		if(path.getName().indexOf('.') < 0)
-		    path = new File(path.toString() + ".hmap");
+		Path path = fc.getSelectedFile().toPath();
+		if(path.getFileName().toString().indexOf('.') < 0)
+		    path = path.resolveSibling(path.getFileName() + ".hmap");
 		exportmap(path);
 	    });
     }
@@ -745,7 +753,7 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 		fc.setFileFilter(new FileNameExtensionFilter("Exported Haven map data", "hmap"));
 		if(fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
 		    return;
-		importmap(fc.getSelectedFile());
+		importmap(fc.getSelectedFile().toPath());
 	    });
     }
 
@@ -754,7 +762,7 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 	cmdmap.put("exportmap", new Console.Command() {
 		public void run(Console cons, String[] args) {
 		    if(args.length > 1)
-			exportmap(new File(args[1]));
+			exportmap(Utils.path(args[1]));
 		    else
 			exportmap();
 		}
@@ -762,7 +770,7 @@ public class MapWnd extends BetterWindow implements Console.Directory {
 	cmdmap.put("importmap", new Console.Command() {
 		public void run(Console cons, String[] args) {
 		    if(args.length > 1)
-			importmap(new File(args[1]));
+			importmap(Utils.path(args[1]));
 		    else
 			importmap();
 		}

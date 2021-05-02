@@ -2,9 +2,7 @@ package haven.purus.pbot.api;
 
 import haven.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class PBotGobAPI {
@@ -20,22 +18,26 @@ public class PBotGobAPI {
 	 * @return List of PBotGobs with resname matching the given regex pattern
 	 */
 	public List<PBotGob> getGobsByResname(String resname) {
-		List<PBotGob> gobs = new ArrayList<>();
+		List<PBotGob> ret = new ArrayList<>();
 		Pattern pat = Pattern.compile(resname);
+		List<Gob> gobs = new ArrayList<>();
 		synchronized(pBotSession.gui.ui.sess.glob.oc) {
-			for(Gob gob : pBotSession.gui.ui.sess.glob.oc) {
-				Resource res;
-				while(true) {
-					try {
-						res = gob.getres();
-						break;
-					} catch(Loading l){PBotUtils.sleep(10);}
-				}
-				if(res != null && pat.matcher(res.name).matches())
-					gobs.add(new PBotGob(gob, pBotSession));
-			}
+			pBotSession.gui.ui.sess.glob.oc.forEach(gobs::add);
 		}
-		return gobs;
+		for(Gob gob : gobs) {
+			Resource res;
+			while(true) {
+				try {
+					res = gob.getres();
+					break;
+				} catch(Loading l) {
+					PBotUtils.sleep(10);
+				}
+			}
+			if(res != null && pat.matcher(res.name).matches())
+				ret.add(new PBotGob(gob, pBotSession));
+		}
+		return ret;
 	}
 
 	/**
@@ -59,24 +61,31 @@ public class PBotGobAPI {
 		double bestDistance = Double.MAX_VALUE;
 		PBotGob bestGob = null;
 		Pattern pat = Pattern.compile(resname);
+		List<Gob> gobs = new ArrayList<>();
 		synchronized(pBotSession.gui.ui.sess.glob.oc) {
-			for(Gob gob : pBotSession.gui.ui.sess.glob.oc) {
-				if(gob.isPlayer())
-					continue;
-				Resource res;
-				while(true) {
-					try {
-						res = gob.getres();
-						break;
-					} catch(Loading l){PBotUtils.sleep(10);}
+			pBotSession.gui.ui.sess.glob.oc.forEach(gobs::add);
+		}
+		for(Gob gob : gobs) {
+			if(gob.isPlayer())
+				continue;
+			Resource res;
+			while(true) {
+				try {
+					res = gob.getres();
+					break;
+				} catch(Loading l) {
+					PBotUtils.sleep(10);
 				}
-				if(res != null && res.name.startsWith("gfx/kritter/horse/") && new Coord2d(gob.getc()).dist(getPlayer().getCoords()) == 0)
-					continue;
-				PBotGob pgob = new PBotGob(gob, pBotSession);
-					if(res != null && pat.matcher(res.name).matches() && pgob.dist(getPlayer()) < bestDistance) {
-						bestDistance = pgob.dist(getPlayer());
-						bestGob = pgob;
-					}
+			}
+			PBotGob pl = getPlayer();
+			if(pl == null)
+				continue;
+			PBotGob pgob = new PBotGob(gob, pBotSession);
+			if(res != null && res.name.startsWith("gfx/kritter/horse/") && pgob.dist(pl) == 0)
+				continue;
+			if(res != null && pat.matcher(res.name).matches() && pgob.dist(pl) < bestDistance) {
+				bestDistance = pgob.dist(pl);
+				bestGob = pgob;
 			}
 		}
 		return bestGob;
@@ -89,13 +98,24 @@ public class PBotGobAPI {
 	 * @return Gob with coordinates or null
 	 */
 	public PBotGob getGobWithCoords(double x, double y) {
-		synchronized (pBotSession.gui.ui.sess.glob.oc) {
-			for (Gob gob : pBotSession.gui.ui.sess.glob.oc) {
-				if(Math.abs(gob.rc.x - x) < 0.001 && Math.abs(gob.rc.y - y) < 0.001)
-					return new PBotGob(gob, pBotSession);
+		while(true) {
+			try {
+				synchronized(pBotSession.gui.ui.sess.glob.oc) {
+					for(Gob gob : pBotSession.gui.ui.sess.glob.oc) {
+						if(Math.abs(gob.getc().x - x) < 0.01 && Math.abs(gob.getc().y - y) < 0.01)
+							return new PBotGob(gob, pBotSession);
+					}
+				}
+			} catch(Loading l) {
+				try {
+					l.waitfor();
+				} catch(InterruptedException e) {
+					e.printStackTrace();
+				}
+				continue;
 			}
+			return null;
 		}
-		return null;
 	}
 
 	/**

@@ -31,6 +31,8 @@ import static haven.OCache.posres;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.function.*;
 import java.lang.reflect.*;
 
@@ -68,6 +70,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	public final ArrayList<Pair<Callback, PBotSession>> gobCbQueue = new ArrayList<>();
 	public final ArrayList<Pair<Callback, PBotSession>> areaSelectCbQueue = new ArrayList<>();
 	public boolean wrongdir = false;
+	public FutureTask<Boolean> pf_route_found = null;
 
 	public interface Delayed {
 	public void run(GOut g);
@@ -1698,7 +1701,8 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	synchronized(glob.map) {
 	    terrain.tick();
 	    oltick();
-	    if(gridlines != null)
+		glob.map.sendreqs();
+		if(gridlines != null)
 		gridlines.tick();
 	    clickmap.tick();
 
@@ -2204,11 +2208,18 @@ public class MapView extends PView implements DTarget, Console.Directory {
 										}
 									}
 									Drawable d = gc.gob.getattr(Drawable.class);
-									if(d instanceof ResDrawable)
-										sb.append("\n sdt: ").append(((ResDrawable) d).sdt.peekrbuf(0));
+									if(d instanceof ResDrawable) {
+										sb.append("\n sdt:");
+										for(int i=0; i<((ResDrawable) d).sdt.rbuf.length; i++) {
+											int sdt = ((ResDrawable) d).sdt.peekrbuf(i);
+											for(int j=7; j>=0; j--)
+												sb.append((sdt & (1<<j)) != 0 ? 1 : 0);
+											sb.append(" ").append(sdt);
+										}
+									}
 									if(d != null) {
 										d.getres().layers(FastMesh.MeshRes.class).stream()
-												.map(mr -> String.format("\n meshid: %s %s %s", mr.id, mr.getres().name, mr.mat.getres().name))
+												.map(mr -> String.format("\n meshid: %s %s %s", mr.id, mr.getres().name, (mr.mat != null ? mr.mat.getres().name : "")))
 												.distinct()
 												.forEach(sb::append);
 									}
@@ -2222,6 +2233,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 											}
 										}
 									}
+									sb.append("\n").append(gc.gob.getc()).append(" ").append(gc.gob.getv());
 									tooltip = sb.toString().replaceAll("\\$", "#").replaceAll("\\{", "(").replaceAll("}", ")");
 									return;
 								}
@@ -2248,7 +2260,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 						int t = map.gettile(mc.floor(tilesz));
 						Resource res = map.tilesetr(t);
 						if (res != null) {
-							tooltip = res.name + "\n" + mc.floor(tilesz);
+							tooltip = res.name + "\n" + map.getgrid(mc.floor(tilesz).div(cmaps)).id + " " + mc.floor(tilesz).mod(cmaps) + "\n" + mc.floor(tilesz);
 							return;
 						}
 					}
@@ -2473,8 +2485,8 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		    wdgmsg("sel", sc, ec, modflags);
 			synchronized(areaSelectCbQueue) {
 				if(areaSelectCbQueue.size() > 0) {
-					Coord scc = sc.mul(tilesz2);
-					Coord ecc = ec.mul(tilesz2);
+					Coord scc = ol.a.ul.mul(tilesz2);
+					Coord ecc = ol.a.br.mul(tilesz2);
 					for(Pair<Callback, PBotSession> cb : areaSelectCbQueue)
 						new Thread(() -> cb.a.callback(new PBotUtils.AreaReturn(scc, ecc)), "PBot cb runner").start();
 					areaSelectCbQueue.clear();

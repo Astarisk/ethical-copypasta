@@ -51,7 +51,7 @@ public class MCache implements MapSource {
     private final Waitable.Queue gridwait = new Waitable.Queue();
     Map<Coord, Request> req = new HashMap<Coord, Request>();
     Map<Coord, Grid> grids = new HashMap<Coord, Grid>();
-    Session sess;
+	Session sess;
     Set<Overlay> ols = new HashSet<Overlay>();
     public int olseq = 0;
     Map<Integer, Defrag> fragbufs = new TreeMap<Integer, Defrag>();
@@ -163,7 +163,7 @@ public class MCache implements MapSource {
     }
 
     public class Overlay {
-	private Area a;
+	public Area a;
 	private OverlayInfo id;
 
 	public Overlay(Area a, OverlayInfo id) {
@@ -761,6 +761,26 @@ public class MCache implements MapSource {
 	    return(cached);
 	}
     }
+
+	public Grid getgrid(long id) {
+		synchronized(grids) {
+			for(Grid g : grids.values()) {
+				if(g.id == id) {
+					return g;
+				}
+			}
+			if(sess != null && sess.ui != null && sess.ui.gui != null && sess.ui.gui.map != null) {
+				Gob pl = sess.ui.gui.map.player();
+				if(pl != null) {
+					Coord toc = pl.rc.floor(MCache.tilesz).div(MCache.cmaps);
+					for(int i=-1; i<=1; i++)
+						for(int j=-1; j<=1; j++)
+							try {getgrid(toc.add(i,j));} catch(MCache.LoadingMap l) {}
+				}
+			}
+			return null;
+		}
+	}
 
     public Grid getgridt(Coord tc) {
 	return(getgrid(tc.div(cmaps)));
