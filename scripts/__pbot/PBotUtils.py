@@ -119,9 +119,10 @@ class PBotUtils(object):
         self.__session.PBotUtils().selectArea(_SelectAreaCb(cb))
 
     ## Wait for pathfinder to finish what its doing
+    # @param timeout timeout in milliseconds before returning false if not finished
     # @return true if route was found and executed, false if not
-    def pf_wait(self):
-        return self.__session.PBotUtils().pfWait()
+    def pf_wait(self, timeout: int = 999999):
+        return self.__session.PBotUtils().pfWait(timeout)
 
     ## Get rc coords of some gridid offset pair
     # @param grid_id mapgrid id

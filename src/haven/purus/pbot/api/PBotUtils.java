@@ -6,6 +6,8 @@ import haven.purus.pathfinder.Pathfinder;
 import java.awt.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class PBotUtils {
 	private PBotSession pBotSession;
@@ -306,11 +308,13 @@ public class PBotUtils {
 	}
 
 	// Wait for the pathfinder to stop, returns true if route finding was successful false otherwise
-	public boolean pfWait() {
+	// Timeout in milliseconds
+	public boolean pfWait(int timeout) {
 		try {
 			if(pBotSession.gui.map.pf_route_found == null)
 				return false;
-			return pBotSession.gui.map.pf_route_found.get();
+			return pBotSession.gui.map.pf_route_found.get(timeout, TimeUnit.MILLISECONDS);
+		} catch(TimeoutException e) {
 		} catch(InterruptedException | ExecutionException ie) {
 			ie.printStackTrace();
 		}

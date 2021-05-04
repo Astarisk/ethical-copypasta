@@ -54,6 +54,7 @@ public class ActAudio extends State {
 	public void add(CS clip);
 	public void remove(CS clip);
 	public void clear();
+	public int size();
     }
 
     public static class Adapter implements Channel {
@@ -90,6 +91,12 @@ public class ActAudio extends State {
 		    parent.remove(i.next());
 		    i.remove();
 		}
+	    }
+	}
+
+	public int size() {
+	    synchronized(this) {
+		return(clips.size());
 	    }
 	}
     }
@@ -158,6 +165,10 @@ public class ActAudio extends State {
 		    mixer.stop(clip);
 	    }
 	}
+
+	public int size() {
+	    return((mixer == null) ? 0 : mixer.size());
+	}
     }
 
     public static class Root {
@@ -168,6 +179,10 @@ public class ActAudio extends State {
 	public void clear() {
 	    pos.clear();
 	    amb.clear();
+	}
+
+	public String stats() {
+	    return(String.format("%d %d %d", aui.size(), pos.size(), amb.size()));
 	}
     }
 

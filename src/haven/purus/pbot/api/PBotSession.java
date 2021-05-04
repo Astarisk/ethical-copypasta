@@ -41,6 +41,10 @@ public class PBotSession {
 		return this.pBotWindowAPI;
 	}
 
+	public void closeSession() {
+		this.gui.ui.sess.close();
+	}
+
 	// Create new session log in char etc. null if not successful
 	public PBotSession newSession(String username, String password, String charname) throws InterruptedException, ExecutionException {
 		FutureTask task = new FutureTask (() -> {
