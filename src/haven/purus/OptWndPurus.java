@@ -6,6 +6,7 @@ import haven.Label;
 import haven.Scrollbar;
 import haven.purus.mapper.Mapper;
 import haven.render.BaseColor;
+import haven.render.Location;
 import haven.render.Pipe;
 import haven.render.States;
 
@@ -350,6 +351,29 @@ public class OptWndPurus extends BetterWindow {
 				return super.mousedown(c, button);
 			}
 		}, "\"Enable columns above players"));
+
+		Label cpScaleLbl = new Label("Cupboard height: " + Config.cupboardHeight.val + "x");
+		Entry cpMenuLbl = new Entry(cpScaleLbl, "Cupboard height");
+		displaySettings.addSubentry(cpMenuLbl);
+		cpMenuLbl.addSubentry(new Entry(new HSlider(UI.scale(400), 1, 20, Math.round(20 * Config.cupboardHeight.val)) {
+			@Override
+			public void changed() {
+				Config.cupboardHeight.setVal(this.val / 20f);
+				SkelSprite.cupboardSize = new Location(new Matrix4f(1, 0, 0, 0,
+						0, 1, 0, 0,
+						0, 0, Config.cupboardHeight.val, 0,
+						0, 0, 0, 1));
+				for(Gob gob : gameui().ui.sess.glob.oc) {
+					try {
+						Resource res = gob.getres();
+						if(res != null && res.name.equals("gfx/terobjs/cupboard"))
+							gob.setattr(gob.getattr(ResDrawable.class));
+					} catch(Loading l) {}
+				}
+				cpScaleLbl.settext("Cupboard height: " + Config.cupboardHeight.val + "x");
+				super.changed();
+			}
+		}, ""));
 
 		Entry combatSettings = new Entry(new Label("Combat Settings"), "Combat Settings");
 		((Label)combatSettings.w).setcolor(Color.ORANGE);
