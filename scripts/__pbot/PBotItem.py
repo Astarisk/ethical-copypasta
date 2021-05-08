@@ -1,4 +1,5 @@
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Union
+
 
 class PBotItem(object):
     def __init__(self, item):
@@ -19,6 +20,19 @@ class PBotItem(object):
     # @return name of the content or None if not found
     def get_contents_name(self) -> Optional[str]:
         return self.__item.getContentsName()
+
+    ## Get elixir effects
+    # @return object describing effects, if they exist, heals are quality adjusted
+    def get_elixir_info(self) -> Optional[any]:
+        info = self.__item.getElixirInfo()
+        if info is None:
+            return None
+        return {"duration": int(info.getTime()), "heals": list({"name": x.getName(), "resname": x.getResname(), "amount": x.getAmount()} for x in info.getHeals()), "hurts": list({"name": x.getName(), "resname": x.getResname(), "amount": x.getAmount()} for x in info.getHurts())}
+
+    ## Check if item has been selected as input for craft
+    # @return true if selected for craft
+    def used_for_craft(self) -> bool:
+        return self.__item.usedForCraft()
 
     ## Quality of the item content
     # @return quality of the item content or -1 if not found

@@ -113,8 +113,16 @@ public class PBotWindow {
 	/**
 	 * Close this window
 	 */
-	public void closeWnd() {
+	public void closeWnd(boolean immediately) {
 		window.wdgmsg("close");
-		window.reqdestroy();
+		if(immediately)
+			window.reqdestroy();
+	}
+
+	/**
+	 * Hide this window
+	 */
+	public void hideWnd() {
+		window.hide();
 	}
 }

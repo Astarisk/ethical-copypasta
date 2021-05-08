@@ -26,8 +26,12 @@
 
 package haven;
 
+import haven.res.ui.tt.alch.elixir.Elixir;
+import haven.res.ui.tt.alch.heal.HealWound;
+import haven.res.ui.tt.alch.hurt.AddWound;
 import haven.res.ui.tt.armor.Armor;
 import haven.res.ui.tt.attrmod.AttrMod;
+import haven.res.ui.tt.craftprep.CraftPrep;
 import haven.res.ui.tt.level.Level;
 import haven.res.ui.tt.q.quality.Quality;
 import haven.res.ui.tt.q.quality.ShowQuality;
@@ -1271,6 +1275,10 @@ public class Resource implements Serializable {
 		put("ui/tt/armor$haven.ItemInfo$InfoFactory", Armor.Fac.class);
 		put("ui/tt/attrmod$haven.ItemInfo$InfoFactory", AttrMod.Fac.class);
 		put("ui/tt/slots$haven.ItemInfo$InfoFactory", ISlots.Fac.class);
+		put("ui/tt/alch/elixir$haven.ItemInfo$InfoFactory", Elixir.Fac.class);
+		put("ui/tt/alch/heal$haven.ItemInfo$InfoFactory", HealWound.Fac.class);
+		put("ui/tt/alch/hurt$haven.ItemInfo$InfoFactory", AddWound.Fac.class);
+		put("ui/tt/craftprep$haven.ItemInfo$InfoFactory", CraftPrep.Fac.class);
 	}};
     public <T> T getcode(Class<T> cl, boolean fail) {
 		try {

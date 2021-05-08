@@ -49,5 +49,10 @@ class PBotWindow(object):
         return [PBotInventory(x) for x in self.__window.getInventories()]
 
     ## Close this window
-    def close(self):
-        self.__window.closeWnd()
+    # @param immediately close the widget immediately or wait for server to close it
+    def close(self, immediately: bool = True):
+        self.__window.closeWnd(immediately)
+
+    ## Hide the window, used to "close" craft window
+    def hide(self):
+        self.__window.hideWnd()
