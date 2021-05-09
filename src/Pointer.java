@@ -111,6 +111,21 @@ public class Pointer extends Widget {
 		return(super.mousedown(c, button));
 	}
 
+	Coord2d prevTc = null;
+	Coord2d prevPl = null;
+
+	Coord2d estimate = null;
+
+	Coord2d getLoc(Coord2d aa, Coord2d ab,  Coord2d ba, Coord2d bb) {
+		double a = ab.sub(aa).div(ab.sub(aa).x).y;
+		double b = bb.sub(ba).div(bb.sub(ba).x).y;
+		double c = aa.y-aa.x*a;
+		double d = ba.y-ba.x*b;
+		if(a == b)
+			return null;
+		return new Coord2d((d-c)/(a-b), a*((d-c)/(a-b))+c);
+	}
+
 	public void uimsg(String name, Object... args) {
 		if(name == "upd") {
 			if(args[0] == null)
@@ -121,6 +136,18 @@ public class Pointer extends Widget {
 				gobid = -1;
 			else
 				gobid = Utils.uint32((Integer)args[1]);
+			if(tc != null && ui.gui.map.player() != null && (prevPl == null || ui.gui.map.player().rc.dist(prevPl) > 11*10)) {
+				if(prevTc != null && prevPl != null) {
+					Coord2d loc = getLoc(prevPl, prevTc, ui.gui.map.player().rc, tc);
+					if(loc != null) {
+						estimate = loc;
+					}
+				} else {
+					estimate = null;
+				}
+				prevTc = tc;
+				prevPl = ui.gui.map.player().rc;
+			}
 		} else if(name == "icon") {
 			int iconid = (Integer)args[0];
 			Indir<Resource> icon = (iconid < 0) ? null : ui.sess.getres(iconid);
@@ -137,7 +164,7 @@ public class Pointer extends Widget {
 		if ((lc != null) && (lc.dist(c) < 20) && this.ui.gui.map.player() != null) {
 			if(this.tooltip instanceof KeyboundTip) {
 				int dist = (int)this.tc.dist(this.ui.gui.map.player().rc)/11;
-				return new KeyboundTip(((KeyboundTip)this.tooltip).base + ", Distance: " + (dist < 990 ? dist : "> 990") + " tiles");
+				return new KeyboundTip(((KeyboundTip)this.tooltip).base + ", Distance: " + (dist < 990 ? dist : (estimate != null) ? "~" + (int)estimate.dist(ui.gui.map.player().rc) / 11 : "> 1000") + " tiles");
 			} else {
 				return this.tooltip;
 			}
