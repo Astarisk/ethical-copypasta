@@ -6,7 +6,7 @@ public class TimeWdg extends Widget {
 	private static final long secinday = 60 * 60 * 24;
 	private static final long dewyladysmantletimemin = 4 * 60 * 60 + 45 * 60;
 	private static final long dewyladysmantletimemax = 7 * 60 * 60 + 15 * 60;
-	private static int seasons[] = {10, 30, 10, 5};
+	private static int seasons[] = {10, 35, 10, 5};
 	public String servertime;
 	public Tex servertimetex;
 	private Glob glob;
