@@ -162,7 +162,7 @@ public class ChatUI extends Widget {
 	private final Scrollbar sb;
 	private final IButton cb;
 	public int urgency = 0;
-	
+
 	public static abstract class Message {
 	    public final double time = Utils.ntime();
 	    
@@ -175,6 +175,7 @@ public class ChatUI extends Widget {
 	    private final Text t;
 	    
 	    public SimpleMessage(String text, Color col, int w) {
+	    	text = "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "] " + text;
 		if(col == null)
 		    this.t = fnd.render(RichText.Parser.quote(text), w);
 		else
@@ -741,7 +742,7 @@ public class ChatUI extends Widget {
 
 	public class MyMessage extends SimpleMessage {
 	    public MyMessage(String text, int w) {
-		super(String.format("[%s] %s", LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")), text), new Color(192, 192, 255), w);
+		super(text, new Color(192, 192, 255), w);
 	    }
 	}
 
