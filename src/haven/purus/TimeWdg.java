@@ -25,21 +25,21 @@ public class TimeWdg extends Widget {
 		long secintoday = secs % secinday;
 		long hours = secintoday / 3600;
 		long mins = (secintoday % 3600) / 60;
-		int nextseason = (int)Math.ceil((1 - glob.ast.sp) * seasons[glob.ast.is]);
+		double nextseason = (1 - glob.ast.sp) * seasons[glob.ast.is];
 
 		String fmt;
 		switch (glob.ast.is) {
 			case 0:
-				fmt = nextseason == 1 ? "Day %d, %02d:%02d. Spring (%d RL day left)." : "Day %d, %02d:%02d. Spring (%d RL days left).";
+				fmt = nextseason == 1 ? "Day %d, %02d:%02d. Spring (%.2f RL day left)." : "Day %d, %02d:%02d. Spring (%.2f RL days left).";
 				break;
 			case 1:
-				fmt = nextseason == 1 ? "Day %d, %02d:%02d. Summer (%d RL day left)." : "Day %d, %02d:%02d. Summer (%d RL days left).";
+				fmt = nextseason == 1 ? "Day %d, %02d:%02d. Summer (%.2f RL day left)." : "Day %d, %02d:%02d. Summer (%.2f RL days left).";
 				break;
 			case 2:
-				fmt = nextseason == 1 ? "Day %d, %02d:%02d. Autumn (%d RL day left)." : "Day %d, %02d:%02d. Autumn (%d RL days left).";
+				fmt = nextseason == 1 ? "Day %d, %02d:%02d. Autumn (%.2f RL day left)." : "Day %d, %02d:%02d. Autumn (%.2f RL days left).";
 				break;
 			case 3:
-				fmt = nextseason == 1 ? "Day %d, %02d:%02d. Winter (%d RL day left)." : "Day %d, %02d:%02d. Winter (%d RL days left).";
+				fmt = nextseason == 1 ? "Day %d, %02d:%02d. Winter (%.2f RL day left)." : "Day %d, %02d:%02d. Winter (%.2f RL days left).";
 				break;
 			default:
 				fmt = "Unknown Season";
