@@ -243,6 +243,8 @@ public class FightWnd extends Widget {
 
 	protected void drawitem(GOut g, Action act, int idx) {
 	    g.chcolor((idx % 2 == 0)?CharWnd.every:CharWnd.other);
+	    if(act.u > 0)
+	    	g.chcolor(new Color(0, 255, 0, 64));
 	    g.frect(Coord.z, g.sz());
 	    g.chcolor();
 	    if(act.ru == null) act.ru = attrf.render(String.format("%d/%d", act.u, act.a));
@@ -487,6 +489,11 @@ public class FightWnd extends Widget {
 			}
 			Tex tex = act.res.get().layer(Resource.imgc).tex();
 			g.image(tex, ic);
+			Tex used = Text.render(act.u + "/" + act.a).tex();
+			g.chcolor(new Color(0, 0, 0, 128));
+			g.frect(ic, used.sz());
+			g.chcolor();
+			g.image(used, ic);
 		    }
 		} catch(Loading l) {}
 		g.chcolor(156, 180, 158, 255);
