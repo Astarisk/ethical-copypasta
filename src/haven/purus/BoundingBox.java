@@ -4,6 +4,7 @@ import haven.*;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class BoundingBox {
 
@@ -102,6 +103,9 @@ public class BoundingBox {
 			polygons.add(acbcPol(neg.ac, neg.bc));
 			return new BoundingBox(polygons, blocks);
 		} else {
+			if(res.name.equals("gfx/kritter/sheep/lamb")) {
+				return new BoundingBox(new ArrayList<Polygon>(){{add(acbcPol(new Coord(-4,-2), new Coord(5,2)));}}, true);
+			}
 			return null;
 		}
 	}

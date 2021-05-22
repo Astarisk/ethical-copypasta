@@ -20,6 +20,15 @@ class PBotWindow(object):
     def get_stockpile_used_capacity(self) -> int:
         return self.__window.getStockpileUsedCapacity()
 
+    ## Returns remaining capacity of the stockpile window which is currently open
+    # @return remaining capacity, or -1 if stockpile window could not be found
+    def get_stockpile_remaining_capacity(self) -> int:
+        used = self.get_stockpile_used_capacity()
+        total = self.get_stockpile_total_capacity()
+        if used == -1 or total == -1:
+            return -1
+        return total-used
+
     ## Take an item from the stockpile to hand
     def take_items_from_stockpile_to_hand(self):
         self.__window.takeItemsFromStockpileHand()

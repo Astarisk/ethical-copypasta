@@ -7,9 +7,11 @@ import haven.purus.GobColor;
 import haven.purus.GobText;
 import haven.purus.pathfinder.Pathfinder;
 import haven.render.MixColor;
+import haven.render.sl.Array;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -366,6 +368,54 @@ public class PBotGob {
 	// Get boundingbox of this gob, or null if not found
 	public BoundingBox getBb() {
 		return BoundingBox.getBoundingBox(gob);
+	}
+
+	public List<String> getCompEqu() {
+		Composite comp = gob.getattr(Composite.class);
+		List<String> ret = new ArrayList<>();
+		if(comp != null) {
+			if(comp.comp.cequ != null) {
+				for(Composited.ED ed : comp.comp.cequ) {
+					while(true) {
+						try {
+							ret.add(ed.res.res.get().name);
+							break;
+						} catch(Loading l) {
+							try {
+								l.waitfor();
+							} catch(InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			}
+		}
+		return ret;
+	}
+
+	public List<String> getCompMod() {
+		Composite comp = gob.getattr(Composite.class);
+		List<String> ret = new ArrayList<>();
+		if(comp != null) {
+			if(comp.comp.cmod != null) {
+				for(Composited.MD md : comp.comp.cmod) {
+					while(true) {
+						try {
+							ret.add(md.mod.get().name);
+							break;
+						} catch(Loading l) {
+							try {
+								l.waitfor();
+							} catch(InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			}
+		}
+		return ret;
 	}
 
 	/**
