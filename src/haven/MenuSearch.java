@@ -55,7 +55,7 @@ public class MenuSearch extends BetterWindow {
 	    double now = Utils.rtime();
 	    if(prevsel == sel) {
 		if((sel != null) && (now - lastcl < 0.5))
-		    menu.use(sel.btn, false);
+		    menu.use(sel.btn, new MenuGrid.Interaction(1, ui.modflags()), false);
 	    } else {
 		prevsel = sel;
 	    }
@@ -75,7 +75,7 @@ public class MenuSearch extends BetterWindow {
 
 		public void activate(String text) {
 		    if(rls.sel != null)
-			menu.use(rls.sel.btn, false);
+			menu.use(rls.sel.btn, new MenuGrid.Interaction(1, ui.modflags()), false);
 		    if(!ui.modctrl)
 			MenuSearch.this.wdgmsg("close");
 		}
