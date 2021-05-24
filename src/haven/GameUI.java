@@ -95,21 +95,22 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	.add(Glob.class, slot -> slot.wdg().ui.sess.glob)
 	.add(Session.class, slot -> slot.wdg().ui.sess);
     public class BeltSlot implements GSprite.Owner {
-	public final int idx;
+	public final int idx, lst;
 	public final Indir<Resource> res;
 	public final Message sdt;
 
-	public BeltSlot(int idx, Indir<Resource> res, Message sdt) {
+	public BeltSlot(int idx, Indir<Resource> res, Message sdt, int lst) {
 	    this.idx = idx;
 	    this.res = res;
 	    this.sdt = sdt;
+	    this.lst = lst;
 	}
 
 	private GSprite spr = null;
 	public GSprite spr() {
 	    GSprite ret = this.spr;
 	    if(ret == null)
-		ret = this.spr = GSprite.create(this, res.get(), Message.nil);
+		ret = this.spr = GSprite.create(this, res.get(), new MessageBuf(sdt));
 	    return(ret);
 	}
 
@@ -124,7 +125,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     	private PBotWindow.PBotScriptEntry scriptEntry;
 
 		public PBotBeltSlot(int idx, String path) {
-			super(idx, null, null);
+			super(idx, null, null, 1);
 			File scriptFile = new File(path);
 			if(scriptFile.exists())
 				this.scriptEntry = new PBotWindow.PBotScriptEntry(scriptFile);
@@ -147,29 +148,111 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		private GameUI wdg() {return(GameUI.this);}
 	}
 
-    public abstract class Belt extends Widget {
+    public abstract class Belt extends Widget implements DTarget, DropTarget {
 	public Belt(Coord sz) {
 	    super(sz);
 	}
 
-	public void keyact(final int slot) {
+	public void act(int idx, MenuGrid.Interaction iact) {
+	    BeltSlot slot = belt[idx];
+	    boolean local = false;
+	    Resource res = null;
+	    if(slot != null) {
+		if(slot.lst == 1) {
+		    local = true;
+		} else if(slot.lst < 0) {
+		    try {
+			res = slot.res.get();
+			local = res.layer(Resource.action) != null;
+		    } catch(Loading l) {
+		    }
+		}
+	    }
+	    if(local && (menu != null)) {
+		if(res != null) {
+		    MenuGrid.Pagina pag = menu.paginafor(slot.res);
+		    try {
+			MenuGrid.PagButton btn = pag.button();
+			menu.use(btn, iact, false);
+		    } catch(Loading l) {
+		    }
+		}
+	    } else {
+		Object[] args = {idx, iact.btn, iact.modflags};
+		if(iact.mc != null) {
+		    args = Utils.extend(args, iact.mc.floor(OCache.posres));
+		    if(iact.click != null)
+			args = Utils.extend(args, iact.click.clickargs());
+		}
+		GameUI.this.wdgmsg("belt", args);
+		return;
+	    }
+	}
+
+	public void keyact(int slot) {
 	    if(map != null) {
+		BeltSlot si = belt[slot];
 		Coord mvc = map.rootxlate(ui.mc);
 		if(mvc.isect(Coord.z, map.sz)) {
 		    map.new Hittest(mvc) {
 			    protected void hit(Coord pc, Coord2d mc, ClickData inf) {
-				Object[] args = {slot, 1, ui.modflags(), mc.floor(OCache.posres)};
-				if(inf != null)
-				    args = Utils.extend(args, inf.clickargs());
-				GameUI.this.wdgmsg("belt", args);
+				act(slot, new MenuGrid.Interaction(1, ui.modflags(), mc, inf));
 			    }
 
 			    protected void nohit(Coord pc) {
-				GameUI.this.wdgmsg("belt", slot, 1, ui.modflags());
+				act(slot, new MenuGrid.Interaction(1, ui.modflags()));
 			    }
 			}.run();
 		}
 	    }
+	}
+
+	public abstract int beltslot(Coord c);
+
+	public boolean mousedown(Coord c, int button) {
+	    int slot = beltslot(c);
+	    if(slot != -1) {
+		if(button == 1)
+		    act(slot, new MenuGrid.Interaction(1, ui.modflags()));
+		if(button == 3) {
+			if(belt[slot] != null && belt[slot] instanceof PBotBeltSlot) {
+				new haven.purus.Config.Setting<String>("beltscript_" + ui.sess.username + "_" + slot, "").setVal("");
+				belt[slot] = null;
+			} else {
+				GameUI.this.wdgmsg("setbelt", slot, null);
+			}
+		}
+		return(true);
+	    }
+	    return(super.mousedown(c, button));
+	}
+
+	public boolean drop(Coord c, Coord ul) {
+	    int slot = beltslot(c);
+	    if(slot != -1) {
+		GameUI.this.wdgmsg("setbelt", slot, 0);
+		return(true);
+	    }
+	    return(false);
+	}
+
+	public boolean iteminteract(Coord c, Coord ul) {return(false);}
+
+	public boolean dropthing(Coord c, Object thing) {
+	    int slot = beltslot(c);
+	    if(slot != -1) {
+		if(thing instanceof Resource) {
+		    Resource res = (Resource)thing;
+		    if(res.layer(Resource.action) != null) {
+			GameUI.this.wdgmsg("setbelt", slot, res.name);
+			return(true);
+		    }
+		} else if(thing instanceof PBotWindow.PBotScriptEntry) {
+				belt[slot] = new PBotBeltSlot(slot, ((PBotWindow.PBotScriptEntry) thing).scriptFile.getPath());
+				new haven.purus.Config.Setting<String>("beltscript_" + ui.sess.username + "_" + slot, "").setVal(((PBotWindow.PBotScriptEntry) thing).scriptFile.getPath());
+			}
+	    }
+	    return(false);
 	}
     }
 
@@ -1137,18 +1220,22 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    else
 		prog = -1;
 	} else if(msg == "setbelt") {
-		int slot = (Integer) args[0];
+	    int slot = (Integer)args[0];
 		if(belt[slot] != null && belt[slot] instanceof PBotBeltSlot)
 			return;
-		if(args.length < 2) {
-			belt[slot] = null;
-		} else {
-			Indir<Resource> res = ui.sess.getres((Integer) args[1]);
-			Message sdt = Message.nil;
-			if(args.length > 2)
-				sdt = new MessageBuf((byte[]) args[2]);
-			belt[slot] = new BeltSlot(slot, res, sdt);
-		}
+
+	    if(args.length < 2) {
+		belt[slot] = null;
+	    } else {
+		Indir<Resource> res = ui.sess.getres((Integer)args[1]);
+		Message sdt = Message.nil;
+		if(args.length > 2)
+		    sdt = new MessageBuf((byte[])args[2]);
+		int lst = -1;
+		if(args.length > 3)
+		    lst = (Integer)args[3];
+		belt[slot] = new BeltSlot(slot, res, sdt, lst);
+	    }
 	} else if(msg == "polowner") {
 	    int id = (Integer)args[0];
 	    String o = (String)args[1];
@@ -1572,7 +1659,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 			return c;
 	}
 
-	private int beltslot(Coord c) {
+	public int beltslot(Coord c) {
 	    for(int i = 0; i < 12; i++) {
 		if(c.isect(beltc(i), invsq.sz()))
 		    return(i + (curbelt * 12));
@@ -1686,38 +1773,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    }
 	    return(false);
 	}
-
-	public boolean drop(Coord c, Coord ul) {
-	    int slot = beltslot(c);
-	    if(slot != -1) {
-		GameUI.this.wdgmsg("setbelt", slot, 0);
-		return(true);
-	    }
-	    return(false);
-	}
-
-	public boolean iteminteract(Coord c, Coord ul) {return(false);}
-
-	public boolean dropthing(Coord c, Object thing) {
-	    int slot = beltslot(c);
-	    if(slot != -1) {
-		if(thing instanceof Resource) {
-		    Resource res = (Resource)thing;
-		    if(res.layer(Resource.action) != null) {
-			GameUI.this.wdgmsg("setbelt", slot, res.name);
-			return(true);
-		    }
-		} else if(thing instanceof PBotWindow.PBotScriptEntry) {
-			belt[slot] = new PBotBeltSlot(slot, ((PBotWindow.PBotScriptEntry) thing).scriptFile.getPath());
-			new haven.purus.Config.Setting<String>("beltscript_" + ui.sess.username + "_" + slot, "").setVal(((PBotWindow.PBotScriptEntry) thing).scriptFile.getPath());
-		}
-	    }
-	    return(false);
-	}
     }
 
     private static final Tex nkeybg = Resource.loadtex("gfx/hud/hb-main");
-    public class NKeyBelt extends Belt implements DTarget, DropTarget {
+    public class NKeyBelt extends Belt {
 	public int curbelt = 0;
 	final Coord pagoff = UI.scale(new Coord(5, 25));
 
@@ -1755,8 +1814,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	private Coord beltc(int i) {
 	    return(pagoff.add(UI.scale((36 * i) + (10 * (i / 5))), 0));
 	}
-
-	private int beltslot(Coord c) {
+    
+	public int beltslot(Coord c) {
 	    for(int i = 0; i < 10; i++) {
 		if(c.isect(beltc(i), invsq.sz()))
 		    return(i + (curbelt * 12));
@@ -1784,19 +1843,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    }
 	    super.draw(g);
 	}
-
-	public boolean mousedown(Coord c, int button) {
-	    int slot = beltslot(c);
-	    if(slot != -1) {
-		if(button == 1)
-		    GameUI.this.wdgmsg("belt", slot, 1, ui.modflags());
-		if(button == 3)
-		    GameUI.this.wdgmsg("setbelt", slot, 1);
-		return(true);
-	    }
-	    return(super.mousedown(c, button));
-	}
-
 	public boolean globtype(char key, KeyEvent ev) {
 	    int c = ev.getKeyCode();
 	    if((c < KeyEvent.VK_0) || (c > KeyEvent.VK_9))
@@ -1809,31 +1855,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		keyact(i + (curbelt * 12));
 	    }
 	    return(true);
-	}
-
-	public boolean drop(Coord c, Coord ul) {
-	    int slot = beltslot(c);
-	    if(slot != -1) {
-		GameUI.this.wdgmsg("setbelt", slot, 0);
-		return(true);
-	    }
-	    return(false);
-	}
-
-	public boolean iteminteract(Coord c, Coord ul) {return(false);}
-
-	public boolean dropthing(Coord c, Object thing) {
-	    int slot = beltslot(c);
-	    if(slot != -1) {
-		if(thing instanceof Resource) {
-		    Resource res = (Resource)thing;
-		    if(res.layer(Resource.action) != null) {
-			GameUI.this.wdgmsg("setbelt", slot, res.name);
-			return(true);
-		    }
-		}
-	    }
-	    return(false);
 	}
     }
 

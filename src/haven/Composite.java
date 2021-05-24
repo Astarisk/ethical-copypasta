@@ -39,8 +39,8 @@ public class Composite extends Drawable {
     public final Indir<Resource> base;
     public final Composited comp;
     public int pseq;
-    public List<MD> nmod;
-    public List<ED> nequ;
+    public List<MD> nmod, pmod;
+    public List<ED> nequ, pequ;
     private Collection<ResData> nposes = null, tposes = null;
     public Collection<ResData> prevposes;
     private boolean nposesold, retainequ = false;

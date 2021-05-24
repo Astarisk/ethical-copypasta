@@ -155,3 +155,13 @@ class PBotGob(object):
     # @return true if the animal is knocked out, false if not
     def is_knocked(self) -> bool:
         return self._gob.isKnocked()
+
+    ## Get list of set composite equs
+    # @return list of resnames of equ, if has any
+    def get_comp_nequ(self) -> List[str]:
+        return list(self._gob.getCompEqu())
+
+    ## Get list of set composite mods
+    # @return list of resnames of mod, if has any
+    def get_comp_nmod(self) -> List[str]:
+        return list(self._gob.getCompMod())

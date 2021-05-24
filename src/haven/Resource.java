@@ -26,8 +26,12 @@
 
 package haven;
 
+import haven.res.ui.tt.alch.elixir.Elixir;
+import haven.res.ui.tt.alch.heal.HealWound;
+import haven.res.ui.tt.alch.hurt.AddWound;
 import haven.res.ui.tt.armor.Armor;
 import haven.res.ui.tt.attrmod.AttrMod;
+import haven.res.ui.tt.craftprep.CraftPrep;
 import haven.res.ui.tt.level.Level;
 import haven.res.ui.tt.q.quality.Quality;
 import haven.res.ui.tt.q.quality.ShowQuality;
@@ -59,7 +63,7 @@ public class Resource implements Serializable {
     public static Class<Audio> audio = Audio.class;
     public static Class<Tooltip> tooltip = Tooltip.class;
     
-    private Collection<Layer> layers = new LinkedList<Layer>();
+    public Collection<Layer> layers = new LinkedList<Layer>();
     public final String name;
     public int ver;
     public ResSource source;
@@ -1271,6 +1275,10 @@ public class Resource implements Serializable {
 		put("ui/tt/armor$haven.ItemInfo$InfoFactory", Armor.Fac.class);
 		put("ui/tt/attrmod$haven.ItemInfo$InfoFactory", AttrMod.Fac.class);
 		put("ui/tt/slots$haven.ItemInfo$InfoFactory", ISlots.Fac.class);
+		put("ui/tt/alch/elixir$haven.ItemInfo$InfoFactory", Elixir.Fac.class);
+		put("ui/tt/alch/heal$haven.ItemInfo$InfoFactory", HealWound.Fac.class);
+		put("ui/tt/alch/hurt$haven.ItemInfo$InfoFactory", AddWound.Fac.class);
+		put("ui/tt/craftprep$haven.ItemInfo$InfoFactory", CraftPrep.Fac.class);
 	}};
     public <T> T getcode(Class<T> cl, boolean fail) {
 		try {
@@ -1470,7 +1478,7 @@ public class Resource implements Serializable {
     }
 
     @LayerName("audio")
-    public class Audio extends Layer implements IDLayer<String> {
+    public class Audio extends Layer implements haven.Audio.Clip {
 	transient public byte[] coded;
 	public final String id;
 	public double bvol = 1.0;
@@ -1488,15 +1496,14 @@ public class Resource implements Serializable {
 
 	public haven.Audio.CS stream() {
 	    try {
-		return(new haven.Audio.VorbisClip(new dolda.xiphutil.VorbisStream(new ByteArrayInputStream(coded))));
+		return(new haven.Audio.VorbisClip(new ByteArrayInputStream(coded)));
 	    } catch(IOException e) {
 		throw(new RuntimeException(e));
 	    }
 	}
 
-	public String layerid() {
-	    return(id);
-	}
+	public String layerid() {return(id);}
+	public double bvol() {return(bvol);}
     }
 
     @LayerName("audio2")
@@ -1583,6 +1590,30 @@ public class Resource implements Serializable {
 	for(Layer l : layers) {
 	    if(cl.isInstance(l))
 		return(cl.cast(l));
+	}
+	return(null);
+    }
+
+    public <L> Collection<L> layers(Class<L> cl, Predicate<? super L> sel) {
+	used = true;
+	if(sel == null)
+	    sel = l -> true;
+	Predicate<? super L> dsel = sel;
+	return(new DefaultCollection<L>() {
+		public Iterator<L> iterator() {
+		    return(Utils.filter(Utils.filter(layers.iterator(), cl), dsel));
+		}
+	    });
+    }
+
+    public <L> L layer(Class<L> cl, Predicate<? super L> sel) {
+	used = true;
+	for(Layer l : layers) {
+	    if(cl.isInstance(l)) {
+		L lc = cl.cast(l);
+		if((sel == null) || sel.test(lc))
+		    return(lc);
+	    }
 	}
 	return(null);
     }

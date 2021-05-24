@@ -1,7 +1,15 @@
 package haven.purus.pbot.api;
 
 import haven.*;
+import haven.res.ui.tt.alch.elixir.Elixir;
+import haven.res.ui.tt.alch.heal.HealWound;
+import haven.res.ui.tt.alch.hurt.AddWound;
+import haven.res.ui.tt.attrmod.AttrMod;
+import haven.res.ui.tt.craftprep.CraftPrep;
 import haven.res.ui.tt.q.qbuff.QBuff;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PBotItem {
 
@@ -37,6 +45,115 @@ public class PBotItem {
 				PBotUtils.sleep(25);
 			}
 			return null;
+		}
+	}
+
+
+	private class ElixirInfo {
+		private final int time;
+		private final List<ElixirEffect> heals = new ArrayList<>();
+		private final List<ElixirEffect> hurts = new ArrayList<>();
+
+		private class ElixirEffect {
+			private final String resname;
+			private final String name;
+			private final int amount;
+
+			ElixirEffect(String name, String resname, int amount) {
+				this.name = name;
+				this.resname = resname;
+				this.amount = amount;
+			}
+
+			public String getResname() {
+				return resname;
+			}
+
+			public String getName() {
+				return name;
+			}
+
+			public int getAmount() {
+				return amount;
+			}
+		}
+
+		ElixirInfo(int time) {
+			this.time = time;
+		}
+
+		public int getTime() {
+			return time;
+		}
+
+		public List<ElixirEffect> getHeals() {
+			return heals;
+		}
+
+		public List<ElixirEffect> getHurts() {
+			return hurts;
+		}
+
+		public void addHeal(String name, String resname, int pts) {
+			heals.add(new ElixirEffect(name, resname, pts));
+		}
+
+		public void addHurt(String name, String resname, int pts) {
+			hurts.add(new ElixirEffect(name, resname, pts));
+		}
+	}
+
+	/**
+	 * Returns name of the item content
+	 * @return Name of the item content or null if not found
+	 */
+	public ElixirInfo getElixirInfo() {
+		while(true) {
+			try {
+				for(ItemInfo info : item.info()) {
+					if(info instanceof ItemInfo.Contents) {
+						for(ItemInfo cont : ((ItemInfo.Contents) info).sub) {
+							if(cont instanceof Elixir) {
+								ElixirInfo ret = new ElixirInfo(((Elixir) cont).time);
+								for(ItemInfo info2 : ((Elixir) cont).effs) {
+									if(info2 instanceof HealWound) {
+										ret.addHeal(((HealWound) info2).res.get().layer(Resource.tooltip).t, ((HealWound) info2).res.get().name, (int)Math.round(((HealWound) info2).a/(Math.sqrt(getContentsQuality()/10))));
+									} else if(info2 instanceof AddWound) {
+										ret.addHurt(((AddWound) info2).res.get().layer(Resource.tooltip).t, ((AddWound) info2).res.get().name, ((AddWound) info2).a);
+									} else if(info2 instanceof AttrMod) {
+										for(AttrMod.Mod mod : ((AttrMod) info2).mods) {
+											ret.addHeal(mod.attr.layer(Resource.tooltip).t, mod.attr.name, (int)Math.round(mod.mod/Math.sqrt(getContentsQuality()/10)));
+										}
+									} else {
+										System.out.println("Elixir unknown type: " + info2.getClass().getName());
+									}
+								}
+								return ret;
+							}
+						}
+					}
+				}
+			} catch(Loading l) {
+				PBotUtils.sleep(25);
+				continue;
+			}
+			return null;
+		}
+	}
+
+	// True if selected green for craft
+	public boolean usedForCraft() {
+		while(true) {
+			try {
+				for(ItemInfo info : item.info()) {
+					if(info instanceof CraftPrep)
+						return true;
+				}
+			} catch(Loading l) {
+				PBotUtils.sleep(20);
+				continue;
+			}
+			return false;
 		}
 	}
 

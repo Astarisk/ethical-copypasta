@@ -28,6 +28,8 @@ package haven;
 
 import java.util.*;
 import java.util.function.*;
+
+import haven.purus.Config;
 import haven.render.*;
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
@@ -51,7 +53,13 @@ public class SkelSprite extends Sprite implements Sprite.CUpd, Skeleton.HasPose 
     private RenderTree.Node[] parts;
     private Collection<Runnable> tickparts = Collections.emptyList();
     private Collection<Consumer<Render>> gtickparts = Collections.emptyList();
-    
+
+
+    public static Location cupboardSize = new Location(new Matrix4f(1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, Config.cupboardHeight.val, 0,
+			0, 0, 0, 1));
+
     public static final Factory fact = new Factory() {
 	    public Sprite create(Owner owner, Resource res, Message sdt) {
 		if(res.layer(Skeleton.Res.class) == null)
@@ -141,7 +149,7 @@ public class SkelSprite extends Sprite implements Sprite.CUpd, Skeleton.HasPose 
     public void iparts(int mask, Collection<RenderTree.Node> rbuf, Collection<Runnable> tbuf, Collection<Consumer<Render>> gbuf) {
 	for(FastMesh.MeshRes mr : res.layers(FastMesh.MeshRes.class)) {
 	    if((mr.mat != null) && ((mr.id < 0) || (((1 << mr.id) & mask) != 0)))
-		rbuf.add(animwrap(mr.mat.get().apply(mr.m), tbuf, gbuf));
+			rbuf.add(animwrap(mr.mat.get().apply(mr.m), tbuf, gbuf));
 	}
 	Owner rec = null;
 	for(RenderLink.Res lr : res.layers(RenderLink.Res.class)) {
@@ -242,6 +250,8 @@ public class SkelSprite extends Sprite implements Sprite.CUpd, Skeleton.HasPose 
     }
     
     public void added(RenderTree.Slot slot) {
+    	if(res.name.equals("gfx/terobjs/cupboard"))
+    		slot.ostate(cupboardSize);
 	parts(slot);
 	slots.add(slot);
     }

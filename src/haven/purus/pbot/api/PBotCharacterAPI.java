@@ -35,7 +35,7 @@ PBotCharacterAPI {
 	 * @return Returns 0-100
 	 */
 	public double getHp() {
-		return (100 * pBotSession.gui.getmeter("hp", 0).a);
+		return (100 * pBotSession.gui.getmeter("hp", 1).a);
 	}
 
 	/**

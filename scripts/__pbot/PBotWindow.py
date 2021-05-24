@@ -20,6 +20,15 @@ class PBotWindow(object):
     def get_stockpile_used_capacity(self) -> int:
         return self.__window.getStockpileUsedCapacity()
 
+    ## Returns remaining capacity of the stockpile window which is currently open
+    # @return remaining capacity, or -1 if stockpile window could not be found
+    def get_stockpile_remaining_capacity(self) -> int:
+        used = self.get_stockpile_used_capacity()
+        total = self.get_stockpile_total_capacity()
+        if used == -1 or total == -1:
+            return -1
+        return total-used
+
     ## Take an item from the stockpile to hand
     def take_items_from_stockpile_to_hand(self):
         self.__window.takeItemsFromStockpileHand()
@@ -49,5 +58,10 @@ class PBotWindow(object):
         return [PBotInventory(x) for x in self.__window.getInventories()]
 
     ## Close this window
-    def close(self):
-        self.__window.closeWnd()
+    # @param immediately close the widget immediately or wait for server to close it
+    def close(self, immediately: bool = True):
+        self.__window.closeWnd(immediately)
+
+    ## Hide the window, used to "close" craft window
+    def hide(self):
+        self.__window.hideWnd()

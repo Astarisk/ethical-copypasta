@@ -360,14 +360,10 @@ public class GLEnvironment implements Environment {
 	    if(disposed.isEmpty())
 		return(buf);
 	    copy = new ArrayList<>(disposed.size());
-	    int lseq = 0;	// XXX: This assertion should be safe to remove once initially verified.
 	    for(Iterator<GLObject> i = disposed.iterator(); i.hasNext();) {
 		GLObject obj = i.next();
-		if(obj.dispseq - lseq < 0)
-		    throw(new AssertionError());
 		if(obj.dispseq - tail > 0)
 		    break;
-		lseq = obj.dispseq;
 		copy.add(obj);
 		i.remove();
 	    }
@@ -574,6 +570,25 @@ public class GLEnvironment implements Environment {
 	    return(ret);
 	}
     }
+    GLTexture.Tex2DArray prepare(Texture2DArray tex) {
+	synchronized(tex) {
+	    GLTexture.Tex2DArray ret;
+	    if(!(tex.ro instanceof GLTexture.Tex2DArray) || ((ret = (GLTexture.Tex2DArray)tex.ro).env != this)) {
+		if(tex.ro != null)
+		    tex.ro.dispose();
+		tex.ro = ret = GLTexture.Tex2DArray.create(this, tex);
+	    }
+	    return(ret);
+	}
+    }
+    GLTexture.Tex2DArray prepare(Texture2DArray.Sampler2DArray smp) {
+	Texture2DArray tex = smp.tex;
+	synchronized(tex) {
+	    GLTexture.Tex2DArray ret = prepare(tex);
+	    ret.setsampler(smp);
+	    return(ret);
+	}
+    }
     GLTexture.Tex2DMS prepare(Texture2DMS tex) {
 	synchronized(tex) {
 	    GLTexture.Tex2DMS ret;
@@ -619,9 +634,11 @@ public class GLEnvironment implements Environment {
 		return(prepare((Texture2D.Sampler2D)val));
 	    if(val instanceof Texture3D.Sampler3D)
 		return(prepare((Texture3D.Sampler3D)val));
+	    if(val instanceof Texture2DArray.Sampler2DArray)
+		return(prepare((Texture2DArray.Sampler2DArray)val));
 	    if(val instanceof Texture2DMS.Sampler2DMS)
 		return(prepare((Texture2DMS.Sampler2DMS)val));
-	    else if(val instanceof TextureCube.SamplerCube)
+	    if(val instanceof TextureCube.SamplerCube)
 		return(prepare((TextureCube.SamplerCube)val));
 	}
 	return(val);

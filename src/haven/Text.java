@@ -309,10 +309,12 @@ public class Text {
     public static void main(String[] args) throws Exception {
 	String cmd = args[0].intern();
 	if(cmd == "render") {
-	    PosixArgs opt = PosixArgs.getopt(args, 1, "aw:f:s:");
+	    PosixArgs opt = PosixArgs.getopt(args, 1, "aw:f:s:c:");
 	    boolean aa = false;
 	    String font = "SansSerif";
-	    int width = 100, size = (int) (10 * Config.fontScale.val);
+	    int width = 100;
+	    float size = 10 * Config.fontScale.val;
+	    Color col = Color.WHITE;
 	    for(char c : opt.parsed()) {
 		if(c == 'a') {
 		    aa = true;
@@ -321,10 +323,12 @@ public class Text {
 		} else if(c == 'w') {
 		    width = Integer.parseInt(opt.arg);
 		} else if(c == 's') {
-		    size = Integer.parseInt(opt.arg);
+		    size = Float.parseFloat(opt.arg);
+		} else if(c == 'c') {
+		    col = Color.decode(opt.arg);
 		}
 	    }
-	    Foundry f = new Foundry(font, size);
+	    Foundry f = new Foundry(new Font(font, Font.PLAIN, 10).deriveFont(size), col);
 	    f.aa = aa;
 	    Text t = f.renderwrap(opt.rest[0], width);
 	    try(java.io.OutputStream out = java.nio.file.Files.newOutputStream(Utils.path(opt.rest[1]))) {
