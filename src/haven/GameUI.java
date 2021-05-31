@@ -169,6 +169,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		    }
 		}
 	    }
+		if(slot != null && slot instanceof PBotBeltSlot) {
+				pBotWindow.useEntry(((GameUI.PBotBeltSlot)slot).scriptEntry);
+				return;
+		}
 	    if(local && (menu != null)) {
 		if(res != null) {
 		    MenuGrid.Pagina pag = menu.paginafor(slot.res);
