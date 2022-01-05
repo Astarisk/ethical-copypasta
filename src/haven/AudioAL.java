@@ -25,9 +25,16 @@ public class AudioAL {
 
 	public final int[] source = new int[1];
 	private final int[] buffer = new int[1];
+	private Cleaner.Cleanable cleanable;
+	private boolean exists = true;
 
 	public AudioAL(InputStream is, boolean mono) {
 		al.alGenSources(1, source, 0);
+		if(al.alGetError() != ALConstants.AL_NO_ERROR) {
+			exists = false;
+			System.out.println("Error while allocating OpenAL source");
+			return;
+		}
 		al.alGenBuffers(1, buffer, 0);
 
 		al.alSourcef(source[0], ALConstants.AL_ROLLOFF_FACTOR, 1/5f);
@@ -56,7 +63,7 @@ public class AudioAL {
 			e.printStackTrace();
 		}
 		al.alSourcei(source[0], ALConstants.AL_BUFFER, buffer[0]);
-		cleaner.register(this, new Cleanup(buffer, source));
+		cleanable = cleaner.register(this, new Cleanup(buffer, source));
 	}
 
 	private static class Cleanup implements Runnable {
@@ -73,25 +80,26 @@ public class AudioAL {
 	}
 
 	void setGain(float gain) {
-		if(this.gain != gain) {
+		if(this.gain != gain && exists) {
 			this.gain = gain;
 			al.alSourcef(source[0], ALConstants.AL_GAIN, gain);
 		}
 	}
 
 	void setPitch(float pitch) {
-		if(this.pitch != pitch) {
+		if(this.pitch != pitch && exists) {
 			this.pitch = pitch;
 			al.alSourcef(source[0], ALConstants.AL_PITCH, pitch);
 		}
 	}
 
 	void setPos(float x, float y, float z) {
-		al.alSource3f(source[0], ALConstants.AL_POSITION, x, y, z);
+		if(exists)
+			al.alSource3f(source[0], ALConstants.AL_POSITION, x, y, z);
 	}
 
 	void start() {
-		if(started) {
+		if(started || !exists) {
 			return;
 		}
 		started = true;
@@ -99,8 +107,14 @@ public class AudioAL {
 	}
 
 	boolean over() {
+		if(!exists)
+			return true;
 		int[] state = new int[1];
 		al.alGetSourcei(source[0], ALConstants.AL_SOURCE_STATE, state, 0);
-		return (state[0] == ALConstants.AL_STOPPED);
+		if(state[0] == ALConstants.AL_STOPPED) {
+			cleanable.clean();
+			return true;
+		}
+		return false;
 	}
 }
