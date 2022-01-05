@@ -22,6 +22,7 @@
     <javac srcdir="src" destdir="build/classes" debug="on"
 	   source="1.8" target="15" includeantruntime="no">
       <classpath>
+	<pathelement path="lib/joal.jar" />
 	<pathelement path="lib/jogl.jar" />
 	<pathelement path="lib/gluegen-rt.jar" />
 	<pathelement path="lib/jnlp.jar" />
@@ -65,7 +66,7 @@
       <fileset dir="build/classes-lib" />
       <manifest>
 	<attribute name="Main-Class" value="haven.MainFrame" />
-	<attribute name="Class-Path" value="lib/gson-2.8.5.jar lib/slf4j-api.jar lib/slf4j-simple.jar lib/jackson-core.jar lib/sentry-4.3.0.jar lib/py4j-0.10.9.2.jar lib/json.jar lib/sqlite-jdbc-3.32.3.2.jar lib/jogl.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar lib/pasta-res.jar" />
+	<attribute name="Class-Path" value="lib/gson-2.8.5.jar lib/slf4j-api.jar lib/slf4j-simple.jar lib/jackson-core.jar lib/sentry-4.3.0.jar lib/py4j-0.10.9.2.jar lib/json.jar lib/sqlite-jdbc-3.32.3.2.jar lib/jogl.jar lib/joal.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar lib/pasta-res.jar" />
       </manifest>
     </jar>
     <chmod file="build/hafen.jar" perm="a+x" />
@@ -121,6 +122,7 @@
     <copy todir="build/lib">
       <fileset dir="lib">
 	<include name="jogl.jar" />
+	<include name="joal.jar" />
 	<include name="gluegen-rt.jar" />
 	<include name="hafen-res.jar" />
 	<include name="builtin-res.jar" />
@@ -147,7 +149,8 @@
       <sysproperty key="haven.cachebase" value="http://game.havenandhearth.com/render/" />
       <sysproperty key="haven.mapbase" value="http://game.havenandhearth.com/java/" />
       <sysproperty key="haven.dbtext" value="on" />
-    </java>
+	  <sysproperty key="joal.openal.lib" value="soft" />
+	</java>
   </target>
   
   <target name="clean">

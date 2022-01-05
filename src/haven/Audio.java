@@ -29,6 +29,7 @@ package haven;
 import java.util.*;
 import java.io.*;
 import java.nio.file.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.sound.sampled.*;
 import dolda.xiphutil.*;
 
@@ -49,7 +50,7 @@ public class Audio {
     }
 
     public interface CS {
-	public int get(double[][] buf, int len);
+		public int get(double[][] buf, int len);
     }
 
     public interface Clip extends Resource.IDLayer<String> {
@@ -61,7 +62,7 @@ public class Audio {
     
     public static class Mixer implements CS {
 	public final boolean cont;
-	private final Collection<CS> clips = new LinkedList<CS>();
+	private final Collection<CS> clips = new ConcurrentLinkedQueue<>();
 
 	public Mixer(boolean continuous) {
 	    this.cont = continuous;
@@ -111,10 +112,10 @@ public class Audio {
 	    }
 	}
 
-	public void add(CS clip) {
-	    synchronized(clips) {
+		public void add(CS clip) {
+		synchronized(clips) {
 		clips.add(clip);
-	    }
+		}
 	}
 
 	public void stop(CS clip) {
@@ -163,53 +164,57 @@ public class Audio {
 	}
     }
 
-    public static class PCMClip implements CS {
-	public final InputStream clip;
-	public final int sch;
-	private final byte[] dbuf = new byte[256];
-	private int head = 0, tail = 0;
-
-	public PCMClip(InputStream clip, int nch) {
-	    this.clip = clip;
-	    this.sch = nch;
+	public static class SourceClip {
+		public AudioAL audioal;
 	}
 
-	public int get(double[][] dst, int ns) {
-	    int nch = dst.length;
-	    double[] dec = new double[sch];
-	    for(int sm = 0; sm < ns; sm++) {
-		while(tail - head < 2 * sch) {
-		    if(head > 0) {
-			for(int i = 0; i < tail - head; i++)
-			    dbuf[i] = dbuf[head + i];
-			tail -= head;
-			head = 0;
-		    }
-		    try {
-			int ret = clip.read(dbuf, tail, dbuf.length - tail);
-			if(ret < 0)
-			    return((sm > 0)?sm:-1);
-			tail += ret;
-		    } catch(IOException e) {
-			return(-1);
-		    }
-		}
-		for(int ch = 0; ch < sch; ch++) {
-		    int b1 = dbuf[head++] & 0xff;
-		    int b2 = dbuf[head++] & 0xff;
-		    int v = b1 + (b2 << 8);
-		    if(v >= 32768)
-			v -= 65536;
-		    dec[ch] = v * 0x1.0p-15;
-		}
-		for(int ch = 0; ch < nch; ch++)
-		    dst[ch][sm] = dec[ch % sch];
-	    }
-	    return(ns);
-	}
-    }
+    public static class PCMClip extends SourceClip implements CS {
+		public final InputStream clip;
+		public final int sch;
+		private final byte[] dbuf = new byte[256];
+		private int head = 0, tail = 0;
 
-    public static class VorbisClip implements CS {
+		public PCMClip(InputStream clip, int nch) {
+			this.clip = clip;
+			this.sch = nch;
+		}
+
+		public int get(double[][] dst, int ns) {
+			int nch = dst.length;
+			double[] dec = new double[sch];
+			for(int sm = 0; sm < ns; sm++) {
+				while(tail - head < 2 * sch) {
+					if(head > 0) {
+						for(int i = 0; i < tail - head; i++)
+							dbuf[i] = dbuf[head + i];
+						tail -= head;
+						head = 0;
+					}
+					try {
+						int ret = clip.read(dbuf, tail, dbuf.length - tail);
+						if(ret < 0)
+							return ((sm > 0) ? sm : -1);
+						tail += ret;
+					} catch(IOException e) {
+						return (-1);
+					}
+				}
+				for(int ch = 0; ch < sch; ch++) {
+					int b1 = dbuf[head++] & 0xff;
+					int b2 = dbuf[head++] & 0xff;
+					int v = b1 + (b2 << 8);
+					if(v >= 32768)
+						v -= 65536;
+					dec[ch] = v * 0x1.0p-15;
+				}
+				for(int ch = 0; ch < nch; ch++)
+					dst[ch][sm] = dec[ch % sch];
+			}
+			return (ns);
+		}
+	}
+
+    public static class VorbisClip extends SourceClip implements CS {
 	public final VorbisStream clip;
 	private float[][] data = new float[1][0];
 	private int dp = 0;
@@ -222,7 +227,7 @@ public class Audio {
 	    this(new VorbisStream(bs));
 	}
 
-	public int get(double[][] dst, int ns) {
+		public int get(double[][] dst, int ns) {
 	    int nch = dst.length;
 	    if(data == null)
 		return(-1);
@@ -242,21 +247,26 @@ public class Audio {
 	    }
 	    return(ns);
 	}
-    }
+	}
 
     public static class VolAdjust implements CS {
 	public final CS bk;
 	public double vol = 1.0, bal = 0.0;
 	private double[] cvol = {};
+	public boolean positional = false;
 
 	public VolAdjust(CS bk, double vol) {
 	    this.bk = bk;
 	    this.vol = vol;
 	}
 
-	public VolAdjust(CS bk) {
+		public VolAdjust(CS bk) {
 	    this(bk, 1.0);
 	}
+		public VolAdjust(CS bk, boolean positional) {
+			this(bk, 1.0);
+			this.positional = positional;
+		}
 
 	public int get(double[][] dst, int ns) {
 	    int nch = dst.length;
@@ -277,7 +287,7 @@ public class Audio {
 	    }
 	    return(ret);
 	}
-    }
+	}
 
     public static class Resampler implements CS {
 	public final CS bk;
@@ -294,7 +304,7 @@ public class Audio {
 	    this.orate = orate;
 	}
 
-	public Resampler(CS bk, double irate) {
+		public Resampler(CS bk, double irate) {
 	    this(bk, irate, fmt.getSampleRate());
 	}
 
@@ -332,7 +342,7 @@ public class Audio {
 	    return(ns);
 	}
 
-	public Resampler sp(double sp) {this.sp = sp; return(this);}
+		public Resampler sp(double sp) {this.sp = sp; return(this);}
     }
 
     public static class Monitor implements CS {
@@ -352,7 +362,7 @@ public class Audio {
 	    return(ret);
 	}
 
-	protected void eof() {
+		protected void eof() {
 	    synchronized(this) {
 		notifyAll();
 	    }
@@ -368,7 +378,7 @@ public class Audio {
     }
 
     public static abstract class Repeater implements CS {
-	private CS cur = null;
+	public CS cur = null;
 
 	public int get(double[][] buf, int ns) {
 	    while(true) {
@@ -394,6 +404,7 @@ public class Audio {
 	public LDump(CS bk, int iv) {
 	    this.bk = bk;
 	    this.iv = iv;
+		throw new RuntimeException("LDump not implemented");
 	}
 
 	public LDump(CS bk) {
@@ -420,7 +431,7 @@ public class Audio {
 	    }
 	    return(ret);
 	}
-    }
+	}
 
     public static class Player extends HackThread {
 	public final CS stream;
@@ -429,7 +440,7 @@ public class Audio {
 	
 	Player(CS stream) {
 	    super("Haven audio player");
-	    this.stream = stream;
+		this.stream = stream;
 	    nch = fmt.getChannels();
 	    setDaemon(true);
 	}
@@ -462,8 +473,94 @@ public class Audio {
 	    }
 	    return(wr);
 	}
-
+	private void clipitr(CS clp, ArrayList<CS> mods) {
+		mods.add(clp);
+		if(clp instanceof SourceClip) {
+			float volume = (float)Audio.volume;
+			float pitch = 1.0f;
+			boolean mono = false;
+			for(CS mod : mods) {
+				if(mod instanceof VolAdjust) {
+					volume *= ((VolAdjust) mod).vol;
+					if(((VolAdjust) mod).positional)
+						mono = true;
+				} else if(mod instanceof Resampler) {
+					pitch = (float)((Resampler) mod).sp;
+				}
+			}
+			if(((SourceClip) clp).audioal == null) {
+				if(clp instanceof PCMClip) {
+					((PCMClip) clp).audioal = new AudioAL(((PCMClip) clp).clip, mono);
+				} else if(clp instanceof VorbisClip) {
+					((VorbisClip) clp).audioal = new AudioAL(((VorbisClip) clp).clip.pcmstream(), mono);
+				}
+			}
+			((SourceClip) clp).audioal.setPitch(pitch);
+			((SourceClip) clp).audioal.setGain(volume);
+			((SourceClip) clp).audioal.start();
+			if(((SourceClip) clp).audioal.over()) {
+				CS prv = clp;
+				for(int i=mods.size()-1; i>=0; i--) {
+					CS cur = mods.get(i);
+					if(cur instanceof Mixer) {
+						((Mixer) cur).stop(prv);
+						break;
+					} else if(cur instanceof Repeater) {
+						((Repeater) cur).cur = ((Repeater) cur).cons();
+						if(((Repeater) cur).cur != null)
+							break;
+					} else if(cur instanceof Monitor) {
+						((Monitor) cur).eof = true;
+						((Monitor) cur).eof();
+					}
+					prv = cur;
+				}
+			}
+		} else if(clp instanceof Mixer) {
+			for(Iterator<CS> i = ((Mixer) clp).clips.iterator(); i.hasNext();) {
+				clipitr(i.next(), mods);
+			}
+		} else if(clp instanceof Resampler) {
+			clipitr(((Resampler) clp).bk, mods);
+		} else if(clp instanceof VolAdjust) {
+			clipitr(((VolAdjust) clp).bk, mods);
+		} else if(clp instanceof Repeater) {
+			if(((Repeater) clp).cur == null)
+				((Repeater) clp).cur = ((Repeater) clp).cons();
+			if(((Repeater) clp).cur == null) {
+				CS prv = clp;
+				for(int i=mods.size()-2; i>=0; i--) {
+					if(mods.get(i) instanceof Mixer) {
+						((Mixer) mods.get(i)).stop(prv);
+						break;
+					}
+					prv = mods.get(i);
+				}
+			} else {
+				clipitr(((Repeater) clp).cur, mods);
+			}
+		} else if(clp instanceof Monitor) {
+			clipitr(((Monitor) clp).bk, mods);
+		} else {
+			throw new RuntimeException("Clip not implemented " + clp.getClass());
+		}
+		mods.remove(mods.size()-1);
+	}
 	public void run() {
+	  while(true) {
+		  try {
+			  Thread.sleep(10);
+			  synchronized(this) {
+				  reopen = false;
+				  this.notifyAll();
+			  }
+			  clipitr(stream, new ArrayList<>());
+		  } catch(InterruptedException e) {
+			  e.printStackTrace();
+		  }
+	  }
+	}
+	/*public void run() {
 	    SourceDataLine line = null;
 	    try {
 		while(true) {
@@ -501,7 +598,7 @@ public class Audio {
 		if(line != null)
 		    line.close();
 	    }
-	}
+	}*/
 
 	void reopen() {
 	    try {
