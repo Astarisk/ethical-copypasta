@@ -553,7 +553,7 @@ public class OptWndPurus extends BetterWindow {
 				add(new Button(UI.scale(100), "Save token") {
 					@Override
 					public boolean mousedown(Coord c, int button) {
-						String newToken = ((TextEntry)mapToken.w).text;
+						String newToken = ((TextEntry)mapToken.w).text();
 						try {
 							URL url = new URL(Mapper.apiURL + "/token/" + newToken + "/valid");
 							Scanner scan = new Scanner(url.openStream());
@@ -646,8 +646,8 @@ public class OptWndPurus extends BetterWindow {
 
 	@Override
 	public void draw(GOut g) {
-		if(!currentSearchword.equals(searchField.text)) {
-			currentSearchword = searchField.text;
+		if(!currentSearchword.equals(searchField.text())) {
+			currentSearchword = searchField.text();
 			el.search(currentSearchword);
 		}
 		super.draw(g);

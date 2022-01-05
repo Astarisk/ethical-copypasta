@@ -208,7 +208,7 @@ public class TimerWnd extends BetterWindow {
 			add(new TextEntry(UI.scale(200), timer.name) {
 				@Override
 				protected void changed() {
-					timer.name = this.text;
+					timer.name = this.text();
 					Config.timersSet.setVal(Config.timersSet.val);
 					super.changed();
 				}
@@ -250,7 +250,7 @@ public class TimerWnd extends BetterWindow {
 					@Override
 					protected void changed() {
 						try {
-							timer.hours = Long.parseLong(this.text);
+							timer.hours = Long.parseLong(this.text());
 							Config.timersSet.setVal(Config.timersSet.val);
 							changed++;
 						} catch(NumberFormatException e) {
@@ -263,7 +263,7 @@ public class TimerWnd extends BetterWindow {
 					@Override
 					protected void changed() {
 						try {
-							timer.minutes = Long.parseLong(this.text);
+							timer.minutes = Long.parseLong(this.text());
 							Config.timersSet.setVal(Config.timersSet.val);
 							changed++;
 						} catch(NumberFormatException e) {
@@ -276,7 +276,7 @@ public class TimerWnd extends BetterWindow {
 					@Override
 					protected void changed() {
 						try {
-							timer.seconds = Long.parseLong(this.text);
+							timer.seconds = Long.parseLong(this.text());
 							Config.timersSet.setVal(Config.timersSet.val);
 							changed++;
 						} catch(NumberFormatException e) {

@@ -51,7 +51,7 @@ public class UI {
     public Session sess;
     public boolean modshift, modctrl, modmeta, modsuper;
     public Object lasttip;
-    double lastevent, lasttick;
+    public double lastevent, lasttick;
     public Widget mouseon;
     public Console cons = new WidgetConsole();
     private Collection<AfterDraw> afterdraws = new LinkedList<AfterDraw>();
@@ -206,8 +206,9 @@ public class UI {
 
     public void tick() {
 	double now = Utils.rtime();
-	root.tick(now - lasttick);
+	double delta = now - lasttick;
 	lasttick = now;
+	root.tick(delta);
 	if(gprefsdirty) {
 	    gprefs.save();
 	    gprefsdirty = false;
@@ -237,7 +238,7 @@ public class UI {
 	synchronized(this) {
 	    Widget wdg = f.create(this, cargs);
 	    wdg.attach(this);
-	    if(parent != 65535) {
+	    if(parent != -1) {
 		Widget pwdg = getwidget(parent);
 		if(pwdg == null)
 		    throw(new UIException("Null parent widget " + parent + " for " + id, type, cargs));
@@ -269,7 +270,7 @@ public class UI {
 				@Override
 				public boolean keydown(KeyEvent ev) {
 					int c = ev.getKeyChar();
-					if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line.length() < 2 || c == '\b') {
+					if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9 && buf.line().length() < 2 || c == '\b') {
 						return buf.key(ev);
 					} else if (c == '\n') {
 						try {

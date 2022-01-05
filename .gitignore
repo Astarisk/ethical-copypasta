@@ -1,6 +1,6 @@
-/.classpath
-/.project
 /build
+/bin
+/local-config.properties
 *~
 /.idea
 *.iml

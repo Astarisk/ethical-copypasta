@@ -86,7 +86,7 @@ public class MenuSearch extends BetterWindow {
 
     private void refilter() {
 	List<Result> found = new ArrayList<>();
-	String needle = sbox.text.toLowerCase();
+	String needle = sbox.text().toLowerCase();
 	for(Result res : this.cur) {
 	    if(res.btn.name().toLowerCase().indexOf(needle) >= 0)
 		found.add(res);
