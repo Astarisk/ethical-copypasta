@@ -2,7 +2,7 @@
 
 <project name="hafen" default="deftgt">
 	<property name="ext-lib-base" value="http://www.havenandhearth.com/java" />
-	<property name="version">1.4.0</property>
+	<property name="version">1.5.0</property>
   <target name="build-env">
     <mkdir dir="build" />
     <mkdir dir="build/classes" />
