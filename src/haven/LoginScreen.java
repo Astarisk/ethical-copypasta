@@ -235,6 +235,7 @@ public class LoginScreen extends Widget {
 	    if(token != null) {
 		ret = new AuthClient.TokenCred(user.text(), Arrays.copyOf(token, token.length));
 	    } else {
+			Credentials.saveCredentials(user.text(), pass.text());
 		ret = new AuthClient.NativeCred(user.text(), pass.text());
 		pass.rsettext("");
 	    }
