@@ -164,8 +164,10 @@
 	<include name="slf4j-simple.jar"/>
 	<include name="slf4j-api.jar"/>
 	<include name="gson-2.8.5.jar"/>
-      </fileset>
-		<fileset dir="lib/joal-natives" />
+	<include name="joal-natives-linux-amd64.jar"/>
+	<include name="joal-natives-windows-amd64.jar"/>
+	<include name="joal-natives-windows-i586.jar"/>
+	  </fileset>
 		<fileset dir="lib/ext">
 			<include name="hafen-res.jar" />
 			<include name="builtin-res.jar" />
@@ -198,7 +200,7 @@
 	<target name="dist" depends="jars, doc">
 		<zip destfile="build/dist.zip" update="true">
 			<fileset dir="build" includes="*hafen.jar, defaultAlarms, alarms/*, scripts/**"/>
-			<zipfileset dir="build/lib" includes="gson-2.8.5.jar slf4j-api.jar slf4j-simple.jar jackson-core.jar sentry-4.3.0.jar py4j-0.10.9.2.jar json.jar sqlite-jdbc-3.32.3.2.jar pasta-res.jar joal.jar joal-natives/joal-natives-linux-amd64.jar joal-natives/joal-natives-windows-amd64.jar joal-natives/joal-natives-windows-i586.jar
+			<zipfileset dir="build/lib" includes="gson-2.8.5.jar slf4j-api.jar slf4j-simple.jar jackson-core.jar sentry-4.3.0.jar py4j-0.10.9.2.jar json.jar sqlite-jdbc-3.32.3.2.jar pasta-res.jar joal.jar joal-natives-linux-amd64.jar joal-natives-windows-amd64.jar joal-natives-windows-i586.jar
  alarms" prefix="lib/"/>
 		</zip>
 	</target>
