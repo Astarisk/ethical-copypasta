@@ -80,41 +80,60 @@ public class AudioAL {
 	}
 
 	void setGain(float gain) {
-		if(this.gain != gain && exists) {
-			this.gain = gain;
-			al.alSourcef(source[0], ALConstants.AL_GAIN, gain);
+		synchronized(this) {
+			if(this.gain != gain && exists) {
+				this.gain = gain;
+				al.alSourcef(source[0], ALConstants.AL_GAIN, gain);
+			}
 		}
 	}
 
 	void setPitch(float pitch) {
-		if(this.pitch != pitch && exists) {
-			this.pitch = pitch;
-			al.alSourcef(source[0], ALConstants.AL_PITCH, pitch);
+		synchronized(this) {
+			if(this.pitch != pitch && exists) {
+				this.pitch = pitch;
+				al.alSourcef(source[0], ALConstants.AL_PITCH, pitch);
+			}
 		}
 	}
 
 	void setPos(float x, float y, float z) {
-		if(exists)
-			al.alSource3f(source[0], ALConstants.AL_POSITION, x, y, z);
+		synchronized(this) {
+			if(exists)
+				al.alSource3f(source[0], ALConstants.AL_POSITION, x, y, z);
+		}
 	}
 
 	void start() {
-		if(started || !exists) {
-			return;
+		synchronized(this) {
+			if(started || !exists) {
+				return;
+			}
+			started = true;
+			al.alSourcePlay(source[0]);
 		}
-		started = true;
-		al.alSourcePlay(source[0]);
+	}
+
+	void stop() {
+		synchronized(this) {
+			if(exists) {
+				exists = false;
+				cleanable.clean();
+			}
+		}
 	}
 
 	boolean over() {
-		if(!exists)
-			return true;
-		int[] state = new int[1];
-		al.alGetSourcei(source[0], ALConstants.AL_SOURCE_STATE, state, 0);
-		if(state[0] == ALConstants.AL_STOPPED) {
-			cleanable.clean();
-			exists = false;
-			return true;
+		synchronized(this) {
+			if(!exists)
+				return true;
+			int[] state = new int[1];
+			al.alGetSourcei(source[0], ALConstants.AL_SOURCE_STATE, state, 0);
+			if(state[0] == ALConstants.AL_STOPPED) {
+				cleanable.clean();
+				exists = false;
+				return true;
+			}
 		}
 		return false;
 	}

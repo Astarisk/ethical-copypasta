@@ -119,6 +119,28 @@ public class Audio {
 	}
 
 	public void stop(CS clip) {
+		Queue<CS> q = new ArrayDeque<CS>();
+		q.add(clip);
+		while(!q.isEmpty()) {
+			CS clp = q.poll();
+			if(clp == null)
+				continue;
+			if(clp instanceof VolAdjust) {
+				q.add(((VolAdjust) clp).bk);
+			} else if(clp instanceof Monitor) {
+				q.add(((Monitor) clp).bk);
+			} else if(clp instanceof Resampler) {
+				q.add(((Resampler) clp).bk);
+			} else if(clp instanceof Repeater) {
+				q.add(((Repeater) clp).cur);
+			} else if(clp instanceof Mixer) {
+				q.addAll(((Mixer) clp).clips);
+			} else if(clp instanceof SourceClip) {
+				((SourceClip) clp).audioal.stop();
+			} else {
+				throw new RuntimeException("Unknown audio clip" + clp.getClass().getName());
+			}
+		}
 	    synchronized(clips) {
 		for(Iterator<CS> i = clips.iterator(); i.hasNext();) {
 		    if(i.next() == clip) {
