@@ -113,6 +113,7 @@ public class AudioAL {
 		al.alGetSourcei(source[0], ALConstants.AL_SOURCE_STATE, state, 0);
 		if(state[0] == ALConstants.AL_STOPPED) {
 			cleanable.clean();
+			exists = false;
 			return true;
 		}
 		return false;
