@@ -119,6 +119,8 @@ public class Audio {
 	}
 
 	public void stop(CS clip) {
+		if(clip == null)
+			return;
 		Queue<CS> q = new ArrayDeque<CS>();
 		q.add(clip);
 		while(!q.isEmpty()) {
@@ -132,7 +134,10 @@ public class Audio {
 			} else if(clp instanceof Resampler) {
 				q.add(((Resampler) clp).bk);
 			} else if(clp instanceof Repeater) {
-				q.add(((Repeater) clp).cur);
+				CS cr = ((Repeater) clp).cur;
+				if(cr == null)
+					continue;
+				q.add(cr);
 			} else if(clp instanceof Mixer) {
 				q.addAll(((Mixer) clp).clips);
 			} else if(clp instanceof SourceClip) {
