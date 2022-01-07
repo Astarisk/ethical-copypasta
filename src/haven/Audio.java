@@ -141,7 +141,9 @@ public class Audio {
 			} else if(clp instanceof Mixer) {
 				q.addAll(((Mixer) clp).clips);
 			} else if(clp instanceof SourceClip) {
-				((SourceClip) clp).audioal.stop();
+				try {
+					((SourceClip) clp).audioal.stop();
+				} catch (NullPointerException npe) {}
 			} else {
 				throw new RuntimeException("Unknown audio clip" + clp.getClass().getName());
 			}
