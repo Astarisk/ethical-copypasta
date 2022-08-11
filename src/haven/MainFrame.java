@@ -40,7 +40,7 @@ import java.lang.reflect.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainFrame extends java.awt.Frame implements Console.Directory {
-    UIPanel p;
+    final UIPanel p;
     private final ThreadGroup g;
     public static MainFrame mf;
     private Thread mt;
@@ -177,8 +177,7 @@ public class MainFrame extends java.awt.Frame implements Console.Directory {
 	    sz = isz;
 	}
 	this.g = new ThreadGroup(HackThread.tg(), "Haven client");
-	JOGLPanel p = new JOGLPanel(sz);
-	this.p = p;
+	Component pp = (Component)(this.p = new JOGLPanel(sz));
 	if(fsmode == null) {
 	    Coord pfm = Utils.getprefc("fsmode", null);
 	    if(pfm != null)
@@ -190,10 +189,10 @@ public class MainFrame extends java.awt.Frame implements Console.Directory {
 	}
 	if(fsmode == null)
 	    fsmode = findmode(800, 600);
-	add(p);
+	add(pp);
 	pack();
 	setResizable(!Utils.getprefb("wndlock", false));
-	p.requestFocus();
+	pp.requestFocus();
 	seticon();
 	setVisible(true);
 	addWindowListener(new WindowAdapter() {

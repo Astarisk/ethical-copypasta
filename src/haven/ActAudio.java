@@ -210,7 +210,7 @@ public class ActAudio extends State {
 	}
 
 	public PosClip(CS clip) {
-	    this(new VolAdjust(clip));
+	    this(new VolAdjust(clip, true));
 	}
 
 	public void added(RenderTree.Slot slot) {
@@ -234,9 +234,23 @@ public class ActAudio extends State {
 	public void autotick(double dt) {
 	    for(RenderTree.Slot slot : slots) {
 		Coord3f pos = spos(slot.state());
-		this.clip.vol = Math.min(1.0, 50.0 / Math.hypot(pos.x, pos.y));
-		this.clip.bal = Utils.clip(Math.atan2(pos.x, -pos.z) / (Math.PI / 8.0), -1, 1);
-		break;
+		CS clp = this.clip;
+		while(clp != null && !(clp instanceof Audio.SourceClip)) {
+			if(clp instanceof VolAdjust) {
+				clp = ((VolAdjust) clp).bk;
+			} else if(clp instanceof Audio.Monitor) {
+				clp = ((Audio.Monitor) clp).bk;
+			} else if(clp instanceof Audio.Resampler) {
+				clp = ((Audio.Resampler) clp).bk;
+			} else if(clp instanceof Audio.Repeater) {
+				clp = ((Audio.Repeater) clp).cur;
+			} else {
+				throw new RuntimeException("Unknown audio clip");
+			}
+		}
+		if(clp != null && ((Audio.SourceClip) clp).audioal != null)
+			((Audio.SourceClip) clp).audioal.setPos(pos.x, -pos.y, 0);
+			break;
 	    }
 	}
     }

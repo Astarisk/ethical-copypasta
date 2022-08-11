@@ -168,6 +168,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		    }
 		}
 	    }
+		if(slot != null && slot instanceof PBotBeltSlot) {
+				pBotWindow.useEntry(((GameUI.PBotBeltSlot)slot).scriptEntry);
+				return;
+		}
 	    if(local && (menu != null)) {
 		if(res != null) {
 		    MenuGrid.Pagina pag = menu.paginafor(slot.res);
@@ -775,7 +779,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		    if(!(wdg instanceof Window))
 			continue;
 		    Window wnd = (Window)wdg;
-		    if(!wnd.visible)
+		    if(!wnd.visible())
 			continue;
 		    Area warea = wnd.parentarea(this);
 		    if(warea.isects(tarea)) {
@@ -1012,9 +1016,9 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	if(prog >= 0)
 	    drawprog(g, prog);
 	int by = sz.y;
-	if(chat.visible)
+	if(chat.visible())
 	    by = Math.min(by, chat.c.y);
-	if(beltwdg.visible)
+	if(beltwdg.visible())
 	    by = Math.min(by, beltwdg.c.y);
 	if(cmdline != null) {
 	    drawcmd(g, new Coord(blpw + UI.scale(10), by -= UI.scale(20)));
@@ -1028,7 +1032,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		g.image(lastmsg.tex(), new Coord(blpw + UI.scale(10), by -= UI.scale(20)));
 	    }
 	}
-	if(!chat.visible) {
+	if(!chat.visible()) {
 	    chat.drawsmall(g, new Coord(blpw + UI.scale(10), by), UI.scale(50));
 	}
     }
@@ -1347,12 +1351,12 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     private boolean wndstate(Window wnd) {
 	if(wnd == null)
 	    return(false);
-	return(wnd.visible);
+	return(wnd.visible());
     }
 
     private void togglewnd(Window wnd) {
 	if(wnd != null) {
-	    if(wnd.show(!wnd.visible)) {
+	    if(wnd.show(!wnd.visible())) {
 		wnd.raise();
 		fitwdg(wnd);
 		setfocus(wnd);
@@ -1422,7 +1426,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    add(new MenuCheckBox("lbtn-map", kb_map, "Map")).state(() -> wndstate(mapfile)).click(() -> {
 		    togglewnd(mapfile);
 		    if(mapfile != null)
-			Utils.setprefb("wndvis-map", mapfile.visible);
+			Utils.setprefb("wndvis-map", mapfile.visible());
 		});
 	    add(new MenuCheckBox("lbtn-ico", kb_ico, "Icon settings"), 0, 0).state(() -> wndstate(iconwnd)).click(() -> {
 		    if(iconconf == null)
@@ -1505,7 +1509,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    toggleui();
 	    return(true);
 	} else if(kb_chat.key().match(ev)) {
-	    if(chat.visible && !chat.hasfocus) {
+	    if(chat.visible() && !chat.hasfocus) {
 		setfocus(chat);
 	    } else {
 		if(chat.targeth == 0) {

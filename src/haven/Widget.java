@@ -142,28 +142,12 @@ public class Widget {
 	public Widget create(UI ui, Object[] par);
     }
 
-    public static class FactMaker implements Resource.PublishedCode.Instancer {
-	public Factory make(Class<?> cl, Resource ires, Object... argv) {
-	    if(Factory.class.isAssignableFrom(cl))
-		return(Resource.PublishedCode.Instancer.stdmake(cl.asSubclass(Factory.class), ires, argv));
-	    try {
-		final Method mkm = cl.getDeclaredMethod("mkwidget", UI.class, Object[].class);
-		int mod = mkm.getModifiers();
-		if(Widget.class.isAssignableFrom(mkm.getReturnType()) && ((mod & Modifier.STATIC) != 0) && ((mod & Modifier.PUBLIC) != 0)) {
-		    return(new Factory() {
-			    public Widget create(UI ui, Object[] args) {
-				try {
-				    return((Widget)mkm.invoke(null, ui, args));
-				} catch(Exception e) {
-				    if(e instanceof RuntimeException) throw((RuntimeException)e);
-				    throw(new RuntimeException(e));
-				}
-			    }
-			});
-		}
-	    } catch(NoSuchMethodException e) {
-	    }
-	    return(null);
+    public static class FactMaker extends Resource.PublishedCode.Instancer.Chain<Factory> {
+	public FactMaker() {
+	    super(Factory.class);
+	    add(new Direct<>(Factory.class));
+	    add(new StaticCall<>(Factory.class, "mkwidget", Widget.class, new Class<?>[] {UI.class, Object[]. class},
+				 (make) -> (ui, args) -> make.apply(new Object [] {ui, args})));
 	}
     }
 
@@ -909,7 +893,7 @@ public class Widget {
 				Widget p = f.rprev();
 				f = ((p == null) || (p == this) || !p.hasparent(this))?lchild:p;
 			    }
-			    if(f.canfocus)
+			    if((f.canfocus && f.tvisible()) || (f == focused))
 				break;
 			}
 			setfocus(f);
@@ -1442,13 +1426,13 @@ public class Widget {
 
     public void hide() {
 	visible = false;
-	if(canfocus && (parent != null))
+	if(parent != null)
 	    parent.delfocusable(this);
     }
 
     public void show() {
 	visible = true;
-	if(canfocus && (parent != null))
+	if(parent != null)
 	    parent.newfocusable(this);
     }
 
@@ -1458,6 +1442,10 @@ public class Widget {
 	else
 	    hide();
 	return(show);
+    }
+
+    public boolean visible() {
+	return(visible);
     }
 
     public boolean tvisible() {

@@ -1,5 +1,9 @@
 ## Changelog
 
+### 1.5.0
+- Added OpenAL for playing audio
+- Various fixes and improvements
+
 ### 1.4.0
 - Added wear bars to items
 - Added dream harvest script

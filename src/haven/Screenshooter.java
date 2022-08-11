@@ -328,7 +328,7 @@ public class Screenshooter extends BetterWindow {
     }
 
     public void upload() {
-	shot.comment = comment.text;
+	shot.comment = comment.text();
 	final Uploader th = new Uploader(decobox.a ? shot.ui : shot.map, shot, png);
 	th.start();
 	ui.destroy(btn);

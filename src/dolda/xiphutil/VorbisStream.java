@@ -176,7 +176,13 @@ public class VorbisStream {
 		private int bufp;
 		
 		private boolean convert() throws IOException {
-		    float[][] inb = decode();
+			float[][] inb;
+			try {
+				inb = decode();
+			}catch(IOException e) {
+				e.printStackTrace(); // Ignored in vorbisclip?
+				return false;
+			}
 		    if(inb == null) {
 			buf = null;
 			return(false);
