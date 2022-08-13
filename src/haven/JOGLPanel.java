@@ -51,6 +51,8 @@ public class JOGLPanel extends GLCanvas implements Runnable, UIPanel, Console.Di
     private final Dispatcher ed;
     private GLEnvironment env = null;
     //private UI ui;
+    private UI lockedui;
+    private final Object uilock = new Object();
     private Area shape;
     private Pipe base, wnd;
 
@@ -526,6 +528,11 @@ public class JOGLPanel extends GLCanvas implements Runnable, UIPanel, Console.Di
 		    buf = env.render();
 		    //UI ui = this.ui;
 			UI ui = MultiSession.activeSession;
+		   // UI ui;
+		    synchronized(uilock) {
+			this.lockedui = ui = ui;
+			uilock.notifyAll();
+		    }
 		    Debug.cycle(ui.modflags());
 		    GSettings prefs = ui.gprefs;
 		    SyncMode syncmode = prefs.syncmode.val;
@@ -648,6 +655,10 @@ public class JOGLPanel extends GLCanvas implements Runnable, UIPanel, Console.Di
 		    prevframe = curframe;
 		}
 	    } finally {
+		synchronized(uilock) {
+		    lockedui = null;
+		    uilock.notifyAll();
+		}
 		if(buf != null)
 		    buf.dispose();
 		drawthread.interrupt();
@@ -658,6 +669,7 @@ public class JOGLPanel extends GLCanvas implements Runnable, UIPanel, Console.Di
     }
 
     public UI newui(UI.Runner fun) {
+//<<<<<<< HEAD
 
 	UI ui = new UI(this, new Coord(getSize()), fun);
 	MultiSession.setActiveSession(ui);
@@ -671,6 +683,34 @@ public class JOGLPanel extends GLCanvas implements Runnable, UIPanel, Console.Di
 	    ui.cons.add((Console.Directory)getParent());
 	ui.cons.add(this);
 	return(ui);
+/*=======
+	UI prevui, newui = new UI(this, new Coord(getSize()), fun);
+	newui.env = this.env;
+	if(getParent() instanceof Console.Directory)
+	    newui.cons.add((Console.Directory)getParent());
+	newui.cons.add(this);
+	synchronized(uilock) {
+	    prevui = this.ui;
+	    ui = newui;
+	    ui.root.guprof = uprof;
+	    ui.root.grprof = rprof;
+	    ui.root.ggprof = gprof;
+	    while((this.lockedui != null) && (this.lockedui == prevui)) {
+		try {
+		    uilock.wait();
+		} catch(InterruptedException e) {
+		    Thread.currentThread().interrupt();
+		    break;
+		}
+	    }
+	}
+	if(prevui != null) {
+	    synchronized(prevui) {
+		prevui.destroy();
+	    }
+	}
+	return(newui);
+>>>>>>> d1818d329f1651030a4f59f5e09511966356ae0a*/
     }
 
     public void background(boolean bg) {

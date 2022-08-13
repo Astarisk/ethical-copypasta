@@ -137,15 +137,15 @@ public class PBotUtils {
 	 * @param timeout Timeout in milliseconds
 	 */
 	public boolean waitForHourglass(int timeout) {
-		double prog = pBotSession.gui.prog;
+		double prog = pBotSession.gui.prog.prog;
 		int retries = 0;
-		while(prog == pBotSession.gui.prog) {
+		while(prog == pBotSession.gui.prog.prog) {
 			if(retries > timeout / 5)
 				return false;
 			retries++;
 			sleep(5);
 		}
-		while(pBotSession.gui.prog >= 0) {
+		while(pBotSession.gui.prog.prog >= 0) {
 			sleep(25);
 		}
 		return true;
@@ -181,12 +181,12 @@ public class PBotUtils {
 	 * Also waits until the hourglass has been seen to change at least once
 	 */
 	public void waitForHourglass() {
-		double prog = pBotSession.gui.prog;
-		while (prog == pBotSession.gui.prog) {
-			prog = pBotSession.gui.prog;
+		double prog = pBotSession.gui.prog.prog;
+		while (prog == pBotSession.gui.prog.prog) {
+			prog = pBotSession.gui.prog.prog;
 			sleep(5);
 		}
-		while (pBotSession.gui.prog >= 0) {
+		while (pBotSession.gui.prog.prog >= 0) {
 			sleep(20);
 		}
 	}
@@ -196,7 +196,7 @@ public class PBotUtils {
 	 * @return value of hourglass
 	 */
 	public double getHourglass() {
-		return pBotSession.gui.prog;
+		return pBotSession.gui.prog.prog;
 	}
 
 	/**
