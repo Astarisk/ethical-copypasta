@@ -39,7 +39,7 @@ public class AlarmWindow extends Window {
 		add(new Button(UI.scale(50), "Add") {
 			@Override
 			public void click() {
-				al.addItem(new AlarmItem(addGobResname.text, addAlarmFilename.text, addVolume.val, false));
+				al.addItem(new AlarmItem(addGobResname.buf.line(), addAlarmFilename.buf.line(), addVolume.val, false));
 				addGobResname.settext("");
 				addAlarmFilename.settext("");
 			}
@@ -225,11 +225,11 @@ public class AlarmWindow extends Window {
 		}
 
 		public String getGobResname() {
-			return gobResname.text;
+			return gobResname.buf.line();
 		}
 
 		public String getAlarmFilename() {
-			return alarmFilename.text;
+			return alarmFilename.buf.line();
 		}
 
 		@Override
