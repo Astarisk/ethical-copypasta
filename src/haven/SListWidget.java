@@ -69,10 +69,10 @@ public abstract class SListWidget<I, W extends Widget> extends Widget {
 	protected abstract String text();
 	protected int margin() {return(0);}
 	protected Text.Foundry foundry() {return(CharWnd.attrf);}
+	protected boolean valid(String text) {return(true);}
 
 	private Tex img = null;
-	private Text text = null;
-	public void draw(GOut g) {
+	protected void drawicon(GOut g) {
 	    int m = margin(), h = sz.y - (m * 2);
 	    try {
 		if(this.img == null) {
@@ -86,33 +86,73 @@ public abstract class SListWidget<I, W extends Widget> extends Widget {
 		    }
 		    this.img = new TexI(img);
 		}
-		g.image(this.img, Coord.of(m));
+		g.image(this.img, Coord.of(sz.y).sub(this.img.sz()).div(2));
 	    } catch(Loading l) {
 		g.image(WItem.missing.layer(Resource.imgc).tex(), Coord.of(m), Coord.of(sz.y - (m * 2)));
 	    }
+	}
+
+	private Text.Line text = null;
+	protected void drawtext(GOut g) {
+	    int tx = sz.y + UI.scale(5);
 	    try {
-		if(this.text == null)
-		    this.text = foundry().render(text());
+		if((this.text == null) || !valid(text.text)) {
+		    String text = text();
+		    this.text = foundry().render(text);
+		    if(tx + this.text.sz().x > sz.x) {
+			int len = this.text.charat(sz.x - tx - foundry().strsize("...").x);
+			this.text = foundry().render(text.substring(0, len) + "...");
+		    }
+		}
 		g.image(this.text.tex(), Coord.of(sz.y + UI.scale(5), (sz.y - this.text.sz().y) / 2));
 	    } catch(Loading l) {
 		Tex missing = foundry().render("...").tex();
-		g.image(missing, Coord.of(sz.y + UI.scale(5), (sz.y - this.text.sz().y) / 2));
+		g.image(missing, Coord.of(sz.y + UI.scale(5), (sz.y - missing.sz().y) / 2));
 		missing.dispose();
 	    }
 	}
 
+	public void draw(GOut g) {
+	    drawicon(g);
+	    drawtext(g);
+	}
+
+	public void dispose() {
+	    super.dispose();
+	    invalidate();
+	}
+
 	public void invalidate() {
-	    if(img != null)
+	    if(img != null) {
+		img.dispose();
 		img = null;
-	    if(text != null)
+	    }
+	    if(text != null) {
+		text.dispose();
 		text = null;
+	    }
+	}
+
+	public static class FromRes extends IconText {
+	    public final Indir<Resource> res;
+
+	    public FromRes(Coord sz, Indir<Resource> res) {
+		super(sz);
+		this.res = res;
+	    }
+
+	    public BufferedImage img() {
+		return(res.get().flayer(Resource.imgc).img);
+	    }
+
+	    public String text() {
+		Resource.Tooltip name = res.get().layer(Resource.tooltip);
+		return((name == null) ? "???" : name.t);
+	    }
 	}
 
 	public static IconText of(Coord sz, Indir<Resource> res) {
-	    return(new IconText(sz) {
-		    public BufferedImage img() {return(res.get().layer(Resource.imgc).img);}
-		    public String text() {return(res.get().layer(Resource.tooltip).t);}
-		});
+	    return(new FromRes(sz, res));
 	}
 
 	public static IconText of(Coord sz, Supplier<BufferedImage> img, Supplier<String> text) {

@@ -81,9 +81,7 @@ public class Following extends Moving {
 	    if(tgt != null) {
 		Skeleton.Pose cpose = getpose(tgt);
 		if(!hlpose || (cpose != lpose)) {
-		    Skeleton.BoneOffset bo = xfres.get().layer(Skeleton.BoneOffset.class, xfname);
-		    if(bo == null)
-			throw(new RuntimeException("No such boneoffset in " + xfres.get() + ": " + xfname));
+		    Skeleton.BoneOffset bo = xfres.get().flayer(Skeleton.BoneOffset.class, xfname);
 		    bxf = bo.forpose(lpose = cpose);
 		    hlpose = true;
 		}
@@ -101,5 +99,19 @@ public class Following extends Moving {
 	    }
 	}
 	return(xf);
+    }
+
+    @OCache.DeltaType(OCache.OD_FOLLOW)
+    public static class $follow implements OCache.Delta {
+	public void apply(Gob g, Message msg) {
+	    long oid = msg.uint32();
+	    if(oid != 0xffffffffl) {
+		Indir<Resource> xfres = OCache.Delta.getres(g, msg.uint16());
+		String xfname = msg.string();
+		g.setattr(new Following(g, oid, xfres, xfname));
+	    } else {
+		g.delattr(Following.class);
+	    }
+	}
     }
 }

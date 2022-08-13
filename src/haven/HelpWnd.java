@@ -56,7 +56,7 @@ public class HelpWnd extends BetterWindow {
 	super.tick(dt);
 	if(res != showing) {
 	    try {
-		text.settext(res.get().layer(Resource.pagina).text);
+		text.settext(res.get().flayer(Resource.pagina).text);
 		showing = res;
 	    } catch(Loading e) {}
 	}

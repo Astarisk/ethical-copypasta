@@ -27,9 +27,13 @@
 package haven;
 
 import java.util.*;
+import java.util.function.*;
 import java.io.*;
+import java.nio.file.*;
 import java.awt.image.*;
 import java.awt.Color;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.*;
 
 public class GobIcon extends GAttrib {
     private static final int size = UI.scale(20);
@@ -91,12 +95,84 @@ public class GobIcon extends GAttrib {
 	return(this.img);
     }
 
+    private static Consumer<UI> resnotif(String nm) {
+	return(ui -> {
+		Indir<Resource> resid = Resource.local().load(nm);
+		ui.sess.glob.loader.defer(() -> {
+			Resource res;
+			try {
+			    res = resid.get();
+			} catch(Loading l) {
+			    throw(l);
+			} catch(RuntimeException e) {
+			    ui.error("Could not play " + nm);
+			    return;
+			}
+			Audio.CS clip = Audio.fromres(res);
+			ui.sfx(clip);
+		    }, null);
+	    });
+    }
+
+    private static Consumer<UI> wavnotif(Path path) {
+	return(ui -> {
+		ui.sess.glob.loader.defer(() -> {
+			Audio.CS clip;
+			InputStream fail = null;
+			try {
+			    fail = Files.newInputStream(path);
+			    clip = Audio.PCMClip.fromwav(new BufferedInputStream(fail));
+			    fail = null;
+			} catch(IOException e) {
+			    String msg = e.getMessage();
+			    if(e instanceof FileSystemException)
+				msg = "Could not open file";
+			    ui.error("Could not play " + path + ": " + msg);
+			    return;
+			} finally {
+			    if(fail != null) {
+				try {
+				    fail.close();
+				} catch(IOException e) {
+				    new Warning(e, "unexpected error on close").issue();
+				}
+			    }
+			}
+			ui.sfx(clip);
+		    }, null);
+	    });
+    }
+
+    private static final Map<Object, Double> lastnotifs = new HashMap<>();
+    private static Consumer<UI> notiflimit(Consumer<UI> bk, Object id) {
+	return(ui -> {
+		double now = Utils.rtime();
+		synchronized(lastnotifs) {
+		    Double last = lastnotifs.get(id);
+		    if((last != null) && (now - last < 0.5))
+			return;
+		    lastnotifs.put(id, now);
+		}
+		bk.accept(ui);
+	    });
+    }
+
     public static class Setting implements Serializable {
 	public Resource.Spec res;
-	public boolean show, defshow;
+	public boolean show, defshow, notify;
+	public String resns;
+	public Path filens;
 
 	public Setting(Resource.Spec res) {
 	    this.res = res;
+	}
+
+	public Consumer<UI> notification() {
+	    if(resns != null)
+		return(notiflimit(resnotif(resns), resns));
+	    if(filens != null)
+		return(notiflimit(wavnotif(filens), filens));
+	    return(null);
 	}
     }
 
@@ -143,6 +219,17 @@ public class GobIcon extends GAttrib {
 		buf.adduint8(set.show ? 1 : 0);
 		buf.adduint8((byte)'d');
 		buf.adduint8(set.defshow ? 1 : 0);
+		if(set.notify) {
+		    buf.adduint8((byte)'n');
+		    buf.adduint8(1);
+		}
+		if(set.resns != null) {
+		    buf.adduint8((byte)'R');
+		    buf.addstring(set.resns);
+		} else if(set.filens != null) {
+		    buf.adduint8((byte)'W');
+		    buf.addstring(set.filens.toString());
+		}
 		buf.adduint8(0);
 	    }
 	    buf.addstring("");
@@ -176,6 +263,19 @@ public class GobIcon extends GAttrib {
 			set.defshow = (buf.uint8() != 0);
 			setdef = true;
 			break;
+		    case (int)'n':
+			set.notify = (buf.uint8() != 0);
+			break;
+		    case (int)'R':
+			set.resns = buf.string();
+			break;
+		    case (int)'W':
+			try {
+			    set.filens = Utils.path(buf.string());
+			} catch(RuntimeException e) {
+			    new Warning(e, "could not read path").issue();
+			}
+			break;
 		    case 0:
 			break data;
 		    default:
@@ -190,67 +290,229 @@ public class GobIcon extends GAttrib {
 	}
     }
 
+    public static class NotificationSetting {
+	public final String name, res;
+	public final Path wav;
+
+	private NotificationSetting(String name, String res, Path wav) {this.name = name; this.res = res; this.wav = wav;}
+	public NotificationSetting(String name, String res) {this(name, res, null);}
+	public NotificationSetting(String name, Path wav)   {this(name, null, wav);}
+	public NotificationSetting(Path wav) {this(wav.getFileName().toString(), wav);}
+
+	public boolean act(Setting conf) {
+	    return(Utils.eq(conf.resns, this.res) && Utils.eq(conf.filens, wav));
+	}
+
+	public static final NotificationSetting nil = new NotificationSetting("None", null, null);
+	public static final NotificationSetting other = new NotificationSetting("Select file...", null, null);
+	public static final List<NotificationSetting> builtin;
+
+	static {
+	    List<NotificationSetting> buf = new ArrayList<>();
+	    buf.add(new NotificationSetting("Bell 1", "sfx/hud/mmap/bell1"));
+	    buf.add(new NotificationSetting("Bell 2", "sfx/hud/mmap/bell2"));
+	    buf.add(new NotificationSetting("Bell 3", "sfx/hud/mmap/bell3"));
+	    buf.add(new NotificationSetting("Wood 1", "sfx/hud/mmap/wood1"));
+	    buf.add(new NotificationSetting("Wood 2", "sfx/hud/mmap/wood2"));
+	    buf.add(new NotificationSetting("Wood 3", "sfx/hud/mmap/wood3"));
+	    buf.add(new NotificationSetting("Wood 4", "sfx/hud/mmap/wood4"));
+	    builtin = buf;
+	}
+    }
+
     public static class SettingsWindow extends Window {
 	public final Settings conf;
 	private final Runnable save;
+	private final PackCont.LinPack cont;
+	private final IconList list;
+	private Widget setbox;
+
+	public static class Icon {
+	    public final Setting conf;
+	    public String name;
+
+	    public Icon(Setting conf) {this.conf = conf;}
+	}
+
+	private <T> Consumer<T> andsave(Consumer<T> main) {
+	    return(val -> {main.accept(val); if(save != null) save.run();});
+	}
 
 	private static final Text.Foundry elf = CharWnd.attrf;
 	private static final int elh = elf.height() + UI.scale(2);
-	public class IconList extends SListBox<Setting, IconList.IconLine> {
-	    private List<Setting> ordered = Collections.emptyList();
+	public class IconList extends SSearchBox<Icon, IconList.IconLine> {
+	    private List<Icon> ordered = Collections.emptyList();
 	    private Map<String, Setting> cur = null;
-	    private Map<Setting, String> reorder = null;
+	    private boolean reorder = false;
 
 	    private IconList(Coord sz) {
 		super(sz, elh);
 	    }
 
-	    public class IconLine extends ItemWidget<Setting> {
-		public IconLine(Coord sz, Setting conf) {
-		    super(IconList.this, sz, conf);
-		    Widget prev = adda(new CheckBox("").state(() -> conf.show).set(val -> {conf.show = val;}),
-				       sz.x - (sz.y / 2), sz.y / 2, 0.5, 0.5);
-		    add(SListWidget.IconText.of(Coord.of(prev.c.x - UI.scale(2), sz.y), () -> item.res.loadsaved(Resource.remote())), Coord.z);
+	    public class IconLine extends SListWidget.ItemWidget<Icon> {
+		public IconLine(Coord sz, Icon icon) {
+		    super(IconList.this, sz, icon);
+		    Widget prev;
+		    prev = adda(new CheckBox("").state(() -> icon.conf.notify).set(andsave(val -> icon.conf.notify = val)).settip("Notify"),
+				sz.x - UI.scale(2) - (sz.y / 2), sz.y / 2, 0.5, 0.5);
+		    prev = adda(new CheckBox("").state(() -> icon.conf.show).set(andsave(val -> icon.conf.show = val)).settip("Display"),
+				prev.c.x - UI.scale(2) - (sz.y / 2), sz.y / 2, 0.5, 0.5);
+		    add(SListWidget.IconText.of(Coord.of(prev.c.x - UI.scale(2), sz.y), () -> item.conf.res.loadsaved(Resource.remote())), Coord.z);
 		}
 	    }
 
-	    protected List<Setting> items() {return(ordered);}
-	    protected IconLine makeitem(Setting conf, int idx, Coord sz) {return(new IconLine(sz, conf));}
+	    protected boolean searchmatch(Icon icon, String text) {
+		return((icon.name != null) &&
+		       (icon.name.toLowerCase().indexOf(text.toLowerCase()) >= 0));
+	    }
+	    protected List<Icon> allitems() {return(ordered);}
+	    protected IconLine makeitem(Icon icon, int idx, Coord sz) {return(new IconLine(sz, icon));}
 
 	    public void tick(double dt) {
 		Map<String, Setting> cur = this.cur;
 		if(cur != conf.settings) {
 		    cur = conf.settings;
-		    ArrayList<Setting> ordered = new ArrayList<>(cur.values());
+		    ArrayList<Icon> ordered = new ArrayList<>(cur.size());
+		    for(Setting conf : cur.values())
+			ordered.add(new Icon(conf));
 		    this.cur = cur;
 		    this.ordered = ordered;
-		    reorder = new IdentityHashMap<>();
+		    reorder = true;
 		}
-		Map<Setting, String> order = reorder;
-		if(order != null) {
-		    reorder = null;
-		    for(Setting conf : ordered) {
-			if(!order.containsKey(conf)) {
+		if(reorder) {
+		    reorder = false;
+		    for(Icon icon : ordered) {
+			if(icon.name == null) {
 			    try {
-				Resource.Tooltip name = conf.res.loadsaved(Resource.remote()).layer(Resource.tooltip);
-				order.put(conf, (name == null) ? "???" : name.t);
+				Resource.Tooltip name = icon.conf.res.loadsaved(Resource.remote()).layer(Resource.tooltip);
+				icon.name = (name == null) ? "???" : name.t;
 			    } catch(Loading l) {
-				reorder = order;
+				reorder = true;
 			    }
 			}
 		    }
 		    Collections.sort(ordered, (a, b) -> {
-			    String an = order.get(a), bn = order.get(b);
-			    if((an == null) && (bn == null))
+			    if((a.name == null) && (b.name == null))
 				return(0);
-			    if(an == null)
+			    if(a.name == null)
 				return(1);
-			    if(bn == null)
+			    if(b.name == null)
 				return(-1);
-			    return(an.compareTo(bn));
+			    return(a.name.compareTo(b.name));
 			});
 		}
 		super.tick(dt);
+	    }
+
+	    public boolean keydown(java.awt.event.KeyEvent ev) {
+		if(ev.getKeyCode() == java.awt.event.KeyEvent.VK_SPACE) {
+		    if(sel != null) {
+			sel.conf.show = !sel.conf.show;
+			if(save != null)
+			    save.run();
+		    }
+		    return(true);
+		}
+		return(super.keydown(ev));
+	    }
+
+	    public void change(Icon icon) {
+		super.change(icon);
+		if(setbox != null) {
+		    setbox.destroy();
+		    setbox = null;
+		}
+		if(icon != null) {
+		    setbox = cont.after(new IconSettings(sz.x - UI.scale(10), icon.conf), list, UI.scale(5));
+		}
+	    }
+	}
+
+	public class IconSettings extends Widget {
+	    public final Setting conf;
+	    public final NotifBox nb;
+
+	    public IconSettings(int w, Setting conf) {
+		super(Coord.z);
+		this.conf = conf;
+		Widget prev = add(new CheckBox("Display").state(() -> conf.show).set(andsave(val -> conf.show = val)),
+				  0, 0);
+		add(new CheckBox("Notify").state(() -> conf.notify).set(andsave(val -> conf.notify = val)),
+		    w / 2, 0);
+		Button pb = new Button(UI.scale(50), "Play") {
+			protected void depress() {}
+			protected void unpress() {}
+			public void click() {play();}
+		    };
+		prev = add(new Label("Sound to play on notification:"), prev.pos("bl").adds(0, 5));
+		nb = new NotifBox(w - pb.sz.x - UI.scale(15));
+		addhl(prev.pos("bl").adds(0, 2), w, Frame.with(nb, false), pb);
+		pack();
+	    }
+
+	    public class NotifBox extends Dropbox<NotificationSetting> {
+		private final List<NotificationSetting> items = new ArrayList<>();
+
+		public NotifBox(int w) {
+		    super(w, 8, UI.scale(20));
+		    items.add(NotificationSetting.nil);
+		    for(NotificationSetting notif : NotificationSetting.builtin)
+			items.add(notif);
+		    if(conf.filens != null)
+			items.add(new NotificationSetting(conf.filens));
+		    items.add(NotificationSetting.other);
+		    for(NotificationSetting item : items) {
+			if(item.act(conf)) {
+			    sel = item;
+			    break;
+			}
+		    }
+		}
+
+		protected NotificationSetting listitem(int idx) {return(items.get(idx));}
+		protected int listitems() {return(items.size());}
+
+		protected void drawitem(GOut g, NotificationSetting item, int idx) {
+		    g.atext(item.name, Coord.of(0, g.sz().y / 2), 0.0, 0.5);
+		}
+
+		private void selectwav() {
+		    java.awt.EventQueue.invokeLater(() -> {
+			    JFileChooser fc = new JFileChooser();
+			    fc.setFileFilter(new FileNameExtensionFilter("PCM wave file", "wav"));
+			    if(fc.showOpenDialog(null) != JFileChooser.APPROVE_OPTION)
+				return;
+			    for(Iterator<NotificationSetting> i = items.iterator(); i.hasNext();) {
+				NotificationSetting item = i.next();
+				if(item.wav != null)
+				    i.remove();
+			    }
+			    NotificationSetting ws = new NotificationSetting(fc.getSelectedFile().toPath());
+			    items.add(items.indexOf(NotificationSetting.other), ws);
+			    change(ws);
+			});
+		}
+
+		public void change(NotificationSetting item) {
+		    super.change(item);
+		    if(item == NotificationSetting.other) {
+			selectwav();
+		    } else {
+			conf.resns = item.res;
+			conf.filens = item.wav;
+			if(save != null)
+			    save.run();
+		    }
+		}
+	    }
+
+	    private void play() {
+		NotificationSetting sel = nb.sel;
+		if(sel == null) sel = NotificationSetting.nil;
+		if(sel.res != null)
+		    resnotif(sel.res).accept(ui);
+		else if(sel.wav != null)
+		    wavnotif(sel.wav).accept(ui);
 	    }
 	}
 
@@ -258,8 +520,10 @@ public class GobIcon extends GAttrib {
 	    super(Coord.z, "Icon settings");
 	    this.conf = conf;
 	    this.save = save;
-	    Widget prev = add(new IconList(UI.scale(250, 500)), Coord.z);
-	    add(new CheckBox("Notification on newly seen icons") {
+	    add(this.cont = new PackCont.LinPack.VPack(), Coord.z).margin(UI.scale(5)).packpar(true);
+	    list = cont.last(new IconList(UI.scale(250, 500)), 0);
+	    cont.last(new HRuler(list.sz.x), 0);
+	    cont.last(new CheckBox("Notification on newly seen icons") {
 		    {this.a = conf.notify;}
 
 		    public void changed(boolean val) {
@@ -267,8 +531,22 @@ public class GobIcon extends GAttrib {
 			if(save != null)
 			    save.run();
 		    }
-		}, prev.pos("bl").adds(5, 5));
-	    pack();
+		}, UI.scale(5));
+	    cont.pack();
+	}
+    }
+
+    @OCache.DeltaType(OCache.OD_ICON)
+    public static class $icon implements OCache.Delta {
+	public void apply(Gob g, Message msg) {
+	    int resid = msg.uint16();
+	    Indir<Resource> res;
+	    if(resid == 65535) {
+		g.delattr(GobIcon.class);
+	    } else {
+		int ifl = msg.uint8();
+		g.setattr(new GobIcon(g, OCache.Delta.getres(g, resid)));
+	    }
 	}
     }
 }

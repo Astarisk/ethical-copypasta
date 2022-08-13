@@ -186,7 +186,7 @@ public class AlarmWindow extends Window {
 						AudioInputStream in = AudioSystem.getAudioInputStream(file);
 						AudioFormat tgtFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2,4, 44100, false);
 						AudioInputStream pcmStream = AudioSystem.getAudioInputStream(tgtFormat, in);
-						Audio.CS klippi = new Audio.PCMClip(pcmStream, 2);
+						Audio.CS klippi = new Audio.PCMClip(pcmStream, 2, 2);
 						((Audio.Mixer)Audio.player.stream).add(new Audio.VolAdjust(klippi, getVolume()/50.0));
 					} catch(UnsupportedAudioFileException e) {
 						e.printStackTrace();

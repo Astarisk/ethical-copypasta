@@ -122,6 +122,9 @@ public abstract class SListBox<I, W extends Widget> extends SListWidget<I, W> {
 	super.tick(dt);
     }
 
+    protected void drawbg(GOut g) {
+    }
+
     protected void drawbg(GOut g, I item, int idx, Area area) {
 	g.chcolor(((idx % 2) == 0) ? every : other);
 	g.frect2(area.ul, area.br);
@@ -136,11 +139,12 @@ public abstract class SListBox<I, W extends Widget> extends SListWidget<I, W> {
 
     protected void drawslot(GOut g, I item, int idx, Area area) {
 	drawbg(g, item, idx, area);
-	if(item == sel)
+	if((sel != null) && (sel == item))
 	    drawsel(g, item, idx, area);
     }
 
     public void draw(GOut g) {
+	drawbg(g);
 	if(curi != null) {
 	    List<? extends I> items = items();
 	    int sy = sb.val;
@@ -178,7 +182,7 @@ public abstract class SListBox<I, W extends Widget> extends SListWidget<I, W> {
 	super.resize(sz);
 	sb.resize(sz.y);
 	sb.c = new Coord(sz.x - sb.sz.x, 0);
-	h = ((sz.y + itemh + marg - 2) / (itemh + marg)) + 1;
+	h = Math.max(((sz.y + itemh + marg - 2) / (itemh + marg)), 0) + 1;
     }
 
     public void display(int idx) {
@@ -193,5 +197,9 @@ public abstract class SListBox<I, W extends Widget> extends SListWidget<I, W> {
 	int p = items().indexOf(item);
 	if(p >= 0)
 	    display(p);
+    }
+
+    public void display() {
+	display(sel);
     }
 }
