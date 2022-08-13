@@ -26,6 +26,8 @@
 
 package haven;
 
+import haven.purus.database.DbCache;
+
 import java.io.*;
 
 public interface ResCache {
@@ -36,7 +38,7 @@ public interface ResCache {
     
     public static class StupidJavaCodeContainer {
 	private static ResCache makeglobal() {
-	    return(HashDirCache.create());
+	    return new DbCache();
 	}
     }
 
