@@ -27,11 +27,14 @@
 package haven.resutil;
 
 import haven.*;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-public class Curiosity extends ItemInfo.Tip {
+public class Curiosity extends ItemInfo.Tip implements GItem.ColorInfo {
+    public final Color better = new Color(0, 255, 0, 64), worse = new Color(255, 0, 0, 64);
     public final int exp, mw, enc, time;
+    public final UI ui;
 
     public Curiosity(Owner owner, int exp, int mw, int enc, int time) {
 	super(owner);
@@ -41,6 +44,13 @@ public class Curiosity extends ItemInfo.Tip {
 	this.time = time;
 	if(owner instanceof GItem)
 		((GItem) owner).studytime = time / Glob.SERVER_TIME_RATIO;
+	UI ui = null;
+	if(owner instanceof Widget) {
+	    Widget wdg = (Widget)owner;
+	    if(wdg.getparent(CharWnd.class) != null)
+		ui = wdg.ui;
+	}
+	this.ui = ui;
     }
 
     static String[] units = {"s", "m", "h", "d"};
@@ -67,7 +77,7 @@ public class Curiosity extends ItemInfo.Tip {
     public BufferedImage tipimg() {
 	StringBuilder buf = new StringBuilder();
 	if(exp > 0)
-	    buf.append(String.format("Learning points: $col[192,192,255]{%s}\n", Utils.thformat(exp)));
+	    buf.append(String.format("Learning points: $col[192,192,255]{%s} ($col[192,192,255]{%s}/h)\n", Utils.thformat(exp), Utils.thformat(Math.round(exp / (time / 3600.0)))));
 	if(time > 0)
 	    buf.append(String.format("Study time: $col[192,255,192]{%s}" + " (LP/hour: $col[192,192,255]{%d})\n", timefmt(time), (int)(exp / (time / Glob.SERVER_TIME_RATIO / 60 / 60.0))));
 	if(mw > 0)
@@ -86,5 +96,24 @@ public class Curiosity extends ItemInfo.Tip {
 		}
 
 		return(RichText.render(buf.toString(), 0).img);
+    }
+
+    public Color olcol() {
+	Object tip = (ui == null) ? null : ui.lasttip;
+	if(tip instanceof ItemInfo.InfoTip) {
+	    Curiosity that = ItemInfo.find(Curiosity.class, ((ItemInfo.InfoTip)tip).info());
+	    if(that != null) {
+		double crate = (double)that.exp / (double)that.time;
+		double trate = (double)this.exp / (double)this.time;
+		if(Debug.ff)
+		    Debug.dump(trate, crate);
+		double ε = 0.5 / 3600.0;
+		if(trate < crate - ε)
+		    return(worse);
+		if(trate > crate + ε)
+		    return(better);
+	    }
+	}
+	return(null);
     }
 }

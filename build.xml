@@ -1,86 +1,120 @@
 <?xml version="1.0" ?>
 
 <project name="hafen" default="deftgt">
+	<property name="ext-lib-base" value="http://www.havenandhearth.com/java" />
 	<property name="version">1.4.0</property>
-  <target name="build-env">
-    <mkdir dir="build" />
-    <mkdir dir="build/classes" />
-	<mkdir dir="build/lib" />
-    <available property="has-res-jar" file="build/lib/hafen-res.jar" />
-    <available property="has-buildinfo" file="build/classes/buildinfo" />
-    <available property="unpacked-lib" file="build/classes-lib" />
-  </target>
+	<target name="build-env">
+		<mkdir dir="build" />
+		<mkdir dir="build/classes" />
+		<mkdir dir="build/lib" />
+		<available property="has-res-jar" file="build/lib/hafen-res.jar" />
+		<available property="has-buildinfo" file="build/classes/buildinfo" />
+		<available property="unpacked-lib" file="build/classes-lib" />
+	</target>
 
-  <target name="buildinfo" depends="build-env" unless="has-buildinfo">
-    <exec executable="git" outputproperty="gitrev" failifexecutionfails="false">
-      <arg line="rev-parse HEAD" />
-    </exec>
-	  <echo file="build/classes/buildinfo" xml:space="default">${version},${gitrev}</echo>
-  </target>
+	<target name="buildinfo" depends="build-env" unless="has-buildinfo">
+		<exec executable="git" outputproperty="gitrev" failifexecutionfails="false">
+			<arg line="rev-parse HEAD" />
+		</exec>
+		<echo file="build/classes/buildinfo" xml:space="default">${version},${gitrev}</echo>
+	</target>
 
-  <target name="hafen-client" depends="build-env">
-    <javac srcdir="src" destdir="build/classes" debug="on"
-	   source="1.8" target="15" includeantruntime="no">
-      <classpath>
-	<pathelement path="lib/jogl.jar" />
-	<pathelement path="lib/gluegen-rt.jar" />
-	<pathelement path="lib/jnlp.jar" />
-	<pathelement path="lib/jglob.jar" />
-	<pathelement path="lib/json.jar" />
-	<pathelement path="lib/py4j-0.10.9.2.jar" />
-	<pathelement path="lib/jackson-core.jar"/>
-	<pathelement path="lib/sentry-4.3.0.jar"/>
-	<pathelement path="lib/slf4j-simple.jar"/>
-	  <pathelement path="lib/slf4j-api.jar"/>
-	  <pathelement path="lib/gson-2.8.5.jar"/>
-	  </classpath>
-      <compilerarg value="-Xlint:unchecked" />
-      <compilerarg value="-Xlint:-options" />
-      <!-- <compilerarg value="-Xbarda" /> -->
-    </javac>
-    <copy todir="build/classes">
-      <fileset dir="src" excludes="**/*.java" />
-    </copy>
-    <copy todir="build/classes/haven" file="etc/ressrv.crt" />
-    <copy todir="build/classes/haven" file="etc/authsrv.crt" />
-    <copy todir="build/classes/haven" file="etc/res-preload" />
-    <copy todir="build/classes/haven" file="etc/res-bgload" />
-    <copy todir="build/classes/haven" file="etc/icon.png" />
-  </target>
 
-  <target name="appletview" depends="build-env">
-    <copy file="etc/applet.html" todir="build" />
-  </target>
+	<macrodef name="extlib">
+		<attribute name="name" />
+		<attribute name="path" />
+		<attribute name="url" />
+		<sequential>
+			<local name="@{name}-files" />
+			<mkdir dir="@{path}" />
+			<loadresource property="@{name}-files">
+				<url url="@{url}/lib-files" />
+				<filterchain>
+					<prefixlines prefix="@{url}/" />
+				</filterchain>
+			</loadresource>
+			<get dest="@{path}/" usetimestamp="true">
+				<resourcelist>
+					<propertyresource name="@{name}-files" />
+				</resourcelist>
+			</get>
+			<touch file="@{path}/has-@{name}" />
+		</sequential>
+	</macrodef>
 
-  <target name="lib-classes" depends="build-env" unless="unpacked-lib">
-    <mkdir dir="build/classes-lib" />
-    <unjar src="lib/jglob.jar" dest="build/classes-lib">
-      <patternset excludes="META-INF/**" />
-    </unjar>
-  </target>
+	<target name="extlib-env">
+		<mkdir dir="lib/ext" />
+		<available property="extlib/has-jogl" file="lib/ext/jogl/has-jogl" />
+	</target>
 
-  <target name="jar" depends="hafen-client,buildinfo,lib-classes">
-    <jar destfile="build/hafen.jar" update="true">
-      <fileset dir="build/classes" />
-      <fileset dir="build/classes-lib" />
-      <manifest>
-	<attribute name="Main-Class" value="haven.MainFrame" />
-	<attribute name="Class-Path" value="lib/gson-2.8.5.jar lib/slf4j-api.jar lib/slf4j-simple.jar lib/jackson-core.jar lib/sentry-4.3.0.jar lib/py4j-0.10.9.2.jar lib/json.jar lib/sqlite-jdbc-3.32.3.2.jar lib/jogl.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar lib/pasta-res.jar" />
-      </manifest>
-    </jar>
-    <chmod file="build/hafen.jar" perm="a+x" />
-  </target>
+	<target name="extlib/jogl" depends="extlib-env" unless="extlib/has-jogl">
+		<extlib name="jogl" path="lib/ext/jogl" url="${ext-lib-base}/jogl/current" />
+	</target>
 
-  <target name="res-jar" depends="build-env">
-    <get src="http://www.havenandhearth.com/java/builtin-res.jar" dest="lib/builtin-res.jar"
-	 usetimestamp="true" />
-    <get src="http://www.havenandhearth.com/java/hafen-res.jar" dest="lib/hafen-res.jar"
-	 usetimestamp="true" />
-    <available property="lib-res-jar" file="lib/hafen-res.jar" />
-    <fail unless="lib-res-jar" message="hafen-res.jar not available" />
-    <available property="lib-builtin-jar" file="lib/builtin-res.jar" />
-    <fail unless="lib-builtin-jar" message="builtin-res.jar not available" />
-  </target>
+
+	<target name="hafen-client" depends="build-env, extlib/jogl">
+		<javac srcdir="src" destdir="build/classes" debug="on"
+			   source="1.8" target="15" includeantruntime="no">
+			<classpath>
+				<pathelement path="lib/ext/jogl/jogl-all.jar" />
+				<pathelement path="lib/ext/jogl/gluegen-rt.jar" />
+				<pathelement path="lib/jnlp.jar" />
+				<pathelement path="lib/jglob.jar" />
+				<pathelement path="lib/json.jar" />
+				<pathelement path="lib/py4j-0.10.9.2.jar" />
+				<pathelement path="lib/jackson-core.jar"/>
+				<pathelement path="lib/sentry-4.3.0.jar"/>
+				<pathelement path="lib/slf4j-simple.jar"/>
+				<pathelement path="lib/slf4j-api.jar"/>
+				<pathelement path="lib/gson-2.8.5.jar"/>
+			</classpath>
+			<compilerarg value="-Xlint:unchecked" />
+			<compilerarg value="-Xlint:-options" />
+			<!-- <compilerarg value="-Xbarda" /> -->
+		</javac>
+		<copy todir="build/classes">
+			<fileset dir="src" excludes="**/*.java" />
+		</copy>
+		<copy todir="build/classes/haven" file="etc/ressrv.crt" />
+		<copy todir="build/classes/haven" file="etc/authsrv.crt" />
+		<copy todir="build/classes/haven" file="etc/res-preload" />
+		<copy todir="build/classes/haven" file="etc/res-bgload" />
+		<copy todir="build/classes/haven" file="etc/icon.png" />
+	</target>
+
+	<target name="appletview" depends="build-env">
+		<copy file="etc/applet.html" todir="build" />
+	</target>
+
+	<target name="lib-classes" depends="build-env" unless="unpacked-lib">
+		<mkdir dir="build/classes-lib" />
+		<unjar src="lib/jglob.jar" dest="build/classes-lib">
+			<patternset excludes="META-INF/**" />
+		</unjar>
+	</target>
+
+	<target name="jar" depends="hafen-client, buildinfo, lib-classes">
+		<jar destfile="build/hafen.jar" update="true">
+			<fileset dir="build/classes" />
+			<fileset dir="build/classes-lib" />
+			<manifest>
+				<attribute name="Main-Class" value="haven.MainFrame" />
+				<attribute name="Class-Path" value="lib/gson-2.8.5.jar lib/slf4j-api.jar lib/slf4j-simple.jar lib/jackson-core.jar lib/sentry-4.3.0.jar lib/py4j-0.10.9.2.jar lib/json.jar lib/sqlite-jdbc-3.32.3.2.jar lib/jogl-all.jar lib/gluegen-rt.jar lib/builtin-res.jar lib/hafen-res.jar lib/pasta-res.jar" />
+			</manifest>
+		</jar>
+		<chmod file="build/hafen.jar" perm="a+x" />
+	</target>
+
+	<target name="res-jar" depends="build-env" unless="has-res-jar">
+		<get src="${ext-lib-base}/builtin-res.jar" dest="lib/ext/builtin-res.jar"
+			 usetimestamp="true" />
+		<get src="${ext-lib-base}/hafen-res.jar" dest="lib/ext/hafen-res.jar"
+			 usetimestamp="true" />
+		<available property="lib-res-jar" file="lib/ext/hafen-res.jar" />
+		<fail unless="lib-res-jar" message="hafen-res.jar not available" />
+		<available property="lib-builtin-jar" file="lib/ext/builtin-res.jar" />
+		<fail unless="lib-builtin-jar" message="builtin-res.jar not available" />
+	</target>
 
 	<target name="custom-encode" depends="build-env">
 		<mkdir dir="build/custom-res"/>
@@ -117,42 +151,45 @@
 		</javadoc>
 	</target>
 
-  <target name="jars" depends="build-env, jar, res-jar, custom-jar, alarms, scripts">
-    <copy todir="build/lib">
-      <fileset dir="lib">
-	<include name="jogl.jar" />
-	<include name="gluegen-rt.jar" />
-	<include name="hafen-res.jar" />
-	<include name="builtin-res.jar" />
-	<include name="sqlite-jdbc-3.32.3.2.jar" />
-	<include name="py4j-0.10.9.2.jar" />
-	<include name="json.jar" />
-	<include name="sentry-4.3.0.jar"/>
-	<include name="jackson-core.jar"/>
-	<include name="slf4j-simple.jar"/>
-	<include name="slf4j-api.jar"/>
-	<include name="gson-2.8.5.jar"/>
-      </fileset>
-      <fileset dir="lib/jogl-natives" />
-    </copy>
-	<copy todir="build" file="etc/run.sh" />
-  </target>
-  
-  <target name="deftgt" depends="jars, appletview" />
+	<target name="jars" depends="build-env, jar, extlib/jogl, res-jar, custom-jar, alarms, scripts">
+		<copy todir="build/lib">
+			<fileset dir="lib">
+				<include name="sqlite-jdbc-3.32.3.2.jar" />
+				<include name="py4j-0.10.9.2.jar" />
+				<include name="json.jar" />
+				<include name="sentry-4.3.0.jar"/>
+				<include name="jackson-core.jar"/>
+				<include name="slf4j-simple.jar"/>
+				<include name="slf4j-api.jar"/>
+				<include name="gson-2.8.5.jar"/>
+			</fileset>
+			<fileset dir="lib/ext">
+				<include name="hafen-res.jar" />
+				<include name="builtin-res.jar" />
+			</fileset>
+			<fileset dir="lib/ext/jogl">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="build" file="etc/run.sh" />
+		<copy file="etc/ansgar-config.properties" tofile="build/lib/haven-config.properties" />
+		<chmod file="build/lib/hafen.jar" perm="a+x" />
+	</target>
+	<target name="deftgt" depends="jars"/>
 
-  <target name="run" depends="jars">
-    <java jar="build/hafen.jar" fork="true">
-      <sysproperty key="haven.defserv" value="game.havenandhearth.com" />
-      <sysproperty key="haven.resurl" value="https://game.havenandhearth.com/res/" />
-      <sysproperty key="haven.cachebase" value="http://game.havenandhearth.com/render/" />
-      <sysproperty key="haven.mapbase" value="http://game.havenandhearth.com/java/" />
-      <sysproperty key="haven.dbtext" value="on" />
-    </java>
-  </target>
-  
-  <target name="clean">
-    <delete dir="build" />
-  </target>
+	<target name="run" depends="jars">
+		<java jar="build/hafen.jar" fork="true">
+			<sysproperty key="haven.defserv" value="game.havenandhearth.com" />
+			<sysproperty key="haven.resurl" value="https://game.havenandhearth.com/res/" />
+			<sysproperty key="haven.cachebase" value="http://game.havenandhearth.com/render/" />
+			<sysproperty key="haven.mapbase" value="http://game.havenandhearth.com/java/" />
+			<sysproperty key="haven.dbtext" value="on" />
+		</java>
+	</target>
+
+	<target name="clean">
+		<delete dir="build" />
+	</target>
 
 	<target name="dist" depends="jars, doc">
 		<zip destfile="build/dist.zip" update="true">
@@ -160,15 +197,16 @@
 			<zipfileset dir="build/lib" includes="gson-2.8.5.jar slf4j-api.jar slf4j-simple.jar jackson-core.jar sentry-4.3.0.jar py4j-0.10.9.2.jar json.jar sqlite-jdbc-3.32.3.2.jar pasta-res.jar alarms" prefix="lib/"/>
 		</zip>
 	</target>
-  
-  <target name="profile" depends="jars">
-    <nbprofiledirect>
-    </nbprofiledirect>
-      <java fork="true" jar="build/hafen.jar">
-        <jvmarg value="${profiler.info.jvmargs.agent}" />
-        <sysproperty key="haven.dbtext" value="on" />
-        <sysproperty key="haven.defserv" value="sh.seatribe.se" />
-        <sysproperty key="haven.resdir" value="/home/fredrik/src/hafen/res" />
-      </java>
-  </target>
+
+	<target name="profile" depends="jars">
+		<nbprofiledirect>
+		</nbprofiledirect>
+		<java fork="true" jar="build/hafen.jar">
+			<jvmarg value="${profiler.info.jvmargs.agent}" />
+			<sysproperty key="haven.dbtext" value="on" />
+			<sysproperty key="haven.defserv" value="sh.seatribe.se" />
+			<sysproperty key="haven.resdir" value="/home/fredrik/src/hafen/res" />
+		</java>
+		<delete dir="lib/ext" />
+	</target>
 </project>
