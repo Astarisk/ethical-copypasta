@@ -53,7 +53,7 @@
 
 
 	<target name="hafen-client" depends="build-env, extlib/jogl">
-		<javac srcdir="src" destdir="build/classes" debug="on"
+		<javac srcdir="src" destdir="build/classes" debug="on" nowarn="on"
 			   source="1.8" target="15" includeantruntime="no">
 			<classpath>
 				<pathelement path="lib/ext/jogl/jogl-all.jar" />

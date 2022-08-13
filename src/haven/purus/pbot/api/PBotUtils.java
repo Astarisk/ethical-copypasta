@@ -302,7 +302,7 @@ public class PBotUtils {
 
 	public int combatState() {
 		if(pBotSession.gui.fv.current != null) {
-			return pBotSession.gui.fv.curgive.state;
+			return pBotSession.gui.fv.curdisp.give.state;
 		}
 		return -1;
 	}

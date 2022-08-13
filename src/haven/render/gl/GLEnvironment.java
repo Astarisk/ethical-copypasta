@@ -43,6 +43,8 @@ public class GLEnvironment implements Environment {
     final Object prepmon = new Object();
     final Collection<GLObject> disposed = new LinkedList<>();
     final List<GLQuery> queries = new LinkedList<>(); // Synchronized on drawmon
+    final Queue<Runnable> callbacks = new LinkedList<>();
+    Thread cbthread = null;
     final Queue<GLRender> submitted = new LinkedList<>();
     final int nilfbo_id, nilfbo_db;
     Area wnd;
@@ -191,9 +193,7 @@ public class GLEnvironment implements Environment {
     }
 
     public GLRender render() {
-	GLRender ret = new GLRender(this);
-	seqreg(ret);
-	return(ret);
+	return(new GLRender(this));
     }
 
     public GLDrawList drawlist() {
@@ -206,6 +206,53 @@ public class GLEnvironment implements Environment {
 
     public Area shape() {
 	return(wnd);
+    }
+
+    private void ckcbt() {
+	synchronized(callbacks) {
+	    if(!callbacks.isEmpty() && (cbthread == null)) {
+		cbthread = new HackThread(this::cbloop, "Render-query callback thread");
+		cbthread.setDaemon(true);
+		cbthread.start();
+	    }
+	}
+    }
+
+    private void cbloop() {
+	try {
+	    double last = Utils.rtime(), now = last;
+	    while(true) {
+		Runnable cb;
+		synchronized(callbacks) {
+		    while(callbacks.isEmpty()) {
+			if(now - last >= 5) {
+			    cbthread = null;
+			    return;
+			}
+			callbacks.wait((int)((last + 6 - now) * 1000));
+			now = Utils.rtime();
+		    }
+		    cb = callbacks.remove();
+		    last = now;
+		}
+		cb.run();
+	    }
+	} catch(InterruptedException e) {
+	} finally {
+	    synchronized(callbacks) {
+		if(cbthread == Thread.currentThread())
+		    cbthread = null;
+		ckcbt();
+	    }
+	}
+    }
+
+    void callback(Runnable cb) {
+	synchronized(callbacks) {
+	    callbacks.add(cb);
+	    callbacks.notifyAll();
+	    ckcbt();
+	}
     }
 
     private void checkqueries(GL3 gl) {
@@ -285,7 +332,7 @@ public class GLEnvironment implements Environment {
 		    } catch(Exception exc) {
 			throw(new BGL.BGLException(prep.gl, null, exc));
 		    }
-		    sequnreg(prep);
+		    prep.dispose();
 		}
 		for(GLRender cmd : copy) {
 		    BufferBGL xf = new BufferBGL(16);
@@ -298,7 +345,7 @@ public class GLEnvironment implements Environment {
 		    } catch(Exception exc) {
 			throw(new BGL.BGLException(cmd.gl, null, exc));
 		    }
-		    sequnreg(cmd);
+		    cmd.dispose();
 		}
 		checkqueries(gl);
 		disposeall().run(gl);
@@ -343,7 +390,7 @@ public class GLEnvironment implements Environment {
 	    }
 	}
 	if(inv)
-	    sequnreg(gcmd);
+	    gcmd.dispose();
     }
 
     public void submitwait() throws InterruptedException {
@@ -380,19 +427,18 @@ public class GLEnvironment implements Environment {
 
     public FillBuffer fillbuf(DataBuffer tgt, int from, int to) {
 	if((from == 0) && (to == tgt.size())) {
-	    if((tgt instanceof VertexArray.Buffer) && (((VertexArray.Buffer)tgt).ro instanceof StreamBuffer))
-		return(((StreamBuffer)(((VertexArray.Buffer)tgt).ro)).new Fill());
-	    if((tgt instanceof Model.Indices) && (((Model.Indices)tgt).ro instanceof StreamBuffer))
-		return(((StreamBuffer)(((Model.Indices)tgt).ro)).new Fill());
+	    StreamBuffer stb;
+	    if((tgt instanceof VertexArray.Buffer) && ((stb = GLReference.get(((VertexArray.Buffer)tgt).ro, StreamBuffer.class)) != null))
+		return(stb.new Fill());
+	    if((tgt instanceof Model.Indices) && ((stb = GLReference.get(((Model.Indices)tgt).ro, StreamBuffer.class)) != null))
+		return(stb.new Fill());
 	}
 	return(new FillBuffers.Array(to - from));
     }
 
     GLRender prepare() {
-	if(prep == null) {
+	if(prep == null)
 	    prep = new GLRender(this);
-	    seqreg(prep);
-	}
 	return(prep);
     }
     void prepare(GLObject obj) {
@@ -424,10 +470,10 @@ public class GLEnvironment implements Environment {
 	    }
 	    case STREAM: {
 		StreamBuffer ret;
-		if(!(buf.ro instanceof StreamBuffer) || ((ret = ((StreamBuffer)buf.ro)).rbuf.env != this)) {
+		if(((ret = GLReference.get(buf.ro, StreamBuffer.class)) == null) || (ret.rbuf.env != this)) {
 		    if(buf.ro != null)
 			buf.ro.dispose();
-		    buf.ro = ret = new StreamBuffer(this, buf.size());
+		    buf.ro = new GLReference<>(ret = new StreamBuffer(this, buf.size()));
 		    StreamBuffer.Fill data = (buf.init == null) ? null : (StreamBuffer.Fill)buf.init.fill(buf, this);
 		    StreamBuffer jdret = ret;
 		    GLBuffer rbuf = ret.rbuf;
@@ -450,10 +496,10 @@ public class GLEnvironment implements Environment {
 	    }
 	    case STATIC: {
 		GLBuffer ret;
-		if(!(buf.ro instanceof GLBuffer) || ((ret = ((GLBuffer)buf.ro)).env != this)) {
+		if(((ret = GLReference.get(buf.ro, GLBuffer.class)) == null) || (ret.env != this)) {
 		    if(buf.ro != null)
 			buf.ro.dispose();
-		    buf.ro = ret = new GLBuffer(this);
+		    buf.ro = new GLReference<>(ret = new GLBuffer(this));
 		    FillBuffers.Array data = (buf.init == null) ? null : (FillBuffers.Array)buf.init.fill(buf, this);
 		    GLBuffer jdret = ret;
 		    prepare((GLRender g) -> {
@@ -485,10 +531,10 @@ public class GLEnvironment implements Environment {
 	    }
 	    case STREAM: {
 		StreamBuffer ret;
-		if(!(buf.ro instanceof StreamBuffer) || ((ret = ((StreamBuffer)buf.ro)).rbuf.env != this)) {
+		if(((ret = GLReference.get(buf.ro, StreamBuffer.class)) == null) || (ret.rbuf.env != this)) {
 		    if(buf.ro != null)
 			buf.ro.dispose();
-		    buf.ro = ret = new StreamBuffer(this, buf.size());
+		    buf.ro = new GLReference<>(ret = new StreamBuffer(this, buf.size()));
 		    StreamBuffer.Fill data = (buf.init == null) ? null : (StreamBuffer.Fill)buf.init.fill(buf, this);
 		    StreamBuffer jdret = ret;
 		    GLBuffer rbuf = ret.rbuf;
@@ -511,10 +557,10 @@ public class GLEnvironment implements Environment {
 	    }
 	    case STATIC: {
 		GLBuffer ret;
-		if(!(buf.ro instanceof GLBuffer) || ((ret = ((GLBuffer)buf.ro)).env != this)) {
+		if(((ret = GLReference.get(buf.ro, GLBuffer.class)) == null) || (ret.env != this)) {
 		    if(buf.ro != null)
 			buf.ro.dispose();
-		    buf.ro = ret = new GLBuffer(this);
+		    buf.ro = new GLReference<>(ret = new GLBuffer(this));
 		    FillBuffers.Array data = (buf.init == null) ? null : (FillBuffers.Array)buf.init.fill(buf, this);
 		    GLBuffer jdret = ret;
 		    prepare((GLRender g) -> {
@@ -536,21 +582,21 @@ public class GLEnvironment implements Environment {
     GLVertexArray prepare(Model mod, GLProgram prog) {
 	synchronized(mod) {
 	    GLVertexArray.ProgIndex idx;
-	    if(!(mod.ro instanceof GLVertexArray.ProgIndex) || ((idx = ((GLVertexArray.ProgIndex)mod.ro)).env != this)) {
+	    if(((idx = GLReference.get(mod.ro, GLVertexArray.ProgIndex.class)) == null) || (idx.env != this)) {
 		if(mod.ro != null)
 		    mod.ro.dispose();
-		mod.ro = idx = new GLVertexArray.ProgIndex(mod, this);
+		mod.ro = new GLReference<>(idx = new GLVertexArray.ProgIndex(this, mod));
 	    }
-	    return(idx.get(prog));
+	    return(idx.get(prog, mod));
 	}
     }
     GLTexture.Tex2D prepare(Texture2D tex) {
 	synchronized(tex) {
 	    GLTexture.Tex2D ret;
-	    if(!(tex.ro instanceof GLTexture.Tex2D) || ((ret = (GLTexture.Tex2D)tex.ro).env != this)) {
+	    if(((ret = GLReference.get(tex.ro, GLTexture.Tex2D.class)) == null) || (ret.env != this)) {
 		if(tex.ro != null)
 		    tex.ro.dispose();
-		tex.ro = ret = GLTexture.Tex2D.create(this, tex);
+		tex.ro = new GLReference<>(ret = GLTexture.Tex2D.create(this, tex));
 	    }
 	    return(ret);
 	}
@@ -566,10 +612,10 @@ public class GLEnvironment implements Environment {
     GLTexture.Tex3D prepare(Texture3D tex) {
 	synchronized(tex) {
 	    GLTexture.Tex3D ret;
-	    if(!(tex.ro instanceof GLTexture.Tex3D) || ((ret = (GLTexture.Tex3D)tex.ro).env != this)) {
+	    if(((ret = GLReference.get(tex.ro, GLTexture.Tex3D.class)) == null) || (ret.env != this)) {
 		if(tex.ro != null)
 		    tex.ro.dispose();
-		tex.ro = ret = GLTexture.Tex3D.create(this, tex);
+		tex.ro = new GLReference<>(ret = GLTexture.Tex3D.create(this, tex));
 	    }
 	    return(ret);
 	}
@@ -585,10 +631,10 @@ public class GLEnvironment implements Environment {
     GLTexture.Tex2DArray prepare(Texture2DArray tex) {
 	synchronized(tex) {
 	    GLTexture.Tex2DArray ret;
-	    if(!(tex.ro instanceof GLTexture.Tex2DArray) || ((ret = (GLTexture.Tex2DArray)tex.ro).env != this)) {
+	    if(((ret = GLReference.get(tex.ro, GLTexture.Tex2DArray.class)) == null) || (ret.env != this)) {
 		if(tex.ro != null)
 		    tex.ro.dispose();
-		tex.ro = ret = GLTexture.Tex2DArray.create(this, tex);
+		tex.ro = new GLReference<>(ret = GLTexture.Tex2DArray.create(this, tex));
 	    }
 	    return(ret);
 	}
@@ -604,10 +650,10 @@ public class GLEnvironment implements Environment {
     GLTexture.Tex2DMS prepare(Texture2DMS tex) {
 	synchronized(tex) {
 	    GLTexture.Tex2DMS ret;
-	    if(!(tex.ro instanceof GLTexture.Tex2DMS) || ((ret = (GLTexture.Tex2DMS)tex.ro).env != this)) {
+	    if(((ret = GLReference.get(tex.ro, GLTexture.Tex2DMS.class)) == null) || (ret.env != this)) {
 		if(tex.ro != null)
 		    tex.ro.dispose();
-		tex.ro = ret = GLTexture.Tex2DMS.create(this, tex);
+		tex.ro = new GLReference<>(ret = GLTexture.Tex2DMS.create(this, tex));
 	    }
 	    return(ret);
 	}
@@ -623,10 +669,10 @@ public class GLEnvironment implements Environment {
     GLTexture.TexCube prepare(TextureCube tex) {
 	synchronized(tex) {
 	    GLTexture.TexCube ret;
-	    if(!(tex.ro instanceof GLTexture.TexCube) || ((ret = (GLTexture.TexCube)tex.ro).env != this)) {
+	    if(((ret = GLReference.get(tex.ro, GLTexture.TexCube.class)) == null) || (ret.env != this)) {
 		if(tex.ro != null)
 		    tex.ro.dispose();
-		tex.ro = ret = GLTexture.TexCube.create(this, tex);
+		tex.ro = new GLReference<>(ret = GLTexture.TexCube.create(this, tex));
 	    }
 	    return(ret);
 	}
@@ -831,16 +877,19 @@ public class GLEnvironment implements Environment {
     }
 
     public boolean compatible(Texture ob) {
-	return((ob.ro != null) && (ob.ro instanceof GLObject) && (((GLObject)ob.ro).env == this));
+	GLObject ro = GLReference.get(ob.ro, GLObject.class);
+	return((ro != null) && (ro.env == this));
     }
 
     public boolean compatible(DataBuffer ob) {
 	if(ob instanceof Model.Indices) {
-	    Model.Indices buf = (Model.Indices)ob;
-	    return((buf.ro != null) && (buf.ro instanceof GLObject) && (((GLObject)buf.ro).env == this));
+	    Disposable ro = GLReference.get(((Model.Indices)ob).ro, Disposable.class);
+	    if(ro instanceof StreamBuffer) ro = ((StreamBuffer)ro).rbuf;
+	    return((ro != null) && (ro instanceof GLObject) && (((GLObject)ro).env == this));
 	} else if(ob instanceof VertexArray.Buffer) {
-	    VertexArray.Buffer buf = (VertexArray.Buffer)ob;
-	    return((buf.ro != null) && (buf.ro instanceof GLObject) && (((GLObject)buf.ro).env == this));
+	    Disposable ro = GLReference.get(((VertexArray.Buffer)ob).ro, Disposable.class);
+	    if(ro instanceof StreamBuffer) ro = ((StreamBuffer)ro).rbuf;
+	    return((ro != null) && (ro instanceof GLObject) && (((GLObject)ro).env == this));
 	} else {
 	    throw(new NotImplemented());
 	}
@@ -869,24 +918,23 @@ public class GLEnvironment implements Environment {
 	    Warning.warn("warning: dispose queue size increased to " + nsz);
     }
 
-    void seqreg(GLRender r) {
+    int seqreg() {
 	synchronized(seqmon) {
-	    if(r.dispseq != 0)
-		throw(new IllegalStateException());
-	    int seq = r.dispseq = seqhead;
+	    int seq = seqhead;
 	    if(++seqhead == 0)
 		seqhead = 1;
 	    if(seqhead - seqtail == sequse.length - 1)
 		seqresize(sequse.length << 1);
 	    sequse[seq & (sequse.length - 1)] = true;
+	    return(seq);
 	}
     }
 
-    void sequnreg(GLRender r) {
+    void sequnreg(int seq) {
+	if(seq == 0)
+	    return;
 	synchronized(seqmon) {
-	    if(r.dispseq == 0)
-		return;
-	    int seq = r.dispseq, m = sequse.length - 1;
+	    int m = sequse.length - 1;
 	    int si = seq & m;
 	    if(!sequse[si])
 		throw(new AssertionError());
@@ -895,13 +943,37 @@ public class GLEnvironment implements Environment {
 		while((seqhead - seqtail > 0) && !sequse[seqtail & m])
 		    seqtail++;
 	    }
-	    r.dispseq = 0;
 	}
     }
 
     int dispseq() {
 	synchronized(seqmon) {
 	    return(seqhead);
+	}
+    }
+
+    class Sequence implements Disposable {
+	public final int no;
+	private final Runnable clean;
+	private final String desc;
+	private volatile boolean cleaned = false;
+
+	Sequence(Object owner) {
+	    this.desc = owner.toString();
+	    this.no = seqreg();
+	    clean = Finalizer.finalize(owner, this::disposed);
+	}
+
+	private void disposed() {
+	    sequnreg(no);
+	    if(!cleaned) {
+		Warning.warn("warning: disposal sequence leaked: " + desc);
+	    }
+	}
+
+	public void dispose() {
+	    cleaned = true;
+	    clean.run();
 	}
     }
 
@@ -929,7 +1001,7 @@ public class GLEnvironment implements Environment {
 	    }
 	    for(GLRender cmd : copy) {
 		cmd.gl.abort();
-		sequnreg(cmd);
+		cmd.dispose();
 	    }
 	}
 	{

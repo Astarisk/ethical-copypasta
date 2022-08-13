@@ -105,6 +105,11 @@ public class Session implements Resource.Resolver {
 		}
 	    }
 	}
+
+	public boolean boostprio(int prio) {
+	    res.boostprio(prio);
+	    return(true);
+	}
     }
 
     private static class CachedRes {
@@ -113,6 +118,7 @@ public class Session implements Resource.Resolver {
 	private String resnm = null;
 	private int resver;
 	private Reference<Ref> ind;
+	private int prio = -6;
 	
 	private CachedRes(int id) {
 	    resid = id;
@@ -122,10 +128,15 @@ public class Session implements Resource.Resolver {
 	    private Resource res;
 		    
 	    public Resource get() {
-		if(resnm == null)
-		    throw(new LoadingIndir(CachedRes.this));
-		if(res == null)
-		    res = Resource.remote().load(resnm, resver, 0).get();
+		if(res == null) {
+		    synchronized(CachedRes.this) {
+			if(res == null) {
+			    if(resnm == null)
+				throw(new LoadingIndir(CachedRes.this));
+			    res = Resource.remote().load(resnm, resver, prio).get();
+			}
+		    }
+		}
 		return(res);
 	    }
 	
@@ -143,14 +154,19 @@ public class Session implements Resource.Resolver {
 	}
 
 	private Ref get() {
-	    Ref ind = (this.ind == null)?null:(this.ind.get());
+	    Ref ind = (this.ind == null) ? null : (this.ind.get());
 	    if(ind == null)
 		this.ind = new WeakReference<Ref>(ind = new Ref());
 	    return(ind);
 	}
 	
+	public void boostprio(int prio) {
+	    if(this.prio < prio)
+		this.prio = prio;
+	}
+
 	public void set(String nm, int ver) {
-	    Resource.remote().load(nm, ver, -5);
+	    Resource.remote().load(nm, ver, -10);
 	    synchronized(this) {
 		this.resnm = nm;
 		this.resver = ver;
@@ -171,8 +187,14 @@ public class Session implements Resource.Resolver {
 	}
     }
 
+    public Indir<Resource> getres(int id, int prio) {
+	CachedRes res = cachedres(id);
+	res.boostprio(prio);
+	return(res.get());
+    }
+
     public Indir<Resource> getres(int id) {
-	return(cachedres(id).get());
+	return(getres(id, 0));
     }
 
     private class ObjAck {
@@ -215,7 +237,32 @@ public class Session implements Resource.Resolver {
 		int fl = msg.uint8();
 		long id = msg.uint32();
 		int frame = msg.int32();
-		oc.receive(fl, id, frame, msg);
+		OCache.ObjDelta delta = new OCache.ObjDelta(fl, id, frame);
+		while(true) {
+		    int afl = 0, len, type = msg.uint8();
+		    if(type == OCache.OD_END)
+			break;
+		    if((type & 0x80) == 0) {
+			len = (type & 0x78) >> 3;
+			if(len > 0)
+			    len++;
+			type = OCache.compodmap[type & 0x7];
+		    } else {
+			type = type & 0x7f;
+			if(((afl = msg.uint8()) & 0x80) == 0) {
+			    len = afl & 0x7f;
+			    afl = 0;
+			} else {
+			    len = msg.uint16();
+			}
+		    }
+		    PMessage attr = new PMessage(type, msg, len);
+		    if(type == OCache.OD_REM)
+			delta.rem = true;
+		    else
+			delta.attrs.add(attr);
+		}
+		oc.receive(delta);
 		synchronized(objacks) {
 		    if(objacks.containsKey(id)) {
 			ObjAck a = objacks.get(id);
@@ -286,8 +333,6 @@ public class Session implements Resource.Resolver {
 			    clip = new Audio.VolAdjust(clip, vol);
 			Audio.play(clip);
 		    }, null);
-	    } else if(msg.type == RMessage.RMSG_CATTR) {
-		glob.cattr(msg);
 	    } else if(msg.type == RMessage.RMSG_MUSIC) {
 		String resnm = msg.string();
 		int resver = msg.uint16();
@@ -450,6 +495,7 @@ public class Session implements Resource.Resolver {
 			    if(++retries > 5) {
 				synchronized(Session.this) {
 				    connfailed = SESSERR_CONN;
+				    connerror = "Could not connect to server";
 				    Session.this.notifyAll();
 				    return;
 				}

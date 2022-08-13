@@ -24,13 +24,11 @@
  *  Boston, MA 02111-1307 USA
  */
 
-package haven.render;
+package haven;
 
-import haven.Disposable;
-
-public interface DrawList extends RenderList<Rendered>, Disposable {
-    public void draw(Render out);
-
-    public default String stats() {return("");}
-    public default DrawList desc(Object desc) {return(this);}
+public interface Scrollable {
+    public int scrollmin();
+    public int scrollmax();
+    public int scrollval();
+    public void scrollval(int val);
 }

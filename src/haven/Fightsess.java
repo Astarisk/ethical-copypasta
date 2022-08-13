@@ -425,8 +425,8 @@ public class Fightsess extends Widget {
 		    break;
 		}
 	    }
-	    if(kb_reaggro.key().match(ev) && fv != null && fv.current != null && fv.current.give != null)
-	    	fv.current.give.wdgmsg("click", 1);
+	    if(kb_reaggro.key().match(ev) && fv != null && fv.current != null && fv.curdisp.give != null)
+	    	fv.curdisp.give.wdgmsg("click", 1);
 	    int fn = n;
 	    if((n >= 0) && (n < actions.length)) {
 		MapView map = getparent(GameUI.class).map;

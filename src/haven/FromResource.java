@@ -24,13 +24,14 @@
  *  Boston, MA 02111-1307 USA
  */
 
-package haven.render;
+package haven;
 
-import haven.Disposable;
+import java.lang.annotation.*;
 
-public interface DrawList extends RenderList<Rendered>, Disposable {
-    public void draw(Render out);
-
-    public default String stats() {return("");}
-    public default DrawList desc(Object desc) {return(this);}
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface FromResource {
+    public String name();
+    public int version();
+    public boolean override() default false;
 }

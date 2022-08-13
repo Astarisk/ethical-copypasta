@@ -234,12 +234,45 @@ public class Utils {
 	return((raw - 186) * (1.0 / 31.0));
     }
 
-    public static synchronized Preferences prefs() {
+    private static Map<Object, Object> sysprefs() {
+	try {
+	    Properties buf = new Properties();
+	    Optional<Path> pfile = Optional.ofNullable(System.getProperty("haven.prefs", null)).map(Utils::path);
+	    if(pfile.isPresent() && Files.exists(pfile.get())) {
+		try(InputStream fp = Files.newInputStream(pfile.get())) {
+		    buf.load(fp);
+		} catch(IOException e) {
+		    new Warning(e, "could not read preferences file").level(Warning.ERROR).issue();
+		}
+	    }
+	    for(Map.Entry<?, ?> ent : System.getProperties().entrySet()) {
+		if((ent.getKey() instanceof String) && (ent.getValue() instanceof String) &&
+		   ((String)ent.getKey()).startsWith("haven.prefs."))
+		{
+		    buf.put(((String)ent.getKey()).substring(12), (String)ent.getValue());
+		}
+	    }
+	    return(buf);
+	} catch(SecurityException e) {
+	    return(Collections.emptyMap());
+	}
+    }
+
+    public static Preferences prefs() {
 	if(prefs == null) {
-	    Preferences node = Preferences.userNodeForPackage(Utils.class);
-	    if(Config.prefspec != null)
-		node = node.node(Config.prefspec);
-	    prefs = node;
+	    synchronized(Utils.class) {
+		if(prefs == null) {
+		    Map<Object, Object> sysprefs = sysprefs();
+		    if(!sysprefs.isEmpty()) {
+			prefs = new MapPrefs("haven", sysprefs);
+		    } else {
+			Preferences node = Preferences.userNodeForPackage(Utils.class);
+			if(Config.prefspec != null)
+			    node = node.node(Config.prefspec);
+			prefs = node;
+		    }
+		}
+	    }
 	}
 	return(prefs);
     }
@@ -254,7 +287,10 @@ public class Utils {
 
     public static void setpref(String prefname, String val) {
 	try {
-	    prefs().put(prefname, val);
+	    if(val == null)
+		prefs().remove(prefname);
+	    else
+		prefs().put(prefname, val);
 	} catch(SecurityException e) {
 	}
     }
@@ -848,7 +884,7 @@ public class Utils {
     }
 
     public static interface IOFunction<T> {
-	/* Check exceptions banzai :P */
+	/* Checked exceptions banzai :P */
 	public T run() throws IOException;
     }
 
@@ -928,6 +964,21 @@ public class Utils {
 	if(term) out.println();
     }
 
+    public static void dumparr(double[] arr, PrintStream out, boolean term) {
+	if(arr == null) {
+	    out.print("null");
+	} else {
+	    out.print('[');
+	    boolean f = true;
+	    for(double v : arr) {
+		if(!f) out.print(", "); f = false;
+		out.print(v);
+	    }
+	    out.print(']');
+	}
+	if(term) out.println();
+    }
+
     public static void dumparr(float[] arr, PrintStream out, boolean term) {
 	if(arr == null) {
 	    out.print("null");
@@ -937,6 +988,21 @@ public class Utils {
 	    for(float v : arr) {
 		if(!f) out.print(", "); f = false;
 		out.print(v);
+	    }
+	    out.print(']');
+	}
+	if(term) out.println();
+    }
+
+    public static void dumparr(long[] arr, PrintStream out, boolean term) {
+	if(arr == null) {
+	    out.print("null");
+	} else {
+	    out.print('[');
+	    boolean f = true;
+	    for(long i : arr) {
+		if(!f) out.print(", "); f = false;
+		out.print(i);
 	    }
 	    out.print(']');
 	}
@@ -1897,6 +1963,12 @@ public class Utils {
 	while(o.hasNext())
 	    dst.add(o.next());
 	return(dst);
+    }
+
+    public static <T> Optional<T> ocast(Object x, Class<T> cl) {
+	if(cl.isInstance(x))
+	    return(Optional.of(cl.cast(x)));
+	return(Optional.empty());
     }
 
     public static int sidcmp(Object a, Object b) {
