@@ -34,7 +34,6 @@ public class IMeter extends LayerMeter {
     public static final Coord fsz = UI.scale(101, 24);
     public static final Coord msz = UI.scale(75, 10);
     public final Indir<Resource> bg;
-    public List<Meter> meters;
 	private static final Resource horseAlarm = Resource.local().loadwait("sfx/alarms/horsestamina");
 	private boolean alarmPlayed = false;
 
