@@ -2601,11 +2601,11 @@ public class MapView extends PView implements DTarget, Console.Directory {
     }
 	public void removeCustomSprites(int id) {
 		OCache oc = ui.sess.glob.oc;
-		synchronized (oc) {
-			for (Gob gob : oc) {
+		synchronized(oc) {
+			for(Gob gob : oc) {
 				Gob.Overlay ol = gob.findol(id);
-				if (ol != null) {
-					ol.remove();
+				if(ol != null) {
+					ol.remove(false);
 				}
 			}
 		}

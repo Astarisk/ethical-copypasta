@@ -516,10 +516,10 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 							}
 							if(Config.animalRadiuses.val && Config.animalRads.val.getOrDefault(res.name, true) && knocked != Knocked.TRUE) {
 								if(ol == null) {
-									addol(new Overlay(Gob.this, new AnimalRad(Gob.this, null, 5 * MCache.tilesz2.y), 1341));
+									addol(new Overlay(Gob.this, new AnimalRad(Gob.this, null, 5 * MCache.tilesz2.y), 1341), false);
 								}
 							} else if(ol != null) {
-								ol.remove();
+								ol.remove(false);
 							}
 						} else if(res.name.startsWith("gfx/borka/body")) {
 							Overlay ol = findol(1342);
@@ -527,13 +527,13 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 								if(ol == null) {
 									KinInfo kin = getattr(KinInfo.class);
 									if(kin == null)
-										addol(new Overlay(Gob.this, new PlayerRad(Gob.this, null, Color.WHITE), 1342));
+										addol(new Overlay(Gob.this, new PlayerRad(Gob.this, null, Color.WHITE), 1342), false);
 									else
-										addol(new Overlay(Gob.this, new PlayerRad(Gob.this, null, BuddyWnd.gc[kin.group]), 1342));
+										addol(new Overlay(Gob.this, new PlayerRad(Gob.this, null, BuddyWnd.gc[kin.group]), 1342), false);
 									updstate();
 								}
 							} else if(ol != null) {
-								ol.remove();
+								ol.remove(false);
 							}
 						}
 						String resname = res.name;
@@ -541,9 +541,9 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 							BoundingBox bb = BoundingBox.getBoundingBox(Gob.this);
 							Overlay ol = findol(1339);
 							if(ol != null && bb == null) {
-								ol.remove();
+								ol.remove(false);
 							} else if(ol == null && bb != null) {
-								addol(new Overlay(Gob.this, new GobBoundingBox(Gob.this, bb), 1339));
+								addol(new Overlay(Gob.this, new GobBoundingBox(Gob.this, bb), 1339), false);
 							}
 						}
 						Drawable d = getattr(Drawable.class);
@@ -569,10 +569,10 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 							}, null);
 							Overlay ol = findol(1340);
 							if(!hide && ol != null) {
-								ol.remove();
+								ol.remove(false);
 							} else if(hide && ol == null) {
 								BoundingBox bb = BoundingBox.getBoundingBox(Gob.this);
-								addol(new Overlay(Gob.this, new GobHideBox(bb), 1340));
+								addol(new Overlay(Gob.this, new GobHideBox(bb), 1340), false);
 							}
 						}
 						ResDrawable rd = getattr(ResDrawable.class);
@@ -647,10 +647,10 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 										Gob.Overlay ovl = findol(1337);
 										synchronized(this) {
 											if(ovl == null) {
-												addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
+												addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337), false);
 											} else if(!((GobText) ovl.spr).text.equals(fscale + "%")) {
-												ovl.remove();
-												addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
+												ovl.remove(false);
+												addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337), false);
 											}
 										}
 									}
@@ -682,10 +682,10 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 								}
 								synchronized(this) {
 									if(ol == null) {
-										addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
+										addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338), false);
 									} else if(!((GobText) ol.spr).text.equals(text)) {
-										ol.remove();
-										addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
+										ol.remove(false);
+										addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338), false);
 									}
 								}
 							}

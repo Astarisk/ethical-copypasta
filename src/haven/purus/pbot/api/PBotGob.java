@@ -142,7 +142,7 @@ public class PBotGob {
 	 */
 	public void removeGobText(int id) {
 		pBotSession.gui.ui.sess.glob.loader.defer(() -> {synchronized(gob) {
-			gob.findol(id).remove();
+			gob.findol(id).remove(false);
 		}}, null);
 	}
 	/**
