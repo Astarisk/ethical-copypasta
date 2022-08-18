@@ -310,7 +310,7 @@ public class CharWnd extends BetterWindow {
 				long seconds = t / 1000 % 60;
 	    		add = "\nNext level: " + String.format("%02d:%02d:%02d",hours,mins,seconds);
 			}
-		rtip = RichText.render(String.format("%s: %.1f%%\nFood efficacy: %d%%" + add, lbl, (lglut) * 1000, Math.round(gmod * 100)), -1).tex();
+		rtip = RichText.render(String.format("%s: %.1f%%\nFood efficacy: %d%%" + add, lbl, (lglut) * 100, Math.round(gmod * 100)), -1).tex();
 	    }
 	    return(rtip);
 	}
