@@ -44,7 +44,7 @@ public class LoginScreen extends Widget {
     public static final Text.Foundry
 	textf = new Text.Foundry(Text.sans, 16).aa(true),
 	textfs = new Text.Foundry(Text.sans, 14).aa(true);
-    public static final Tex bg = Resource.loadtex("gfx/loginscr");
+    public static final Tex bg = Resource.loadtex("gfx/loginscr2");
     public static final Position bgc = new Position(UI.scale(420, 300));
     public final Credbox login;
     public final String hostname;
