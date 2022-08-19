@@ -1,10 +1,11 @@
-/* Preprocessed source code */
+package haven.res.ui.locptr;/* Preprocessed source code */
 import haven.*;
 import haven.render.*;
 import java.awt.Color;
 import static java.lang.Math.*;
 
 /* >wdg: Pointer */
+@haven.FromResource(name = "ui/locptr", version = 20)
 public class Pointer extends Widget {
 	public static final BaseColor col = new BaseColor(new Color(241, 227, 157, 255));
 	public Indir<Resource> icon;
