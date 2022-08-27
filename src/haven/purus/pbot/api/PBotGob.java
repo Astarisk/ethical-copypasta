@@ -418,6 +418,24 @@ public class PBotGob {
 		return ret;
 	}
 
+	public class KinInfo {
+		public String name;
+		public int group, type;
+		KinInfo(String name, int group, int type) {
+			this.name = name;
+			this.group = group;
+			this.type = type;
+		}
+	}
+	public KinInfo getKinInfo() {
+		haven.KinInfo kin = gob.getattr(haven.KinInfo.class);
+		if(kin == null) {
+			return null;
+		} else {
+			return new KinInfo(kin.name, kin.group, kin.type);
+		}
+	}
+
 	/**
 	 * Is the gob knocked out/dead
 	 * @return True if animal is knocked out, false if not
