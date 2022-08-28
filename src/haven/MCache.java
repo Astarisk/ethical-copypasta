@@ -42,6 +42,7 @@ public class MCache implements MapSource {
     public static final Coord cmaps = Coord.of(100, 100);
     public static final Coord cutsz = Coord.of(25, 25);
     public static final Coord cutn = cmaps.div(cutsz);
+	public boolean grid_update = true;
     public final Resource.Spec[] nsets = new Resource.Spec[256];
     @SuppressWarnings("unchecked")
     private final Reference<Resource>[] sets = new Reference[256];
@@ -481,6 +482,7 @@ public class MCache implements MapSource {
 	}
 
 	private void fillz(Message buf) {
+		grid_update = true;
 	    int fmt = buf.uint8();
 	    if(fmt == 0) {
 		float z = buf.float32() * 11;
