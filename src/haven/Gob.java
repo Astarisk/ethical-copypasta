@@ -44,13 +44,12 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     public boolean virtual = false;
     int clprio = 0;
     public long id;
+    public boolean removed = false;
     public final Glob glob;
     Map<Class<? extends GAttrib>, GAttrib> attr = new ConcurrentHashMap<>();
     public final Collection<Overlay> ols = new LinkedBlockingDeque<>();
     public final Collection<RenderTree.Slot> slots = new ArrayList<>(1);
     private final Collection<SetupMod> setupmods = new ArrayList<>();
-    private final Collection<ResAttr.Cell<?>> rdata = new LinkedList<ResAttr.Cell<?>>();
-    private final Collection<ResAttr.Load> lrdata = new LinkedList<ResAttr.Load>();
     private static final MixColor dFrameDone =  new MixColor(255, 0, 0, 64);
 	private static final MixColor dFrameEmpty =  new MixColor(0, 255, 0, 64);
 	private static final MixColor ttEmpty =  new MixColor(255, 0, 0, 64);
@@ -74,6 +73,8 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	private static final HashMap<String, Type> types = new HashMap<String, Type>(){{
 		put("gfx/borka/body", Type.PLAYER);
     }};
+    private final LinkedList<Runnable> deferred = new LinkedList<>();
+    private Loader.Future<?> deferral = null;
 
     public static class Overlay implements RenderTree.Node {
 	public final int id;
@@ -140,10 +141,18 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	    added = false;
 	}
 
-	public void remove() {
+	public void remove(boolean async) {
+	    if(async) {
+		gob.defer(() -> remove(false));
+		return;
+	    }
 	    remove0();
 	    gob.ols.remove(this);
 		gob.updCustom();
+	}
+
+	public void remove() {
+	    remove(true);
 	}
 
 	public void added(RenderTree.Slot slot) {
@@ -164,71 +173,6 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	public default Pipe.Op placestate() {return(null);}
     }
 
-    /* XXX: This whole thing didn't turn out quite as nice as I had
-     * hoped, but hopefully it can at least serve as a source of
-     * inspiration to redo attributes properly in the future. There
-     * have already long been arguments for remaking GAttribs as
-     * well. */
-    public static class ResAttr {
-	public boolean update(Message dat) {
-	    return(false);
-	}
-
-	public void dispose() {
-	}
-
-	public static class Cell<T extends ResAttr> {
-	    final Class<T> clsid;
-	    Indir<Resource> resid = null;
-	    MessageBuf odat;
-	    public T attr = null;
-
-	    public Cell(Class<T> clsid) {
-		this.clsid = clsid;
-	    }
-
-	    public void set(ResAttr attr) {
-		if(this.attr != null)
-		    this.attr.dispose();
-		this.attr = clsid.cast(attr);
-	    }
-	}
-
-	private static class Load {
-	    final Indir<Resource> resid;
-	    final MessageBuf dat;
-
-	    Load(Indir<Resource> resid, Message dat) {
-		this.resid = resid;
-		this.dat = new MessageBuf(dat);
-	    }
-	}
-
-	@Resource.PublishedCode(name = "gattr", instancer = FactMaker.class)
-	public static interface Factory {
-	    public ResAttr mkattr(Gob gob, Message dat);
-	}
-
-	public static class FactMaker implements Resource.PublishedCode.Instancer<Factory> {
-	    public Factory make(Class<?> cl, Resource ires, Object... argv) {
-		if(Factory.class.isAssignableFrom(cl))
-		    return(Resource.PublishedCode.Instancer.stdmake(cl.asSubclass(Factory.class), ires, argv));
-		if(ResAttr.class.isAssignableFrom(cl)) {
-		    try {
-			final java.lang.reflect.Constructor<? extends ResAttr> cons = cl.asSubclass(ResAttr.class).getConstructor(Gob.class, Message.class);
-			return(new Factory() {
-				public ResAttr mkattr(Gob gob, Message dat) {
-				    return(Utils.construct(cons, gob, dat));
-				}
-			    });
-		    } catch(NoSuchMethodException e) {
-		    }
-		}
-		return(null);
-	    }
-	}
-    }
-
     public Gob(Glob glob, Coord2d c, long id) {
 	this.glob = glob;
 	this.rc = c;
@@ -245,7 +189,6 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     public void ctick(double dt) {
 	for(GAttrib a : attr.values())
 	    a.ctick(dt);
-	loadrattr();
 	for(Iterator<Overlay> i = ols.iterator(); i.hasNext();) {
 	    Overlay ol = i.next();
 	    if(ol.slots == null) {
@@ -275,9 +218,47 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	}
     }
 
+    void removed() {
+	removed = true;
+    }
+
+    private void deferred() {
+	while(true) {
+	    Runnable task;
+	    synchronized(deferred) {
+		task = deferred.peek();
+		if(task == null) {
+		    deferral = null;
+		    return;
+		}
+	    }
+	    synchronized(this) {
+		if(!removed)
+		    task.run();
+	    }
+	    if(task instanceof Disposable)
+		((Disposable)task).dispose();
+	    synchronized(deferred) {
+		if(deferred.poll() != task)
+		    throw(new RuntimeException());
+	    }
+	}
+    }
+
+    public void defer(Runnable task) {
+	synchronized(deferred) {
+	    deferred.add(task);
+	    if(deferral == null)
+		deferral = glob.loader.defer(this::deferred, null);
+	}
+    }
+
     public void addol(Overlay ol, boolean async) {
-	if(!async)
-	    ol.init();
+	if(async) {
+	    defer(() -> addol(ol, false));
+	    return;
+	}
+	ol.init();
 	ol.add0();
 	ols.add(ol);
 	updCustom();
@@ -303,10 +284,6 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     public void dispose() {
 	for(GAttrib a : attr.values())
 	    a.dispose();
-	for(ResAttr.Cell rd : rdata) {
-	    if(rd.attr != null)
-		rd.attr.dispose();
-	}
     }
 
     public void move(Coord2d c, double a) {
@@ -414,94 +391,6 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 
     public void delattr(Class<? extends GAttrib> c) {
 	setattr(attrclass(c), null);
-    }
-
-    private Class<? extends ResAttr> rattrclass(Class<? extends ResAttr> cl) {
-	while(true) {
-	    Class<?> p = cl.getSuperclass();
-	    if(p == ResAttr.class)
-		return(cl);
-	    cl = p.asSubclass(ResAttr.class);
-	}
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends ResAttr> ResAttr.Cell<T> getrattr(Class<T> c) {
-	for(ResAttr.Cell<?> rd : rdata) {
-	    if(rd.clsid == c)
-		return((ResAttr.Cell<T>)rd);
-	}
-	ResAttr.Cell<T> rd = new ResAttr.Cell<T>(c);
-	rdata.add(rd);
-	return(rd);
-    }
-
-    public static <T extends ResAttr> ResAttr.Cell<T> getrattr(Object obj, Class<T> c) {
-	if(!(obj instanceof Gob))
-	    return(new ResAttr.Cell<T>(c));
-	return(((Gob)obj).getrattr(c));
-    }
-
-    private void loadrattr() {
-	boolean upd = false;
-	for(Iterator<ResAttr.Load> i = lrdata.iterator(); i.hasNext();) {
-	    ResAttr.Load rd = i.next();
-	    ResAttr attr;
-	    try {
-		attr = rd.resid.get().getcode(ResAttr.Factory.class, true).mkattr(this, rd.dat.clone());
-	    } catch(Loading l) {
-		continue;
-	    }
-	    ResAttr.Cell<?> rc = getrattr(rattrclass(attr.getClass()));
-	    if(rc.resid == null)
-		rc.resid = rd.resid;
-	    else if(rc.resid != rd.resid)
-		throw(new RuntimeException("Conflicting resattr resource IDs on " + rc.clsid + ": " + rc.resid + " -> " + rd.resid));
-	    rc.odat = rd.dat;
-	    rc.set(attr);
-	    i.remove();
-	    upd = true;
-	}
-    }
-
-    public void setrattr(Indir<Resource> resid, Message dat) {
-	for(Iterator<ResAttr.Cell<?>> i = rdata.iterator(); i.hasNext();) {
-	    ResAttr.Cell<?> rd = i.next();
-	    if(rd.resid == resid) {
-		if(dat.equals(rd.odat))
-		    return;
-		if((rd.attr != null) && rd.attr.update(dat))
-		    return;
-		break;
-	    }
-	}
-	for(Iterator<ResAttr.Load> i = lrdata.iterator(); i.hasNext();) {
-	    ResAttr.Load rd = i.next();
-	    if(rd.resid == resid) {
-		i.remove();
-		break;
-	    }
-	}
-	lrdata.add(new ResAttr.Load(resid, dat));
-	loadrattr();
-    }
-
-    public void delrattr(Indir<Resource> resid) {
-	for(Iterator<ResAttr.Cell<?>> i = rdata.iterator(); i.hasNext();) {
-	    ResAttr.Cell<?> rd = i.next();
-	    if(rd.resid == resid) {
-		i.remove();
-		rd.attr.dispose();
-		break;
-	    }
-	}
-	for(Iterator<ResAttr.Load> i = lrdata.iterator(); i.hasNext();) {
-	    ResAttr.Load rd = i.next();
-	    if(rd.resid == resid) {
-		i.remove();
-		break;
-	    }
-	}
     }
 
     public void draw(GOut g) {}
@@ -620,10 +509,10 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 							}
 							if(Config.animalRadiuses.val && Config.animalRads.val.getOrDefault(res.name, true) && knocked != Knocked.TRUE) {
 								if(ol == null) {
-									addol(new Overlay(Gob.this, new AnimalRad(Gob.this, null, 5 * MCache.tilesz2.y), 1341));
+									addol(new Overlay(Gob.this, new AnimalRad(Gob.this, null, 5 * MCache.tilesz2.y), 1341), false);
 								}
 							} else if(ol != null) {
-								ol.remove();
+								ol.remove(false);
 							}
 						} else if(res.name.startsWith("gfx/borka/body")) {
 							Overlay ol = findol(1342);
@@ -631,13 +520,13 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 								if(ol == null) {
 									KinInfo kin = getattr(KinInfo.class);
 									if(kin == null)
-										addol(new Overlay(Gob.this, new PlayerRad(Gob.this, null, Color.WHITE), 1342));
+										addol(new Overlay(Gob.this, new PlayerRad(Gob.this, null, Color.WHITE), 1342), false);
 									else
-										addol(new Overlay(Gob.this, new PlayerRad(Gob.this, null, BuddyWnd.gc[kin.group]), 1342));
+										addol(new Overlay(Gob.this, new PlayerRad(Gob.this, null, BuddyWnd.gc[kin.group]), 1342), false);
 									updstate();
 								}
 							} else if(ol != null) {
-								ol.remove();
+								ol.remove(false);
 							}
 						}
 						String resname = res.name;
@@ -645,9 +534,9 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 							BoundingBox bb = BoundingBox.getBoundingBox(Gob.this);
 							Overlay ol = findol(1339);
 							if(ol != null && bb == null) {
-								ol.remove();
+								ol.remove(false);
 							} else if(ol == null && bb != null) {
-								addol(new Overlay(Gob.this, new GobBoundingBox(Gob.this, bb), 1339));
+								addol(new Overlay(Gob.this, new GobBoundingBox(Gob.this, bb), 1339), false);
 							}
 						}
 						Drawable d = getattr(Drawable.class);
@@ -673,10 +562,10 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 							}, null);
 							Overlay ol = findol(1340);
 							if(!hide && ol != null) {
-								ol.remove();
+								ol.remove(false);
 							} else if(hide && ol == null) {
 								BoundingBox bb = BoundingBox.getBoundingBox(Gob.this);
-								addol(new Overlay(Gob.this, new GobHideBox(bb), 1340));
+								addol(new Overlay(Gob.this, new GobHideBox(bb), 1340), false);
 							}
 						}
 						ResDrawable rd = getattr(ResDrawable.class);
@@ -751,10 +640,10 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 										Gob.Overlay ovl = findol(1337);
 										synchronized(this) {
 											if(ovl == null) {
-												addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
+												addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337), false);
 											} else if(!((GobText) ovl.spr).text.equals(fscale + "%")) {
-												ovl.remove();
-												addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337));
+												ovl.remove(false);
+												addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, fscale + "%", Color.WHITE, 5), 1337), false);
 											}
 										}
 									}
@@ -786,10 +675,10 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 								}
 								synchronized(this) {
 									if(ol == null) {
-										addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
+										addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338), false);
 									} else if(!((GobText) ol.spr).text.equals(text)) {
-										ol.remove();
-										addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338));
+										ol.remove(false);
+										addol(new Gob.Overlay(Gob.this, new GobText(Gob.this, text, col, -4), 1338), false);
 									}
 								}
 							}

@@ -36,7 +36,7 @@ public class IMeter extends LayerMeter {
     public final Indir<Resource> bg;
 	private static final Resource horseAlarm = Resource.local().loadwait("sfx/alarms/horsestamina");
 	private boolean alarmPlayed = false;
-    
+
     @RName("im")
     public static class $_ implements Factory {
 	public Widget create(UI ui, Object[] args) {
@@ -54,7 +54,7 @@ public class IMeter extends LayerMeter {
 
     public void draw(GOut g) {
 	try {
-	    Tex bg = this.bg.get().layer(Resource.imgc).tex();
+	    Tex bg = this.bg.get().flayer(Resource.imgc).tex();
 	    g.chcolor(0, 0, 0, 255);
 	    g.frect(off, msz);
 	    g.chcolor();
@@ -69,7 +69,6 @@ public class IMeter extends LayerMeter {
 	} catch(Loading l) {
 	}
     }
-
     public void uimsg(String msg, Object... args) {
 	if(msg == "set") {
 	    this.meters = decmeters(args, 0);

@@ -46,6 +46,7 @@ public class MapFile {
     public final Map<Long, SMarker> smarkers = new HashMap<>();
     public int markerseq = 0;
     public final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final Random rnd = new Random();
 
     public MapFile(ResCache store, String filename) {
 	this.store = store;
@@ -85,15 +86,13 @@ public class MapFile {
 	warn(null, fmt, args);
     }
 
-    public static MapFile load(ResCache store, String filename) {
+    public static MapFile load(ResCache store, String filename) throws IOException {
 	MapFile file = new MapFile(store, filename);
 	InputStream fp;
 	try {
 	    fp = file.sfetch("index");
 	} catch(FileNotFoundException e) {
 	    return(file);
-	} catch(IOException e) {
-	    return(null);
 	}
 	try(StreamMessage data = new StreamMessage(fp)) {
 	    int ver = data.uint8();
@@ -107,12 +106,10 @@ public class MapFile {
 			file.smarkers.put(((SMarker)mark).oid, (SMarker)mark);
 		}
 	    } else {
-		warn("unknown mapfile index version: %d", ver);
-		return(null);
+		throw(new IOException(String.format("unknown mapfile index version: %d", ver)));
 	    }
 	} catch(Message.BinError e) {
-	    warn(e, "error when loading index: %s", e);
-	    return(null);
+	    throw(new IOException(String.format("error when loading index: %s", e), e));
 	}
 	return(file);
     }
@@ -500,7 +497,7 @@ public class MapFile {
 	public BufferedImage olrender(Coord off, String tag) {
 	    WritableRaster buf = PUtils.imgraster(cmaps);
 	    for(Overlay ol : ols) {
-		MCache.ResOverlay olid = ol.olid.loadsaved().layer(MCache.ResOverlay.class);;
+		MCache.ResOverlay olid = ol.olid.loadsaved().flayer(MCache.ResOverlay.class);
 		if(!olid.tags().contains(tag))
 		    continue;
 		Color col = olcol(olid);
@@ -1369,7 +1366,7 @@ public class MapFile {
 	public Tileset tileset(int n) {
 	    if(tilesets[n] == null) {
 		Resource res = nsets[n].loadsaved(Resource.remote());
-		tilesets[n] = res.layer(Tileset.class);
+		tilesets[n] = res.flayer(Tileset.class);
 	    }
 	    return(tilesets[n]);
 	}
@@ -1392,6 +1389,8 @@ public class MapFile {
 		return(null);
 	    }
 	    try(StreamMessage data = new StreamMessage(fp)) {
+		if(data.eom())
+		    return(null);
 		int ver = data.uint8();
 		if(ver == 1) {
 		    Segment seg = new Segment(id);
@@ -1411,23 +1410,32 @@ public class MapFile {
 	    }
 	}, (id, seg) -> {
 	    checklock();
-	    OutputStream fp;
-	    try {
-		fp = sstore("seg-%x", seg.id);
-	    } catch(IOException e) {
-		throw(new StreamMessage.IOError(e));
+	    if(seg == null) {
+		try(OutputStream fp = sstore("seg-%x", id)) {
+		} catch(IOException e) {
+		    throw(new StreamMessage.IOError(e));
+		}
+		if(knownsegs.remove(id))
+		    defersave();
+	    } else {
+		OutputStream fp;
+		try {
+		    fp = sstore("seg-%x", seg.id);
+		} catch(IOException e) {
+		    throw(new StreamMessage.IOError(e));
+		}
+		try(StreamMessage out = new StreamMessage(fp)) {
+		    out.adduint8(1);
+		    ZMessage z = new ZMessage(out);
+		    z.addint64(seg.id);
+		    z.addint32(seg.map.size());
+		    for(Map.Entry<Coord, Long> e : seg.map.entrySet())
+			z.addcoord(e.getKey()).addint64(e.getValue());
+		    z.finish();
+		}
+		if(knownsegs.add(id))
+		    defersave();
 	    }
-	    try(StreamMessage out = new StreamMessage(fp)) {
-		out.adduint8(1);
-		ZMessage z = new ZMessage(out);
-		z.addint64(seg.id);
-		z.addint32(seg.map.size());
-		for(Map.Entry<Coord, Long> e : seg.map.entrySet())
-		    z.addcoord(e.getKey()).addint64(e.getValue());
-		z.finish();
-	    }
-	    if(knownsegs.add(id))
-		defersave();
 	});
 
     private void merge(Segment dst, Segment src, Coord soff) {
@@ -1510,7 +1518,7 @@ public class MapFile {
 	    if(!missing.isEmpty()) {
 		Segment seg;
 		if(mseg == -1) {
-		    seg = new Segment(Utils.el(missing).id);
+		    seg = new Segment(rnd.nextLong());
 		    moff = Coord.z;
 		    if(debug) Debug.log.printf("mapfile: creating new segment %x\n", seg.id);
 		} else {

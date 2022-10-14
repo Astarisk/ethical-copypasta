@@ -581,7 +581,7 @@ public class OptWndPurus extends BetterWindow {
 						try {
 							Toolkit.getDefaultToolkit().beep();
 							if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-								Desktop.getDesktop().browse(new URI("https://odditown.com/haven/map/"));
+								Desktop.getDesktop().browse(new URI("https://hnhmap.vatsul.com/map/" + Config.mapperToken.val));
 							}
 						} catch(URISyntaxException | IOException e) {
 						}
@@ -608,8 +608,8 @@ public class OptWndPurus extends BetterWindow {
 
 	@Override
 	public void draw(GOut g) {
-		if(!currentSearchword.equals(searchField.text())) {
-			currentSearchword = searchField.text();
+		if(!currentSearchword.equals(searchField.buf.line())) {
+			currentSearchword = searchField.buf.line();
 			el.search(currentSearchword);
 		}
 		super.draw(g);

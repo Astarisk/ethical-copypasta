@@ -142,7 +142,7 @@ public class PBotGob {
 	 */
 	public void removeGobText(int id) {
 		pBotSession.gui.ui.sess.glob.loader.defer(() -> {synchronized(gob) {
-			gob.findol(id).remove();
+			gob.findol(id).remove(false);
 		}}, null);
 	}
 	/**
@@ -416,6 +416,24 @@ public class PBotGob {
 			}
 		}
 		return ret;
+	}
+
+	public class KinInfo {
+		public String name;
+		public int group, type;
+		KinInfo(String name, int group, int type) {
+			this.name = name;
+			this.group = group;
+			this.type = type;
+		}
+	}
+	public KinInfo getKinInfo() {
+		haven.KinInfo kin = gob.getattr(haven.KinInfo.class);
+		if(kin == null) {
+			return null;
+		} else {
+			return new KinInfo(kin.name, kin.group, kin.type);
+		}
 	}
 
 	/**

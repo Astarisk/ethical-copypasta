@@ -65,6 +65,10 @@ public class TileGrid implements Rendered, RenderTree.Node, TickList.Ticking, Ti
 	}
 
 	public void autogtick(Render g) {
+		if(mCache.grid_update) {
+			mCache.grid_update = false;
+			update = true;
+		}
 		if(update) {
 			try {
 				g.update(model.va.bufs[0], this::fill);

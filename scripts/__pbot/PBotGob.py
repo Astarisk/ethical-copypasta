@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 class PBotGob(object):
     def __init__(self, gob):
@@ -160,6 +160,30 @@ class PBotGob(object):
     # @return list of resnames of equ, if has any
     def get_comp_nequ(self) -> List[str]:
         return list(self._gob.getCompEqu())
+
+    ## Get KinInfo group (kin color)
+    # @return kin group if it has one
+    def get_kininfo_group(self) -> Optional[int]:
+        ki = self._gob.getKinInfo()
+        if ki is None:
+            return None
+        return ki.group
+
+    ## Get KinInfo type (maybe villager etc. status)
+    # @return kin type if it has one
+    def get_kininfo_type(self) -> Optional[int]:
+        ki = self._gob.getKinInfo()
+        if ki is None:
+            return None
+        return ki.type
+
+    ## Get KinInfo name
+    # @return kin name if it has one
+    def get_kininfo_name(self) -> Optional[str]:
+        ki = self._gob.getKinInfo()
+        if ki is None:
+            return None
+        return ki.name
 
     ## Get list of set composite mods
     # @return list of resnames of mod, if has any

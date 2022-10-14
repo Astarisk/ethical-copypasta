@@ -49,7 +49,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public String charname; // presentation name
 	public String hatname;
     public final Hidepanel ulpanel, umpanel, urpanel, blpanel, mapmenupanel, brpanel, menupanel;
-    public Avaview portrait;
+    public Widget portrait;
     public MenuGrid menu;
     public MapView map;
     public GobIcon.Settings iconconf;
@@ -74,7 +74,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public WItem vhand;
     public ChatUI chat;
     public ChatUI.Channel syslog;
-    public double prog = -1;
+    public Progress prog = null;
     private boolean afk = false;
     public BeltSlot[] belt = new BeltSlot[144];
     public Belt beltwdg;
@@ -264,7 +264,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public static class $_ implements Factory {
 	public Widget create(UI ui, Object[] args) {
 	    String chrid = (String)args[0];
-	    int plid = (Integer)args[1];
+	    long plid = Utils.uint32((Integer)args[1]);
 	    String genus = "";
 	    if(args.length > 2)
 		genus = (String)args[2];
@@ -327,12 +327,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	menupanel.add(new MainMenu(), 0, 0);
 	menubuttons(rbtnimg);
 	foldbuttons();
-	portrait = ulpanel.add(new Avaview(Avaview.dasz, plid, "avacam") {
-		public boolean mousedown(Coord c, int button) {
-		    return(true);
-		}
-	    }, UI.scale(new Coord(10, 10)));
-	buffs = ulpanel.add(new Bufflist(), UI.scale(new Coord(95, 65)));
+	portrait = ulpanel.add(Frame.with(new Avaview(Avaview.dasz, plid, "avacam"), false), UI.scale(10, 10));
+	buffs = ulpanel.add(new Bufflist(), portrait.c.x + portrait.sz.x + UI.scale(10), portrait.c.y + ((IMeter.fsz.y + UI.scale(2)) * 2) + UI.scale(5 - 2));
 	umpanel.add(new Cal(), Coord.z);
 	syslog = chat.add(new ChatUI.Log("System"));
 	opts = add(new OptWnd());
@@ -585,6 +581,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
 	public void presize() {
 	    move();
+	}
+
+	public void cresize(Widget ch) {
+	    sz = contentsz();
 	}
 
 	public boolean mshow(final boolean vis) {
@@ -849,7 +849,16 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		}
 	    }
 	    if(mapstore != null) {
-		MapFile file = MapFile.load(mapstore, mapfilename());
+		MapFile file;
+		try {
+		    file = MapFile.load(mapstore, mapfilename());
+			Mapper.sendMarkerData(file);
+		} catch(java.io.IOException e) {
+		    /* XXX: Not quite sure what to do here. It's
+		     * certainly not obvious that overwriting the
+		     * existing mapfile with a new one is better. */
+		    throw(new RuntimeException("failed to load mapfile", e));
+		}
 		mmap = blpanel.add(new CornerMap(UI.scale(new Coord(133, 133)), file), minimapc);
 		mmap.lower();
 		mapfile = new MapWnd(file, map, Utils.getprefc("wndsz-map", UI.scale(new Coord(700, 500))), "Map");
@@ -900,7 +909,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	} else if(place == "chat") {
 	    chat.addchild(child);
 	} else if(place == "party") {
-	    add(child, UI.scale(10), UI.scale(95));
+	    add(child, portrait.pos("bl").adds(0, 10));
 	} else if(place == "meter") {
 	    int x = (meters.size() % 3) * (IMeter.fsz.x + UI.scale(5));
 	    int y = (meters.size() / 3) * (IMeter.fsz.y + UI.scale(2));
@@ -992,29 +1001,52 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	meters.remove(w);
     }
 
-    private static final Resource.Anim progt = Resource.local().loadwait("gfx/hud/prog").layer(Resource.animc);
-    private Tex curprog = null;
-    private int curprogf, curprogb;
-    private void drawprog(GOut g, double prog) {
-	int fr = Utils.clip((int)Math.floor(prog * progt.f.length), 0, progt.f.length - 2);
-	int bf = Utils.clip((int)(((prog * progt.f.length) - fr) * 255), 0, 255);
-	if((curprog == null) || (curprogf != fr) || (curprogb != bf)) {
-	    if(curprog != null)
-		curprog.dispose();
+    public static class Progress extends Widget {
+	private static final Resource.Anim progt = Resource.local().loadwait("gfx/hud/prog").layer(Resource.animc);
+	public double prog;
+	private TexI curi;
+	private String tip;
+
+	public Progress(double prog) {
+	    super(progt.f[0][0].ssz.add(0,12));
+	    set(prog);
+	}
+
+	public void set(double prog) {
+	    int fr = Utils.clip((int)Math.floor(prog * progt.f.length), 0, progt.f.length - 2);
+	    int bf = Utils.clip((int)(((prog * progt.f.length) - fr) * 255), 0, 255);
 	    WritableRaster buf = PUtils.imgraster(progt.f[fr][0].ssz);
 	    PUtils.blit(buf, progt.f[fr][0].scaled().getRaster(), Coord.z);
 	    PUtils.blendblit(buf, progt.f[fr + 1][0].scaled().getRaster(), Coord.z, bf);
-	    curprog = new TexI(PUtils.rasterimg(buf)); curprogf = fr; curprogb = bf;
+	    if(this.curi != null)
+		this.curi.dispose();
+	    this.curi = new TexI(PUtils.rasterimg(buf));
+
+	    double d = Math.abs(prog - this.prog);
+	    int dec = Math.max(0, (int)Math.round(-Math.log10(d)) - 2);
+	    this.tip = String.format("%." + dec + "f%%", prog * 100);
+	    this.prog = prog;
 	}
-	g.aimage(curprog, new Coord(sz.x / 2, (sz.y * 4) / 10), 0.5, 0.5);
-	g.atext(Math.round(prog * 10000.0) / 100.0 + " %", new Coord(sz.x / 2, (sz.y * 4) / 10).add(0, curprog.sz().y/2), 0.5, 0);
+
+	public void draw(GOut g) {
+	    g.image(curi, Coord.z);
+		g.atext(Math.round(prog * 10000.0) / 100.0 + " %", new Coord(sz.x / 2, (sz.y * 4) / 10).add(0, curi.sz().y/2), 0.5, 0);
+	}
+
+	public boolean checkhit(Coord c) {
+	    return(Utils.checkhit(curi.back, c, 10));
+	}
+
+	public Object tooltip(Coord c, Widget prev) {
+	    if(checkhit(c))
+		return(tip);
+	    return(super.tooltip(c, prev));
+	}
     }
 
     public void draw(GOut g) {
 	beltwdg.c = new Coord(chat.c.x, Math.min(chat.c.y - beltwdg.sz.y, sz.y - beltwdg.sz.y));
 	super.draw(g);
-	if(prog >= 0)
-	    drawprog(g, prog);
 	int by = sz.y;
 	if(chat.visible())
 	    by = Math.min(by, chat.c.y);
@@ -1074,7 +1106,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	}
     }
 
-    public class CornerMap extends MiniMap {
+    public class CornerMap extends MiniMap implements Console.Directory {
 	public CornerMap(Coord sz, MapFile file) {
 	    super(sz, file);
 	    follow(new MapLocator(map));
@@ -1126,6 +1158,22 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    if(zoomlevel >= 5)
 		return(false);
 	    return(super.allowzoomout());
+	}
+	private Map<String, Console.Command> cmdmap = new TreeMap<String, Console.Command>();
+	{
+	    cmdmap.put("rmseg", new Console.Command() {
+		    public void run(Console cons, String[] args) {
+			MiniMap.Location loc = curloc;
+			if(loc != null) {
+			    try(Locked lk = new Locked(file.lock.writeLock())) {
+				file.segments.remove(loc.seg.id);
+			    }
+			}
+		    }
+		});
+	}
+	public Map<String, Console.Command> findcmds() {
+	    return(cmdmap);
 	}
     }
 
@@ -1219,10 +1267,18 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 			Audio.play(Resource.local().loadwait("sfx/alarms/shipleak"));
 		}
 	} else if(msg == "prog") {
-	    if(args.length > 0)
-		prog = ((Number)args[0]).doubleValue() / 100.0;
-	    else
-		prog = -1;
+	    if(args.length > 0) {
+		double p = ((Number)args[0]).doubleValue() / 100.0;
+		if(prog == null)
+		    prog = adda(new Progress(p), 0.5, 0.35);
+		else
+		    prog.set(p);
+	    } else {
+		if(prog != null) {
+		    prog.reqdestroy();
+		    prog = null;
+		}
+	    }
 	} else if(msg == "setbelt") {
 	    int slot = (Integer)args[0];
 		if(belt[slot] != null && belt[slot] instanceof PBotBeltSlot)
@@ -1450,6 +1506,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public static final KeyBinding kb_shoot = KeyBinding.get("screenshot", KeyMatch.forchar('S', KeyMatch.M));
     public static final KeyBinding kb_chat = KeyBinding.get("chat-toggle", KeyMatch.forchar('C', KeyMatch.C));
     public static final KeyBinding kb_hide = KeyBinding.get("ui-toggle", KeyMatch.nil);
+    public static final KeyBinding kb_logout = KeyBinding.get("logout", KeyMatch.nil);
+    public static final KeyBinding kb_switchchr = KeyBinding.get("logout-cs", KeyMatch.nil);
     public boolean globtype(char key, KeyEvent ev) {
     	if(haven.purus.Config.kb_resinfo.key().match(ev)) {
     		haven.purus.Config.resinfo.setVal(!haven.purus.Config.resinfo.val);
@@ -1507,6 +1565,12 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    return(true);
 	} else if(kb_hide.key().match(ev)) {
 	    toggleui();
+	    return(true);
+	} else if(kb_logout.key().match(ev)) {
+	    act("lo");
+	    return(true);
+	} else if(kb_switchchr.key().match(ev)) {
+	    act("lo", "cs");
 	    return(true);
 	} else if(kb_chat.key().match(ev)) {
 	    if(chat.visible() && !chat.hasfocus) {
@@ -1568,6 +1632,8 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	chat.move(new Coord(blpw, sz.y));
 	if(map != null)
 	    map.resize(sz);
+	if(prog != null)
+	    prog.move(sz.sub(prog.sz).mul(0.5, 0.35));
 	beltwdg.c = new Coord(blpw + UI.scale(10), sz.y - beltwdg.sz.y - UI.scale(5));
 	this.statuswdg.c = new Coord(sz.x/2 + UI.scale(80), UI.scale(10));
 	ui.sess.glob.timewdg.c =  new Coord(sz.x / 2 - UI.scale(360 / 2), umpanel.sz.y);

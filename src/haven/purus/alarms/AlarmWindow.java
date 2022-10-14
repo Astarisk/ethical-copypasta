@@ -39,7 +39,7 @@ public class AlarmWindow extends Window {
 		add(new Button(UI.scale(50), "Add") {
 			@Override
 			public void click() {
-				al.addItem(new AlarmItem(addGobResname.text(), addAlarmFilename.text(), addVolume.val, false));
+				al.addItem(new AlarmItem(addGobResname.buf.line(), addAlarmFilename.buf.line(), addVolume.val, false));
 				addGobResname.settext("");
 				addAlarmFilename.settext("");
 			}
@@ -186,7 +186,7 @@ public class AlarmWindow extends Window {
 						AudioInputStream in = AudioSystem.getAudioInputStream(file);
 						AudioFormat tgtFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2,4, 44100, false);
 						AudioInputStream pcmStream = AudioSystem.getAudioInputStream(tgtFormat, in);
-						Audio.CS klippi = new Audio.PCMClip(pcmStream, 2);
+						Audio.CS klippi = new Audio.PCMClip(pcmStream, 2, 2);
 						((Audio.Mixer)Audio.player.stream).add(new Audio.VolAdjust(klippi, getVolume()/50.0));
 					} catch(UnsupportedAudioFileException e) {
 						e.printStackTrace();
@@ -225,11 +225,11 @@ public class AlarmWindow extends Window {
 		}
 
 		public String getGobResname() {
-			return gobResname.text();
+			return gobResname.buf.line();
 		}
 
 		public String getAlarmFilename() {
-			return alarmFilename.text();
+			return alarmFilename.buf.line();
 		}
 
 		@Override

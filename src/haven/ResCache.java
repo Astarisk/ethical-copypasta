@@ -38,7 +38,7 @@ public interface ResCache {
     
     public static class StupidJavaCodeContainer {
 	private static ResCache makeglobal() {
-		return new DbCache();
+	    return new DbCache();
 	}
     }
 

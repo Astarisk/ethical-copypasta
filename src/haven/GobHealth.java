@@ -27,6 +27,8 @@
 package haven;
 
 import java.awt.Color;
+
+import haven.purus.GobDecayNum;
 import haven.render.*;
 
 public class GobHealth extends GAttrib implements Gob.SetupMod {
@@ -43,5 +45,15 @@ public class GobHealth extends GAttrib implements Gob.SetupMod {
 	if(hp >= 1)
 	    return(null);
 	return(fx);
+    }
+
+    @OCache.DeltaType(OCache.OD_HEALTH)
+    public static class $health implements OCache.Delta {
+	public void apply(Gob g, Message msg) {
+	    int hp = msg.uint8();
+		if(haven.purus.Config.showGobDecayNum.val)
+			g.setattr(new GobDecayNum(g, hp));
+	    g.setattr(new GobHealth(g, hp / 4.0f));
+	}
     }
 }

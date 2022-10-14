@@ -72,7 +72,10 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	public boolean wrongdir = false;
 	public FutureTask<Boolean> pf_route_found = null;
 
-	public interface Delayed {
+    public static double plobpgran = Utils.getprefd("plobpgran", 8);
+    public static double plobagran = Utils.getprefd("plobagran", 16);
+
+    public interface Delayed {
 	public void run(GOut g);
     }
 
@@ -399,7 +402,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	private double tf = 1.0;
 
 	public SOrthoCam(String... args) {
-	    PosixArgs opt = PosixArgs.getopt(args, "enift:");
+	    PosixArgs opt = PosixArgs.getopt(args, "enift:Z:");
 	    for(char c : opt.parsed()) {
 		switch(c) {
 		case 'e':
@@ -416,6 +419,9 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		    break;
 		case 't':
 		    tf = Double.parseDouble(opt.arg);
+		    break;
+		case 'Z':
+		    field = tfield = Float.parseFloat(opt.arg);
 		    break;
 		}
 	    }
@@ -559,29 +565,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		}
 	}
 
-	@Deprecated private String oltag(int id) {
-		switch(id) {
-			case 0: case 1:
-				return("cplot");
-			case 2: case 3:
-				return("vlg");
-			case 4: case 5:
-				return("realm");
-			case 16:
-				return("cplot-s");
-			case 17:
-				return("sel");
-		}
-		return("n/a");
-	}
-	@Deprecated public void enol(int id) {
-		enol(oltag(id));
-	}
-	@Deprecated public void disol(int id) {
-		disol(oltag(id));
-	}
-
-	private final Gobs gobs;
+    private final Gobs gobs;
     private class Gobs implements RenderTree.Node, OCache.ChangeCallback {
 	final OCache oc = glob.oc;
 	final Map<Gob, Loader.Future<?>> adding = new HashMap<>();
@@ -668,6 +652,19 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		}
 	    }
 	}
+
+	public Loading loading() {
+	    synchronized(this) {
+		if(adding.isEmpty())
+		    return(null);
+		for(Loader.Future<?> t : adding.values()) {
+		    Loading l = t.lastload();
+		    if(l != null)
+			return(l);
+		}
+	    }
+	    return(new Loading("Loading objects..."));
+	}
     }
 
     private class MapRaster extends RenderTree.Node.Track1 {
@@ -717,6 +714,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			    cuts.put(cc, new Pair<>(cut, slot.add(draw, cs)));
 			}
 		    } catch(Loading l) {
+			l.boostprio(5);
 			curload = l;
 		    }
 		}
@@ -744,6 +742,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		area = new Area(cc.sub(view, view), cc.add(view, view).add(1, 1));
 		lastload = null;
 	    } catch(Loading l) {
+		l.boostprio(5);
 		lastload = l;
 	    }
 	}
@@ -872,6 +871,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 				basic.add(ol = new Overlay(id));
 				ols.put(id, ol);
 			    } catch(Loading l) {
+				l.boostprio(2);
 				continue;
 			    }
 			}
@@ -887,6 +887,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		}
 	    }
 	} catch(Loading l) {
+	    l.boostprio(2);
 	}
 	for(Overlay ol : ols.values())
 	    ol.tick();
@@ -1107,27 +1108,6 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    return(idx);
 	}, RenderContext.slot, Light.lights);
 
-    public static final Uniform maploc = new Uniform(Type.VEC3, p -> {
-	    Coord3f orig = Homo3D.locxf(p).mul4(Coord3f.o);
-	    try {
-		orig.z = p.get(RenderContext.slot).context(Glob.class).map.getcz(orig.x, -orig.y);
-	    } catch(Loading l) {
-		/* XXX: WaterTile's obfog effect is the only thing
-		 * that uses maploc, in order to get the precise water
-		 * surface level. Arguably, maploc should be
-		 * eliminated entirely and the obfog should pass the
-		 * water level in a uniform instead. However, this
-		 * works better for now, because with such a mechanic,
-		 * Skeleton.FxTrack audio sprites would never complete
-		 * if they get outside the map and stuck as constantly
-		 * loading and never playing. Either way, when
-		 * loading, the likely quite slight deviation between
-		 * origin-Z and map-Z level probably doesn't matter a
-		 * whole lot, but solve pl0x. */
-	    }
-	    return(orig);
-	}, Homo3D.loc, RenderContext.slot);
-
     private final Map<RenderTree.Node, RenderTree.Slot> rweather = new HashMap<>();
     private void updweather() {
 	Glob.Weather[] wls = glob.weather().toArray(new Glob.Weather[0]);
@@ -1325,7 +1305,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    if((draw == null) || !out.env().compatible(draw)) {
 		if(draw != null)
 		    dispose();
-		draw = out.env().drawlist();
+		draw = out.env().drawlist().desc("click-list: " + this);
 		if(doinst) {
 		    instancer = new InstanceList(this);
 		    instancer.add(draw, Rendered.class);
@@ -1344,7 +1324,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	}
 
 	public void get(Render out, Coord c, Consumer<ClickData> cb) {
-	    out.pget(basic, FragID.fragid, Area.sized(c, new Coord(1, 1)), new VectorFormat(1, NumberFormat.SINT32), data -> {
+	    out.pget(basic, FragID.fragid, Area.sized(Coord.of(c.x, sz().y - c.y), new Coord(1, 1)), new VectorFormat(1, NumberFormat.SINT32), data -> {
 		    int id = data.getInt(0);
 		    if(id == 0) {
 			cb.accept(null);
@@ -1360,11 +1340,12 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	}
 
 	public void fuzzyget(Render out, Coord c, int rad, Consumer<ClickData> cb) {
-	    Area area = new Area(c.sub(rad, rad), c.add(rad + 1, rad + 1)).overlap(Area.sized(Coord.z, this.sz()));
+	    Coord gc = Coord.of(c.x, sz().y - c.y);
+	    Area area = new Area(gc.sub(rad, rad), gc.add(rad + 1, rad + 1)).overlap(Area.sized(Coord.z, this.sz()));
 	    out.pget(basic, FragID.fragid, area, new VectorFormat(1, NumberFormat.SINT32), data -> {
 		    Clickslot cs;
 		    {
-			int id = data.getInt(area.ridx(c) * 4);
+			int id = data.getInt(area.ridx(gc) * 4);
 			if((id != 0) && ((cs = idmap.get(id)) != null)) {
 			    cb.accept(new ClickData(cs.bk.state().get(Clickable.slot), (RenderTree.Slot)cs.bk.cast(RenderTree.Node.class)));
 			    return;
@@ -1376,7 +1357,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			int id = data.getInt(area.ridx(fc) * 4);
 			if((id == 0) || ((cs = idmap.get(id)) == null))
 			    continue;
-			int r = (int)Math.round(fc.dist(c) * 10);
+			int r = (int)Math.round(fc.dist(gc) * 10);
 			if(r < maxr) {
 			    score.clear();
 			    maxr = r;
@@ -1465,7 +1446,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			    this.cut = ((MapClick)cd.ci).cut;
 			ckdone(1);
 		    });
-		out.pget(clmaplist.basic, ClickLocation.fragloc, Area.sized(c, new Coord(1, 1)), new VectorFormat(2, NumberFormat.FLOAT32), data -> {
+		out.pget(clmaplist.basic, ClickLocation.fragloc, Area.sized(Coord.of(c.x, clmaplist.sz().y - c.y), new Coord(1, 1)), new VectorFormat(2, NumberFormat.FLOAT32), data -> {
 			pos = new Coord2d(data.getFloat(0), data.getFloat(4));
 			if(clickdb)
 			    Debug.log.printf("map-pos: %s\n", pos);
@@ -1666,6 +1647,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    glob.map.reqarea(cc.floor(tilesz).sub(MCache.cutsz.mul(view + 1)),
 			     cc.floor(tilesz).add(MCache.cutsz.mul(view + 1)));
 	} catch(Loading e) {
+	    e.boostprio(6);
 	    lastload = e;
 	    String text = e.getMessage();
 	    if(text == null)
@@ -1674,15 +1656,29 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    g.frect(Coord.z, sz);
 	    g.chcolor(Color.WHITE);
 	    g.atext(text, sz.div(2), 0.5, 0.5);
-	    if(e instanceof Resource.Loading) {
-		((Resource.Loading)e).boostprio(5);
-	    }
 	}
     }
 	RenderTree.Slot gridS = null;
 	RenderTree.Slot clickpS = null;
-	public void tick(double dt) {
+    private double initload = -2;
+    private boolean initdraw = false;
+    private void checkload() {
+	if(initload == -1)
+	    return;
+	double now = Utils.rtime();
+	if(initload == -2) {
+	    delay2(g -> initdraw = true);
+	    initload = now;
+	}
+	if((terrain.loading() == null) && (gobs.loading() == null) && initdraw) {
+	    wdgmsg("initload", now - initload);
+	    initload = -1;
+	}
+    }
+
+    public void tick(double dt) {
 	super.tick(dt);
+	checkload();
 	camload = null;
 	try {
 	    if((shake = shake * Math.pow(100, -dt)) < 0.01)
@@ -1692,6 +1688,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    camoff.z = (float)((Math.random() - 0.5) * shake);
 	    camera.tick(dt);
 	} catch(Loading e) {
+	    e.boostprio(5);
 	    camload = e;
 	}
 	basic(Camera.class, camera);
@@ -1747,7 +1744,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 
     public static class StdPlace implements PlobAdjust {
 	boolean freerot = false;
-	Coord2d gran = (plobgran == 0)?null:new Coord2d(1.0 / plobgran, 1.0 / plobgran).mul(tilesz);
+	Coord2d gran = (plobpgran == 0) ? null : new Coord2d(1.0 / plobpgran, 1.0 / plobpgran).mul(tilesz);
 
 	public void adjust(Plob plob, Coord pc, Coord2d mc, int modflags) {
 	    Coord2d nc;
@@ -1772,7 +1769,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    if((modflags & 2) == 0)
 		na = (Math.PI / 4) * Math.round((plob.a + (amount * Math.PI / 4)) / (Math.PI / 4));
 	    else
-		na = plob.a + amount * Math.PI / 16;
+		na = plob.a + amount * Math.PI / plobagran;
 	    na = Utils.cangle(na);
 	    plob.move(na);
 	    return(true);
@@ -1902,15 +1899,6 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		plgob = -1;
 	    else
 		plgob = Utils.uint32((Integer)args[0]);
-	} else if(msg == "flashol") {
-	    Collection<String> ols = new ArrayList<>();
-	    int olflash = (Integer)args[0];
-	    for(int i = 0; i < 32; i++) {
-		if((olflash & (1 << i)) != 0)
-		    ols.add(oltag(i));
-	    }
-	    double tm = ((Number)args[1]).doubleValue() / 1000.0;
-	    flashol(ols, tm);
 	} else if(msg == "flashol2") {
 	    Collection<String> ols = new LinkedList<>();
 	    double tm = ((Number)args[0]).doubleValue() / 100.0;
@@ -1951,17 +1939,12 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    out.clear(bstate, FragID.fragid, FColor.BLACK);
 	    out.clear(bstate, 1.0);
 	    checkmapclick(out, basic, pc, mc -> {
-		    /* XXX: This is somewhat doubtfully nice, but running
-		     * it in the defer group would cause unnecessary
-		     * latency, and it shouldn't really be a problem. */
-		    new HackThread(() -> {
-			    synchronized(ui) {
-				if(mc != null)
-				    hit(pc, mc);
-				else
-				    nohit(pc);
-			    }
-		    }, "Hit-test callback").start();
+		    synchronized(ui) {
+			if(mc != null)
+			    hit(pc, mc);
+			else
+			    nohit(pc);
+		    }
 		});
 	    env.submit(out);
 	}
@@ -2000,21 +1983,16 @@ public class MapView extends PView implements DTarget, Console.Directory {
 			done = true;
 	    }
 	    if(done) {
-		/* XXX: This is somewhat doubtfully nice, but running
-		 * it in the defer group would cause unnecessary
-		 * latency, and it shouldn't really be a problem. */
-		new HackThread(() -> {
-			synchronized(ui) {
-			    if(mapcl != null) {
-				if(objcl == null)
-				    hit(pc, mapcl, null);
-				else
-				    hit(pc, mapcl, objcl);
-			    } else {
-				nohit(pc);
-			    }
-			}
-		}, "Hit-test callback").start();
+		synchronized(ui) {
+		    if(mapcl != null) {
+			if(objcl == null)
+			    hit(pc, mapcl, null);
+			else
+			    hit(pc, mapcl, objcl);
+		    } else {
+			nohit(pc);
+		    }
+		}
 	    }
 	}
 	
@@ -2597,9 +2575,16 @@ public class MapView extends PView implements DTarget, Console.Directory {
     static {
 	Console.setscmd("placegrid", new Console.Command() {
 		public void run(Console cons, String[] args) {
-		    if((plobgran = Integer.parseInt(args[1])) < 0)
-			plobgran = 0;
-		    Utils.setprefi("plobgran", plobgran);
+		    if((plobpgran = Double.parseDouble(args[1])) < 0)
+			plobpgran = 0;
+		    Utils.setprefd("plobpgran", plobpgran);
+		}
+	    });
+	Console.setscmd("placeangle", new Console.Command() {
+		public void run(Console cons, String[] args) {
+		    if((plobagran = Double.parseDouble(args[1])) < 2)
+			plobagran = 2;
+		    Utils.setprefd("plobagran", plobagran);
 		}
 	    });
 	Console.setscmd("clickfuzz", new Console.Command() {
@@ -2616,11 +2601,11 @@ public class MapView extends PView implements DTarget, Console.Directory {
     }
 	public void removeCustomSprites(int id) {
 		OCache oc = ui.sess.glob.oc;
-		synchronized (oc) {
-			for (Gob gob : oc) {
+		synchronized(oc) {
+			for(Gob gob : oc) {
 				Gob.Overlay ol = gob.findol(id);
-				if (ol != null) {
-					ol.remove();
+				if(ol != null) {
+					ol.remove(false);
 				}
 			}
 		}

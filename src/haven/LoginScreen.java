@@ -44,7 +44,7 @@ public class LoginScreen extends Widget {
     public static final Text.Foundry
 	textf = new Text.Foundry(Text.sans, 16).aa(true),
 	textfs = new Text.Foundry(Text.sans, 14).aa(true);
-    public static final Tex bg = Resource.loadtex("gfx/loginscr");
+    public static final Tex bg = Resource.loadtex("gfx/loginscr2");
     public static final Position bgc = new Position(UI.scale(420, 300));
     public final Credbox login;
     public final String hostname;
@@ -67,19 +67,14 @@ public class LoginScreen extends Widget {
 	add(new Img(bg), Coord.z);
 	optbtn = adda(new Button(UI.scale(100), "Options"), pos("cbl").add(10, -10), 0, 1);
 	optbtn.setgkey(GameUI.kb_opt);
-//<<<<<<< HEAD
 	add(new Credentials.CredentialsWidget());
 	statusbtn = adda(new Button(UI.scale(200), "Initializing..."), sz.x-UI.scale(210), UI.scale(120), 0, 1);
 		executorService.scheduleWithFixedDelay(checkStatus,0, 5, TimeUnit.SECONDS);
 	pastadiscord = adda(new Button(UI.scale(200), "Pasta Discord"), sz.x-UI.scale(210), UI.scale(40), 0, 1);
 	hnhdiscord = adda(new Button(UI.scale(200), "HnH Public Discord"), sz.x-UI.scale(210), UI.scale(80), 0, 1);
 
-
-	/*}
-=======*/
 	adda(login = new Credbox(), bgc.adds(0, 10), 0.5, 0.0).hide();
     }
-//>>>>>>> default/master
 
     public static final KeyBinding kb_savtoken = KeyBinding.get("login/savtoken", KeyMatch.forchar('R', KeyMatch.M));
     public static final KeyBinding kb_deltoken = KeyBinding.get("login/deltoken", KeyMatch.forchar('F', KeyMatch.M));
@@ -194,7 +189,7 @@ public class LoginScreen extends Widget {
 	    } else if(pass.text.equals("")) {
 		setfocus(pass);
 		return(false);
-=======*/
+//=======*/
 	private void checktoken() {
 	    if(this.token != null) {
 		Arrays.fill(this.token, (byte)0);
@@ -204,7 +199,7 @@ public class LoginScreen extends Widget {
 	    if(token == null) {
 		tkbox.hide();
 		pwbox.show();
-//>>>>>>> default/master
+//>>>>>>> fdac2ac6
 	    } else {
 		tkbox.show();
 		pwbox.hide();
@@ -236,7 +231,19 @@ public class LoginScreen extends Widget {
 		ret = new AuthClient.TokenCred(user.text(), Arrays.copyOf(token, token.length));
 	    } else {
 			Credentials.saveCredentials(user.text(), pass.text());
-		ret = new AuthClient.NativeCred(user.text(), pass.text());
+		String pw = pass.text();
+		ret = null;
+		parse: if(pw.length() == 64) {
+		    byte[] ptok;
+		    try {
+			ptok = Utils.hex2byte(pw);
+		    } catch(IllegalArgumentException e) {
+			break parse;
+		    }
+		    ret = new AuthClient.TokenCred(user.text(), ptok);
+		}
+		if(ret == null)
+		    ret = new AuthClient.NativeCred(user.text(), pw);
 		pass.rsettext("");
 	    }
 	    return(ret);
