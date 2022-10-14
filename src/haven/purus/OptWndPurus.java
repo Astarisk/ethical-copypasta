@@ -552,23 +552,6 @@ public class OptWndPurus extends BetterWindow {
 				add(new Button(UI.scale(100), "Save token") {
 					@Override
 					public boolean mousedown(Coord c, int button) {
-						String newToken = ((TextEntry)mapToken.w).text();
-						try {
-							URL url = new URL(Mapper.apiURL + "/token/" + newToken + "/valid");
-							Scanner scan = new Scanner(url.openStream());
-							if(scan.hasNextLine() && scan.nextLine().equals("Valid")) {
-								Config.mapperToken.setVal(newToken);
-								((Label)mapTokenStatus.w).setcolor(Color.GREEN);
-								((Label)mapTokenStatus.w).settext("Map token was successfully updated!");
-							} else {
-								((Label)mapTokenStatus.w).setcolor(Color.RED);
-								((Label)mapTokenStatus.w).settext("Map token entered was invalid! Changes not saved.");
-							}
-						} catch(IOException e) {
-							((Label)mapTokenStatus.w).setcolor(Color.RED);
-							((Label)mapTokenStatus.w).settext("Error while connecting to server! Changes not saved.");
-							e.printStackTrace();
-						}
 						return super.mousedown(c, button);
 					}
 					{visible = true;}
