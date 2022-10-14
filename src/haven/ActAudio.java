@@ -34,359 +34,345 @@ import haven.Audio.CS;
 import haven.Audio.VolAdjust;
 
 public class ActAudio extends State {
-    public static final Slot<ActAudio> audio = new State.Slot<>(Slot.Type.SYS, ActAudio.class);
-    public final Channel pos;
-    public final Channel amb;
-    private final Map<Global, Global> global = new HashMap<Global, Global>();
+	public static final Slot<ActAudio> audio = new State.Slot<>(Slot.Type.SYS, ActAudio.class);
+	public final Channel pos;
+	public final Channel amb;
+	private final Map<Global, Global> global = new HashMap<Global, Global>();
 
-    public haven.render.sl.ShaderMacro shader() {return(null);}
+	public haven.render.sl.ShaderMacro shader() {return(null);}
 
-    public ActAudio(Root root) {
-	this.pos = new Adapter(root.pos);
-	this.amb = new Adapter(root.amb);
-    }
-
-    public void apply(Pipe st) {
-	st.put(audio, this);
-    }
-
-    public static interface Channel {
-	public void add(CS clip);
-	public void remove(CS clip);
-	public void clear();
-	public int size();
-    }
-
-    public static class Adapter implements Channel {
-	public final Channel parent;
-	private Collection<CS> clips = new HashSet<CS>();
-
-	public Adapter(Channel parent) {
-	    this.parent = parent;
+	public ActAudio(Root root) {
+		this.pos = new Adapter(root.pos);
+		this.amb = new Adapter(root.amb);
 	}
 
-	public void add(CS clip) {
-	    synchronized(this) {
-		if(clips != null) {
-		    clips.add(clip);
-		    parent.add(clip);
+	public void apply(Pipe st) {
+		st.put(audio, this);
+	}
+
+	public static interface Channel {
+		public void add(CS clip);
+		public void remove(CS clip);
+		public void clear();
+		public int size();
+	}
+
+	public static class Adapter implements Channel {
+		public final Channel parent;
+		private Collection<CS> clips = new HashSet<CS>();
+
+		public Adapter(Channel parent) {
+			this.parent = parent;
 		}
-	    }
-	}
 
-	public void remove(CS clip) {
-	    synchronized(this) {
-		if(clips != null) {
-		    clips.remove(clip);
-		    parent.remove(clip);
+		public void add(CS clip) {
+			synchronized(this) {
+				if(clips != null) {
+					clips.add(clip);
+					parent.add(clip);
+				}
+			}
 		}
-	    }
-	}
 
-	public void clear() {
-	    synchronized(this) {
-		Collection<CS> clips = this.clips;
-		this.clips = null;
-		for(Iterator<CS> i = clips.iterator(); i.hasNext();) {
-		    parent.remove(i.next());
-		    i.remove();
+		public void remove(CS clip) {
+			synchronized(this) {
+				if(clips != null) {
+					clips.remove(clip);
+					parent.remove(clip);
+				}
+			}
 		}
-	    }
-	}
 
-	public int size() {
-	    synchronized(this) {
-		return(clips.size());
-	    }
-	}
-    }
-
-    public static class RootChannel implements Channel {
-	public final String name;
-	public double volume;
-	private Audio.VolAdjust volc = null;
-	private Audio.Mixer mixer = null;
-
-	private RootChannel(String name) {
-	    this.name = name;
-	    this.volume = Double.parseDouble(Utils.getpref("sfxvol-" + name, "1.0"));
-	}
-
-	public Audio.Mixer mixer() {
-	    Audio.Mixer ret = this.mixer;
-	    if(ret == null) {
-		synchronized(this) {
-		    if((ret = this.mixer) == null) {
-			this.volc = new Audio.VolAdjust(ret = this.mixer = new Audio.Mixer(true));
-			this.volc.vol = volume;
-			Audio.play(this.volc);
-		    }
+		public void clear() {
+			synchronized(this) {
+				Collection<CS> clips = this.clips;
+				this.clips = null;
+				for(Iterator<CS> i = clips.iterator(); i.hasNext();) {
+					parent.remove(i.next());
+					i.remove();
+				}
+			}
 		}
-	    }
-	    return(ret);
+
+		public int size() {
+			synchronized(this) {
+				return(clips.size());
+			}
+		}
 	}
 
-	public void setvolume(double volume) {
-	    if(volc != null)
-		volc.vol = volume;
-	    this.volume = volume;
-	    Utils.setpref("sfxvol-" + name, Double.toString(volume));
-	}
+	public static class RootChannel implements Channel {
+		public final String name;
+		public double volume;
+		private Audio.VolAdjust volc = null;
+		private Audio.Mixer mixer = null;
 
-	public void setVolumeNoSave(double volume) {
-		if(volc != null)
-			volc.vol = volume;
-		this.volume = volume;
-	}
+		private RootChannel(String name) {
+			this.name = name;
+			this.volume = Double.parseDouble(Utils.getpref("sfxvol-" + name, "1.0"));
+		}
 
-	public void clear() {
-	    synchronized(this) {
-		if(mixer != null) {
-		    Audio.stop(volc);
+		public Audio.Mixer mixer() {
+			Audio.Mixer ret = this.mixer;
+			if(ret == null) {
+				synchronized(this) {
+					if((ret = this.mixer) == null) {
+						this.volc = new Audio.VolAdjust(ret = this.mixer = new Audio.Mixer(true));
+						this.volc.vol = volume;
+						Audio.play(this.volc);
+					}
+				}
+			}
+			return(ret);
+		}
+
+		public void setvolume(double volume) {
+			if(volc != null)
+				volc.vol = volume;
+			this.volume = volume;
+			Utils.setpref("sfxvol-" + name, Double.toString(volume));
+		}
+
+		public void setVolumeNoSave(double volume) {
+			if(volc != null)
+				volc.vol = volume;
+			this.volume = volume;
+		}
+
+		public void clear() {
+			synchronized(this) {
+				if(mixer != null) {
+					Audio.stop(volc);
 		    /* XXX? clear() should only be called once, so
 		     * ensure mixer isn't later mistakenly re-added
 		     * due to racy code still using this channel.
 		    mixer = null;
 		    volc = null;
 		    */
+				}
+			}
 		}
-	    }
+
+		public void add(CS clip) {
+			synchronized(this) {
+				mixer().add(clip);
+			}
+		}
+
+		public void remove(CS clip) {
+			synchronized(this) {
+				if(mixer != null)
+					mixer.stop(clip);
+			}
+		}
+
+		public int size() {
+			return((mixer == null) ? 0 : mixer.size());
+		}
 	}
 
-	public void add(CS clip) {
-	    synchronized(this) {
-		mixer().add(clip);
-	    }
+	public static class Root {
+		public final RootChannel aui = new RootChannel("aui");
+		public final RootChannel pos = new RootChannel("pos");
+		public final RootChannel amb = new RootChannel("amb");
+
+		public void clear() {
+			pos.clear();
+			amb.clear();
+		}
+
+		public String stats() {
+			return(String.format("%d %d %d", aui.size(), pos.size(), amb.size()));
+		}
 	}
 
-	public void remove(CS clip) {
-	    synchronized(this) {
-		if(mixer != null)
-		    mixer.stop(clip);
-	    }
+	public interface Global {
+		public boolean cycle(ActAudio list);
 	}
 
-	public int size() {
-	    return((mixer == null) ? 0 : mixer.size());
+	public static Coord3f spos(Pipe st) {
+		Coord3f pos = Coord3f.o;
+		Location.Chain loc = st.get(Homo3D.loc);
+		if(loc != null)
+			pos = loc.fin(Matrix4f.id).mul4(pos);
+		Camera cam = st.get(Homo3D.cam);
+		if(cam != null)
+			pos = cam.fin(Matrix4f.id).mul4(pos);
+		return(pos);
 	}
-    }
 
-    public static class Root {
-	public final RootChannel aui = new RootChannel("aui");
-	public final RootChannel pos = new RootChannel("pos");
-	public final RootChannel amb = new RootChannel("amb");
+	public static class PosClip implements RenderTree.Node, TickList.TickNode, TickList.Ticking {
+		private final VolAdjust clip;
+		private final Collection<RenderTree.Slot> slots = new ArrayList<>(1);
+
+		public PosClip(VolAdjust clip) {
+			this.clip = clip;
+		}
+
+		public PosClip(CS clip) {
+			this(new VolAdjust(clip));
+		}
+
+		public void added(RenderTree.Slot slot) {
+			ActAudio list = slot.state().get(audio);
+			if(list == null)
+				return;
+			slots.add(slot);
+			autotick(0);
+			list.pos.add(clip);
+		}
+
+		public void removed(RenderTree.Slot slot) {
+			ActAudio list = slot.state().get(audio);
+			if(list == null)
+				return;
+			slots.remove(slot);
+			list.pos.remove(clip);
+		}
+
+		public TickList.Ticking ticker() {return(this);}
+		public void autotick(double dt) {
+			for(RenderTree.Slot slot : slots) {
+				Coord3f pos = spos(slot.state());
+				this.clip.vol = Math.min(1.0, 50.0 / Math.hypot(pos.x, pos.y));
+				this.clip.bal = Utils.clip(Math.atan2(pos.x, -pos.z) / (Math.PI / 8.0), -1, 1);
+				break;
+			}
+		}
+	}
+
+	public static class Ambience implements RenderTree.Node {
+		public final Resource res;
+		public final double bvol;
+
+		public Ambience(Resource res, double bvol) {
+			Audio.Clip clip = res.flayer(Audio.clip, "amb");
+			if(bvol < 0)
+				bvol = clip.bvol();
+			this.res = res;
+			this.bvol = bvol;
+		}
+
+		public Ambience(Resource res) {
+			this(res, -1);
+		}
+
+		public static class Glob implements Global {
+			public final Resource res;
+			private final VolAdjust clip;
+			private final Collection<RenderList.Slot<Ambience>> active = new ArrayList<>();
+			private double lastupd = Utils.rtime();
+			private boolean added = false, hasvol = false;
+
+			public Glob(Resource res) {
+				this.res = res;
+				List<Audio.Clip> clips = new ArrayList<>(res.layers(Audio.clip, clip -> clip.layerid().equals("amb")));
+				if(clips.isEmpty())
+					throw(new RuntimeException("No ambient clip found in " + res));
+				this.clip = new VolAdjust(new Audio.Repeater() {
+					Random rnd = new Random();
+					public CS cons() {
+						return(clips.get(rnd.nextInt(clips.size())).stream());
+					}
+				}, 0);
+			}
+
+			public int hashCode() {
+				return(res.hashCode());
+			}
+
+			public boolean equals(Object other) {
+				return((other instanceof Glob) && (((Glob)other).res == this.res));
+			}
+
+			private double curvol() {
+				double acc = 0;
+				for(RenderList.Slot<Ambience> slot : active) {
+					Coord3f pos = spos(slot.state());
+					double bvol = slot.obj().bvol;
+					double svol = Math.min(1.0, 50.0 / Math.hypot(pos.x, pos.y));
+					acc += svol * bvol;
+				}
+				return(acc);
+			}
+
+			public boolean cycle(ActAudio list) {
+				double now = Utils.rtime();
+				double td = Math.max(now - lastupd, 0.0);
+				synchronized(active) {
+					double vacc = curvol();
+					if(hasvol) {
+						if(vacc < clip.vol)
+							clip.vol = Math.max(clip.vol - (td * 0.5), 0.0);
+						else if(vacc > clip.vol)
+							clip.vol = Math.min(clip.vol + (td * 0.5), 1.0);
+					} else {
+						clip.vol = vacc;
+						hasvol = true;
+					}
+					if(active.isEmpty() && (clip.vol < 0.005)) {
+						list.amb.remove(clip);
+						return(true);
+					}
+				}
+				lastupd = now;
+				if(!added) {
+					list.amb.add(clip);
+					added = true;
+				}
+				return(false);
+			}
+
+			public void add(RenderList.Slot<Ambience> slot) {
+				synchronized(active) {
+					active.add(slot);
+				}
+			}
+
+			public void remove(RenderList.Slot<Ambience> slot) {
+				synchronized(active) {
+					active.remove(slot);
+				}
+			}
+		}
+
+		public void added(RenderTree.Slot slot) {
+			ActAudio list = slot.state().get(audio);
+			if(list == null)
+				return;
+			list.intern(new Glob(res)).add(slot.cast(Ambience.class));
+		}
+
+		public void removed(RenderTree.Slot slot) {
+			ActAudio list = slot.state().get(audio);
+			if(list == null)
+				return;
+			list.intern(new Glob(res)).remove(slot.cast(Ambience.class));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends Global> T intern(T glob) {
+		synchronized(global) {
+			T ret = (T)global.get(glob);
+			if(ret == null)
+				global.put(glob, ret = glob);
+			return(ret);
+		}
+	}
+
+	public void cycle() {
+		synchronized(global) {
+			for(Iterator<Global> i = global.keySet().iterator(); i.hasNext();) {
+				Global glob = i.next();
+				if(glob.cycle(this))
+					i.remove();
+			}
+		}
+	}
 
 	public void clear() {
-	    pos.clear();
-	    amb.clear();
+		pos.clear();
+		amb.clear();
 	}
-
-	public String stats() {
-	    return(String.format("%d %d %d", aui.size(), pos.size(), amb.size()));
-	}
-    }
-
-    public interface Global {
-	public boolean cycle(ActAudio list);
-    }
-
-    public static Coord3f spos(Pipe st) {
-	Coord3f pos = Coord3f.o;
-	Location.Chain loc = st.get(Homo3D.loc);
-	if(loc != null)
-	    pos = loc.fin(Matrix4f.id).mul4(pos);
-	Camera cam = st.get(Homo3D.cam);
-	if(cam != null)
-	    pos = cam.fin(Matrix4f.id).mul4(pos);
-	return(pos);
-    }
-
-    public static class PosClip implements RenderTree.Node, TickList.TickNode, TickList.Ticking {
-	private final VolAdjust clip;
-	private final Collection<RenderTree.Slot> slots = new ArrayList<>(1);
-
-	public PosClip(VolAdjust clip) {
-	    this.clip = clip;
-	}
-
-	public PosClip(CS clip) {
-	    this(new VolAdjust(clip, true));
-	}
-
-	public void added(RenderTree.Slot slot) {
-	    ActAudio list = slot.state().get(audio);
-	    if(list == null)
-		return;
-	    slots.add(slot);
-	    autotick(0);
-	    list.pos.add(clip);
-	}
-
-	public void removed(RenderTree.Slot slot) {
-	    ActAudio list = slot.state().get(audio);
-	    if(list == null)
-		return;
-	    slots.remove(slot);
-	    list.pos.remove(clip);
-	}
-
-	public TickList.Ticking ticker() {return(this);}
-	public void autotick(double dt) {
-	    for(RenderTree.Slot slot : slots) {
-		Coord3f pos = spos(slot.state());
-		CS clp = this.clip;
-		while(clp != null && !(clp instanceof Audio.SourceClip)) {
-			if(clp instanceof VolAdjust) {
-				clp = ((VolAdjust) clp).bk;
-			} else if(clp instanceof Audio.Monitor) {
-				clp = ((Audio.Monitor) clp).bk;
-			} else if(clp instanceof Audio.Resampler) {
-				clp = ((Audio.Resampler) clp).bk;
-			} else if(clp instanceof Audio.Repeater) {
-				clp = ((Audio.Repeater) clp).cur;
-			} else {
-				throw new RuntimeException("Unknown audio clip");
-			}
-		}
-		if(clp != null && ((Audio.SourceClip) clp).audioal != null)
-			((Audio.SourceClip) clp).audioal.setPos(pos.x, -pos.y, 0);
-			break;
-	    }
-	}
-    }
-
-    public static class Ambience implements RenderTree.Node {
-	public final Resource res;
-	public final double bvol;
-
-	public Ambience(Resource res, double bvol) {
-	    Audio.Clip clip = res.flayer(Audio.clip, "amb");
-	    if(bvol < 0)
-		bvol = clip.bvol();
-	    this.res = res;
-	    this.bvol = bvol;
-	}
-
-	public Ambience(Resource res) {
-	    this(res, -1);
-	}
-
-	public static class Glob implements Global {
-	    public final Resource res;
-	    private final VolAdjust clip;
-	    private final Collection<RenderList.Slot<Ambience>> active = new ArrayList<>();
-	    private double lastupd = Utils.rtime();
-	    private boolean added = false, hasvol = false;
-	    
-	    public Glob(Resource res) {
-		this.res = res;
-		List<Audio.Clip> clips = new ArrayList<>(res.layers(Audio.clip, clip -> clip.layerid().equals("amb")));
-		if(clips.isEmpty())
-		    throw(new RuntimeException("No ambient clip found in " + res));
-		this.clip = new VolAdjust(new Audio.Repeater() {
-			Random rnd = new Random();
-			public CS cons() {
-			    return(clips.get(rnd.nextInt(clips.size())).stream());
-			}
-		    }, 0);
-	    }
-
-	    public int hashCode() {
-		return(res.hashCode());
-	    }
-
-	    public boolean equals(Object other) {
-		return((other instanceof Glob) && (((Glob)other).res == this.res));
-	    }
-
-	    private double curvol() {
-		double acc = 0;
-		for(RenderList.Slot<Ambience> slot : active) {
-		    Coord3f pos = spos(slot.state());
-		    double bvol = slot.obj().bvol;
-		    double svol = Math.min(1.0, 50.0 / Math.hypot(pos.x, pos.y));
-		    acc += svol * bvol;
-		}
-		return(acc);
-	    }
-
-	    public boolean cycle(ActAudio list) {
-		double now = Utils.rtime();
-		double td = Math.max(now - lastupd, 0.0);
-		synchronized(active) {
-		    double vacc = curvol();
-		    if(hasvol) {
-			if(vacc < clip.vol)
-			    clip.vol = Math.max(clip.vol - (td * 0.5), 0.0);
-			else if(vacc > clip.vol)
-			    clip.vol = Math.min(clip.vol + (td * 0.5), 1.0);
-		    } else {
-			clip.vol = vacc;
-			hasvol = true;
-		    }
-		    if(active.isEmpty() && (clip.vol < 0.005)) {
-			list.amb.remove(clip);
-			return(true);
-		    }
-		}
-		lastupd = now;
-		if(!added) {
-		    list.amb.add(clip);
-		    added = true;
-		}
-		return(false);
-	    }
-
-	    public void add(RenderList.Slot<Ambience> slot) {
-		synchronized(active) {
-		    active.add(slot);
-		}
-	    }
-
-	    public void remove(RenderList.Slot<Ambience> slot) {
-		synchronized(active) {
-		    active.remove(slot);
-		}
-	    }
-	}
-
-	public void added(RenderTree.Slot slot) {
-	    ActAudio list = slot.state().get(audio);
-	    if(list == null)
-		return;
-	    list.intern(new Glob(res)).add(slot.cast(Ambience.class));
-	}
-
-	public void removed(RenderTree.Slot slot) {
-	    ActAudio list = slot.state().get(audio);
-	    if(list == null)
-		return;
-	    list.intern(new Glob(res)).remove(slot.cast(Ambience.class));
-	}
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends Global> T intern(T glob) {
-	synchronized(global) {
-	    T ret = (T)global.get(glob);
-	    if(ret == null)
-		global.put(glob, ret = glob);
-	    return(ret);
-	}
-    }
-
-    public void cycle() {
-	synchronized(global) {
-	    for(Iterator<Global> i = global.keySet().iterator(); i.hasNext();) {
-		Global glob = i.next();
-		if(glob.cycle(this))
-		    i.remove();
-	    }
-	}
-    }
-    
-    public void clear() {
-	pos.clear();
-	amb.clear();
-    }
 }

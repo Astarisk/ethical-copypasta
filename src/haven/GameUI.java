@@ -852,7 +852,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 		MapFile file;
 		try {
 		    file = MapFile.load(mapstore, mapfilename());
-			Mapper.sendMarkerData(file);
 		} catch(java.io.IOException e) {
 		    /* XXX: Not quite sure what to do here. It's
 		     * certainly not obvious that overwriting the
