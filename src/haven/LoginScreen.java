@@ -44,7 +44,7 @@ public class LoginScreen extends Widget {
     public static final Text.Foundry
 	textf = new Text.Foundry(Text.sans, 16).aa(true),
 	textfs = new Text.Foundry(Text.sans, 14).aa(true);
-    public static final Tex bg = Resource.loadtex("gfx/loginscr2");
+    public static final Tex bg = Resource.loadtex("gfx/loginscr");
     public static final Position bgc = new Position(UI.scale(420, 300));
     public final Credbox login;
     public final String hostname;
@@ -70,7 +70,7 @@ public class LoginScreen extends Widget {
 	add(new Credentials.CredentialsWidget());
 	statusbtn = adda(new Button(UI.scale(200), "Initializing..."), sz.x-UI.scale(210), UI.scale(120), 0, 1);
 		executorService.scheduleWithFixedDelay(checkStatus,0, 5, TimeUnit.SECONDS);
-	pastadiscord = adda(new Button(UI.scale(200), "Pasta Discord"), sz.x-UI.scale(210), UI.scale(40), 0, 1);
+//	pastadiscord = adda(new Button(UI.scale(200), "Pasta Discord"), sz.x-UI.scale(210), UI.scale(40), 0, 1);
 	hnhdiscord = adda(new Button(UI.scale(200), "HnH Public Discord"), sz.x-UI.scale(210), UI.scale(80), 0, 1);
 
 	adda(login = new Credbox(), bgc.adds(0, 10), 0.5, 0.0).hide();
@@ -364,7 +364,7 @@ public class LoginScreen extends Widget {
 		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
 		if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
 			try {
-				desktop.browse(new URI("https://discord.gg/S8ZPxJmHXS"));
+				desktop.browse(new URI("https://discord.gg/G8NCWkugvN"));
 			} catch (IOException | URISyntaxException e) {
 				e.printStackTrace();
 			}
@@ -373,7 +373,7 @@ public class LoginScreen extends Widget {
 		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
 		if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
 			try {
-				desktop.browse(new URI("https://discord.gg/ctCypnN"));
+				desktop.browse(new URI("https://discord.gg/G8NCWkugvN"));
 			} catch (IOException | URISyntaxException e) {
 				e.printStackTrace();
 			}
